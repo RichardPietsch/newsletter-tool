@@ -1,0 +1,1 @@
+export const renderFooter=(contact:string,legal:string)=>`<mj-section background-color="#ffffff" padding="20px 24px 32px"><mj-column><mj-divider border-color="#d7dee8" /><mj-text font-size="12px" color="#5d6b82" line-height="1.5">${contact}<br/>${legal}</mj-text></mj-column></mj-section>`;
