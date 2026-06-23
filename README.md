@@ -1,6 +1,6 @@
 # Newsletter Tool
 
-Desktop-orientierter Next.js Newsletter-Editor. JSON ist die editierbare Quelle; vollständiges E-Mail-HTML wird serverseitig per MJML exportiert.
+Desktop-orientierter Next.js Newsletter-Editor. Der Stack verwendet Next.js 16.2.9 mit React 19.2.7, entsprechend `next@latest`/`react@latest` zum Zeitpunkt der Aktualisierung. JSON ist die editierbare Quelle; vollständiges E-Mail-HTML wird serverseitig per MJML exportiert.
 
 ## Architektur
 - `app/`: App Router Pages und API Route Handler für Newsletter, Assets und Export.

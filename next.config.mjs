@@ -1,3 +1,3 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { experimental: { serverComponentsExternalPackages: ['mjml','sharp'] } };
+const nextConfig = { serverExternalPackages: ['mjml', 'sharp'] };
 export default nextConfig;
