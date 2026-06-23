@@ -37,6 +37,15 @@ docker compose pull minio createbucket
 docker compose up --build
 ```
 
+### Hinweis zum `createbucket`-Container
+
+`createbucket` ist ein einmaliger Initialisierungscontainer. Es ist korrekt, dass er nach erfolgreicher Ausgabe wie `Bucket created successfully` oder `Access permission ... is set to download` mit Code `0` beendet wird. Er ist kein dauerhaft laufender Dienst. Der Web-Container wartet nur darauf, dass dieser Job erfolgreich abgeschlossen wurde.
+
+Wenn der Bucket bereits existiert, bleibt der Befehl durch `--ignore-existing` idempotent. Falls der Web-Container danach nicht startet, prüfe gezielt die Web-Logs:
+```bash
+docker compose logs -f web
+```
+
 ## Datenbank
 ```bash
 pnpm db:generate
