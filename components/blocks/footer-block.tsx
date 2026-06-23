@@ -1,0 +1,1 @@
+export function FooterBlock({contact,legal}:{contact:string;legal:string}){return <div className="bg-white p-8 text-sm text-slate-500"><div className="mb-4 border-t"/>{contact}<br/>{legal}<br/><span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">Gesperrt</span></div>}
