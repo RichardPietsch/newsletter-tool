@@ -10,7 +10,6 @@ export const headerVariantSchema = z.object({
 
 export const globalSettingsSchema = z.object({
   headerVariants: z.array(headerVariantSchema).default([]),
-  activeHeaderVariantId: z.string().optional(),
   footerRichText: tiptapDocSchema,
 });
 

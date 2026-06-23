@@ -75,7 +75,7 @@ pnpm build
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
 ## Konfiguration
-Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt und eine aktive Variante ausgewählt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
+Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt. Die aktive Header-Variante wird nicht global gesetzt, sondern pro Newsletter im Header-Inspector ausgewählt. Nicht verwendete Header-Varianten können in den globalen Einstellungen gelöscht werden; verwendete Varianten bleiben geschützt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
 
 ## Annahmen und Einschränkungen
 - Next.js 16 dynamische Routen verwenden asynchrone `params`; Seiten und Route Handler warten diese daher explizit ab.

@@ -20,7 +20,7 @@ function docFromPlainText(text: string): GlobalSettings['footerRichText'] {
   };
 }
 
-export function SettingsEditor({ initialSettings }: { initialSettings: GlobalSettings }) {
+export function SettingsEditor({ initialSettings, usedHeaderVariantIds }: { initialSettings: GlobalSettings; usedHeaderVariantIds: string[] }) {
   const [settings, setSettings] = useState(initialSettings);
   const [status, setStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [uploading, setUploading] = useState(false);
@@ -57,7 +57,6 @@ export function SettingsEditor({ initialSettings }: { initialSettings: GlobalSet
     const next = {
       ...settings,
       headerVariants: [...settings.headerVariants, variant],
-      activeHeaderVariantId: settings.activeHeaderVariantId ?? variant.id,
     };
     setSettings(next);
     await save(next);
@@ -78,7 +77,7 @@ export function SettingsEditor({ initialSettings }: { initialSettings: GlobalSet
 
       <section className="rounded-xl bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Header-Varianten</h2>
-        <p className="mt-1 text-sm text-slate-600">Jede Variante besteht aus einem hochgeladenen Bild. Die aktive Variante wird global im Editor und Export verwendet.</p>
+        <p className="mt-1 text-sm text-slate-600">Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.</p>
         <label className="mt-4 inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-white">
           {uploading ? 'Upload läuft …' : 'Header-Bild hochladen'}
           <input className="sr-only" type="file" accept="image/jpeg,image/png,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHeaderImage(file); }} />
@@ -100,10 +99,19 @@ export function SettingsEditor({ initialSettings }: { initialSettings: GlobalSet
                   setSettings(next);
                 }} onBlur={() => void save()} />
               </label>
-              <label className="mt-3 flex items-center gap-2 text-sm">
-                <input type="radio" name="active-header" checked={settings.activeHeaderVariantId === variant.id} onChange={() => { const next = { ...settings, activeHeaderVariantId: variant.id }; setSettings(next); void save(next); }} />
-                Als aktive Header-Variante verwenden
-              </label>
+              <button
+                type="button"
+                className="mt-3 rounded border px-3 py-2 text-sm text-red-700 disabled:cursor-not-allowed disabled:text-slate-400"
+                disabled={usedHeaderVariantIds.includes(variant.id)}
+                title={usedHeaderVariantIds.includes(variant.id) ? 'Diese Variante wird in mindestens einem Newsletter verwendet.' : 'Header-Variante löschen'}
+                onClick={() => {
+                  const next = { ...settings, headerVariants: settings.headerVariants.filter((item) => item.id !== variant.id) };
+                  setSettings(next);
+                  void save(next);
+                }}
+              >
+                {usedHeaderVariantIds.includes(variant.id) ? 'Wird verwendet' : 'Variante löschen'}
+              </button>
             </article>
           ))}
           {settings.headerVariants.length === 0 && <p className="rounded border border-dashed p-6 text-slate-600">Noch keine Header-Variante vorhanden. Lade ein JPEG, PNG oder GIF hoch.</p>}
