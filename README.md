@@ -74,6 +74,9 @@ pnpm build
 ## Export-Architektur
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
+## Editor
+Textmodule unterstützen Rich-Text mit Absatz, H2, H3, Fett, Kursiv, Unterstreichen, schwarzen und roten Hervorhebungen sowie nummerierten und unnummerierten Listen. Die rechte Inspector-Seitenleiste bleibt beim Scrollen der Canvas fixiert und scrollt nur ihren eigenen Inhalt.
+
 ## Konfiguration
 Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt. Die aktive Header-Variante wird nicht global gesetzt, sondern pro Newsletter im Header-Inspector ausgewählt. Nicht verwendete Header-Varianten können in den globalen Einstellungen gelöscht werden; verwendete Varianten bleiben geschützt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
 
