@@ -19,7 +19,23 @@ pnpm dev
 ```bash
 docker compose up --build
 ```
-Startet Next.js, PostgreSQL und MinIO. MinIO läuft lokal auf `http://localhost:9000`, Konsole auf `http://localhost:9001`.
+Startet Next.js, PostgreSQL und MinIO. MinIO läuft lokal auf `http://localhost:9000`, Konsole auf `http://localhost:9001`. Der Compose-Stack verwendet die offiziellen Docker-Hub-Images `minio/minio:latest` und `minio/mc:latest`, weil die zuvor eingetragenen datierten `minio/mc`-Tags nicht auf Docker Hub existierten.
+
+Für eine saubere lokale Erstinitialisierung nach Schemaänderungen:
+```bash
+docker compose up -d db minio createbucket
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed
+docker compose up --build web
+```
+
+Wenn Docker alte, nicht mehr gültige Image-Tags gecacht hat, entferne sie mit:
+```bash
+docker compose down --remove-orphans
+docker compose pull minio createbucket
+docker compose up --build
+```
 
 ## Datenbank
 ```bash
