@@ -75,7 +75,7 @@ pnpm build
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
 ## Editor
-Textmodule werden direkt im Newsletter-Canvas mit Tiptap bearbeitet. Die Symbol-Toolbar am ausgewählten Textmodul unterstützt Absatz, H2, H3, Fett, Kursiv, Unterstreichen, schwarze und rote Hervorhebungen sowie nummerierte und unnummerierte Listen. Die rechte Inspector-Seitenleiste bleibt beim Scrollen der Canvas fixiert und scrollt nur ihren eigenen Inhalt.
+Bildmodule erlauben Uploads von JPEG, PNG und GIF über den Inspector und skalieren Bilder serverseitig automatisch auf maximal 600 px Breite. Textmodule werden direkt im Newsletter-Canvas mit Tiptap bearbeitet. Die Symbol-Toolbar am ausgewählten Textmodul unterstützt Absatz, H2, H3, Fett, Kursiv, Unterstreichen, schwarze und rote Hervorhebungen sowie nummerierte und unnummerierte Listen. Die rechte Inspector-Seitenleiste bleibt beim Scrollen der Canvas fixiert und scrollt nur ihren eigenen Inhalt.
 
 ## Konfiguration
 Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt. Die aktive Header-Variante wird nicht global gesetzt, sondern pro Newsletter im Header-Inspector ausgewählt. Nicht verwendete Header-Varianten können in den globalen Einstellungen gelöscht werden; verwendete Varianten bleiben geschützt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
