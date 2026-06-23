@@ -1,0 +1,1 @@
+export const renderHeader=(branding:string)=>`<mj-section background-color="#ffffff" padding="32px 24px 20px"><mj-column><mj-text font-size="24px" font-weight="700" color="#1d4ed8">${branding}</mj-text><mj-divider border-color="#d7dee8" /></mj-column></mj-section>`;
