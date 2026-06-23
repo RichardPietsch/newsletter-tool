@@ -1,0 +1,1 @@
+export function HeaderBlock({branding}:{branding:string}){return <div className="bg-white p-8"><div className="text-2xl font-bold text-blue-700">{branding}</div><div className="mt-4 border-t"/><span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">Gesperrt</span></div>}
