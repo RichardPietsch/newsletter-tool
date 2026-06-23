@@ -4,6 +4,7 @@ import { EditorShell } from '@/components/editor/editor-shell';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
 import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+import { getGlobalSettings } from '@/lib/settings/store';
 
 type NewsletterPageProps = {
   params: Promise<{ id: string }>;
@@ -17,5 +18,7 @@ export default async function Page({ params }: NewsletterPageProps) {
     notFound();
   }
 
-  return <EditorShell id={newsletter.id} document={newsletterDocumentSchema.parse(newsletter.document)} />;
+  const settings = await getGlobalSettings();
+
+  return <EditorShell id={newsletter.id} document={newsletterDocumentSchema.parse(newsletter.document)} settings={settings} />;
 }

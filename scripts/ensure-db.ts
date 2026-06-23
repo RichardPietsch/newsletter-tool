@@ -38,6 +38,15 @@ async function main() {
     );
   `);
 
+
+  await db.execute(sql`
+    create table if not exists app_settings (
+      id text primary key,
+      settings jsonb not null,
+      updated_at timestamp not null default now()
+    );
+  `);
+
   await db.insert(users).values({ id: DEFAULT_USER_ID, email: 'local@example.test' }).onConflictDoNothing();
   console.log('Database schema and default user are ready.');
 }

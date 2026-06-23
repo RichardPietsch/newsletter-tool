@@ -3,11 +3,11 @@
 Desktop-orientierter Next.js Newsletter-Editor. Der Stack verwendet Next.js 16.2.9 mit React 19.2.7, entsprechend `next@latest`/`react@latest` zum Zeitpunkt der Aktualisierung. JSON ist die editierbare Quelle; vollständiges E-Mail-HTML wird serverseitig per MJML exportiert.
 
 ## Architektur
-- `app/`: App Router Pages und API Route Handler für Newsletter, Assets und Export.
+- `app/`: App Router Pages und API Route Handler für Newsletter, Assets, globale Einstellungen und Export.
 - `components/`: dreispaltiger Editor mit Side-Rail, Canvas, Einfügeflächen, Overlay und Inspector.
 - `lib/newsletter/`: Zod-Schemas, Defaults, Operationen, Zustand Store und Undo/Redo.
 - `email/`: zentrale E-Mail-Theme-Werte und MJML-Modulrenderer. `theme.css` ist die menschlich lesbare Referenz; `theme.ts` enthält dieselben Token für die Pipeline.
-- `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets`.
+- `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets` und `app_settings`.
 
 ## Start
 ```bash
@@ -74,9 +74,12 @@ pnpm build
 ## Export-Architektur
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
+## Konfiguration
+Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt und eine aktive Variante ausgewählt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
+
 ## Annahmen und Einschränkungen
 - Next.js 16 dynamische Routen verwenden asynchrone `params`; Seiten und Route Handler warten diese daher explizit ab.
 - Ein lokaler Default-User ohne Authentifizierung.
 - Header/Footer sind systemdefiniert und gesperrt.
-- Settings und Account sind bewusst Platzhalter.
+- Account ist bewusst ein Platzhalter; Einstellungen sind als globaler Header-/Footer-Bereich umgesetzt.
 - Tiptap ist als eingeschränkter Rich-Text-Stack installiert; der MVP-Inspector speichert Tiptap-JSON über ein kontrolliertes Textfeld.
