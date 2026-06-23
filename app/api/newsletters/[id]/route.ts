@@ -1,3 +1,28 @@
-import { NextResponse } from 'next/server'; import { db } from '@/lib/db'; import { newsletters } from '@/lib/db/schema'; import { eq } from 'drizzle-orm'; import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
-export async function GET(_:Request,{params}:{params:{id:string}}){const [n]=await db.select().from(newsletters).where(eq(newsletters.id,params.id)); return n?NextResponse.json(n):NextResponse.json({error:'Nicht gefunden'},{status:404})}
-export async function PUT(req:Request,{params}:{params:{id:string}}){const body=await req.json(); const document=newsletterDocumentSchema.parse(body.document); const [n]=await db.update(newsletters).set({title:body.title||document.title,document,updatedAt:new Date()}).where(eq(newsletters.id,params.id)).returning(); return NextResponse.json(n)}
+import { NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/db';
+import { newsletters } from '@/lib/db/schema';
+import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+
+type NewsletterRouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+export async function GET(_: Request, { params }: NewsletterRouteContext) {
+  const { id } = await params;
+  const [newsletter] = await db.select().from(newsletters).where(eq(newsletters.id, id));
+  return newsletter ? NextResponse.json(newsletter) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+}
+
+export async function PUT(request: Request, { params }: NewsletterRouteContext) {
+  const { id } = await params;
+  const body = await request.json();
+  const document = newsletterDocumentSchema.parse(body.document);
+  const [newsletter] = await db
+    .update(newsletters)
+    .set({ title: body.title || document.title, document, updatedAt: new Date() })
+    .where(eq(newsletters.id, id))
+    .returning();
+
+  return newsletter ? NextResponse.json(newsletter) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+}

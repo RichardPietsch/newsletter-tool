@@ -1,2 +1,29 @@
-import { NextResponse } from 'next/server'; import { db } from '@/lib/db'; import { newsletters } from '@/lib/db/schema'; import { eq } from 'drizzle-orm'; import { renderNewsletter, safeFilename } from '@/email/render-newsletter'; import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
-export async function GET(_:Request,{params}:{params:{id:string}}){const [n]=await db.select().from(newsletters).where(eq(newsletters.id,params.id)); if(!n)return NextResponse.json({error:'Nicht gefunden'},{status:404}); const doc=newsletterDocumentSchema.parse(n.document); const html=renderNewsletter(doc); return new NextResponse(html,{headers:{'content-type':'text/html; charset=utf-8','content-disposition':`attachment; filename="${safeFilename(doc.title)}"`}})}
+import { NextResponse } from 'next/server';
+import { eq } from 'drizzle-orm';
+import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
+import { db } from '@/lib/db';
+import { newsletters } from '@/lib/db/schema';
+import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+
+type NewsletterExportRouteContext = {
+  params: Promise<{ id: string }>;
+};
+
+export async function GET(_: Request, { params }: NewsletterExportRouteContext) {
+  const { id } = await params;
+  const [newsletter] = await db.select().from(newsletters).where(eq(newsletters.id, id));
+
+  if (!newsletter) {
+    return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  }
+
+  const document = newsletterDocumentSchema.parse(newsletter.document);
+  const html = renderNewsletter(document);
+
+  return new NextResponse(html, {
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+      'content-disposition': `attachment; filename="${safeFilename(document.title)}"`,
+    },
+  });
+}

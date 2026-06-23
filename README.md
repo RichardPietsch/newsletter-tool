@@ -75,6 +75,7 @@ pnpm build
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
 ## Annahmen und Einschränkungen
+- Next.js 16 dynamische Routen verwenden asynchrone `params`; Seiten und Route Handler warten diese daher explizit ab.
 - Ein lokaler Default-User ohne Authentifizierung.
 - Header/Footer sind systemdefiniert und gesperrt.
 - Settings und Account sind bewusst Platzhalter.
