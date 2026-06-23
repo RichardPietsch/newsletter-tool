@@ -1,0 +1,2 @@
+import { notFound } from 'next/navigation'; import { db } from '@/lib/db'; import { newsletters } from '@/lib/db/schema'; import { eq } from 'drizzle-orm'; import { EditorShell } from '@/components/editor/editor-shell'; import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+export default async function Page({params}:{params:{id:string}}){const [n]=await db.select().from(newsletters).where(eq(newsletters.id,params.id)); if(!n)notFound(); return <EditorShell id={n.id} document={newsletterDocumentSchema.parse(n.document)}/>}
