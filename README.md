@@ -53,6 +53,12 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
+Für Docker und schnelle lokale Reparaturen gibt es zusätzlich:
+```bash
+pnpm db:ensure
+```
+Dieser Befehl legt die MVP-Tabellen bei Bedarf per `create table if not exists` an und seedet den lokalen Default-User. Der Docker-Web-Service führt ihn vor `pnpm dev` automatisch aus, damit der Button "Neuen Newsletter erstellen" nicht gegen eine leere Datenbank läuft.
+
 ## Umgebungsvariablen
 Siehe `.env.example`. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
 
