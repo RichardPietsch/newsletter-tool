@@ -75,6 +75,7 @@ pnpm build
 Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
 
 ## Editor
+Header-Logos werden in Vorschau und Export kompakt, zentriert und mit maximal 200 px Breite dargestellt; Export-Renderer müssen sich visuell an der Canvas-Vorschau orientieren.
 Bildmodule erlauben Uploads von JPEG, PNG und GIF über den Inspector und skalieren Bilder serverseitig automatisch auf maximal 600 px Breite. Textmodule werden direkt im Newsletter-Canvas mit Tiptap bearbeitet. Die Symbol-Toolbar am ausgewählten Textmodul unterstützt Absatz, H2, H3, Fett, Kursiv, Unterstreichen, schwarze und rote Hervorhebungen sowie nummerierte und unnummerierte Listen. Die rechte Inspector-Seitenleiste bleibt beim Scrollen der Canvas fixiert und scrollt nur ihren eigenen Inhalt.
 
 ## Konfiguration
