@@ -45,6 +45,12 @@ services:
         mc mb --ignore-existing local/newsletter-assets
         mc anonymous set download local/newsletter-assets
 
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+
   web:
     build: .
     env_file: .env.example
@@ -52,6 +58,10 @@ services:
       DATABASE_URL: postgres://newsletter:newsletter@db:5432/newsletter
       S3_ENDPOINT: http://minio:9000
       PUBLIC_ASSET_BASE_URL: http://localhost:9000/newsletter-assets
+      APP_URL: http://localhost:3000
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      SMTP_FROM: Newsletter Tool <no-reply@newsletter.local>
     command: sh -c "pnpm db:ensure && pnpm dev"
     ports:
       - '3000:3000'
@@ -60,6 +70,8 @@ services:
         condition: service_healthy
       createbucket:
         condition: service_completed_successfully
+      mailpit:
+        condition: service_started
 
 volumes:
   postgres-data:

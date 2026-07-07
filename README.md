@@ -3,11 +3,12 @@
 Desktop-orientierter Next.js Newsletter-Editor. Der Stack verwendet Next.js 16.2.9 mit React 19.2.7, entsprechend `next@latest`/`react@latest` zum Zeitpunkt der Aktualisierung. JSON ist die editierbare Quelle; vollständiges E-Mail-HTML wird serverseitig per MJML exportiert.
 
 ## Architektur
-- `app/`: App Router Pages und API Route Handler für Newsletter, Assets, globale Einstellungen und Export.
+- `app/`: App Router Pages und API Route Handler für Login, Newsletter, Assets, nutzerbezogene Einstellungen und Export.
 - `components/`: dreispaltiger Editor mit Side-Rail, Canvas, Einfügeflächen, Overlay und Inspector.
 - `lib/newsletter/`: Zod-Schemas, Defaults, Operationen, Zustand Store und Undo/Redo.
 - `email/`: zentrale E-Mail-Theme-Werte und MJML-Modulrenderer. `theme.css` ist die menschlich lesbare Referenz; `theme.ts` enthält dieselben Token für die Pipeline.
-- `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets` und `app_settings`.
+- `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets`, `app_settings`, Magic Links und Sessions.
+- `lib/auth/`: Passwordless Authentifizierung mit gehashten Einmal-Token, HTTP-only Session-Cookies und Zugriffsschutz für Pages/API-Routen.
 
 ## Start
 ```bash
@@ -19,7 +20,7 @@ pnpm dev
 ```bash
 docker compose up --build
 ```
-Startet Next.js, PostgreSQL und MinIO. MinIO läuft lokal auf `http://localhost:9000`, Konsole auf `http://localhost:9001`. Der Compose-Stack verwendet die offiziellen Docker-Hub-Images `minio/minio:latest` und `minio/mc:latest`, weil die zuvor eingetragenen datierten `minio/mc`-Tags nicht auf Docker Hub existierten.
+Startet Next.js, PostgreSQL, MinIO und Mailpit für lokale Login-E-Mails. MinIO läuft lokal auf `http://localhost:9000`, Konsole auf `http://localhost:9001`. Mailpit ist unter `http://localhost:8025` erreichbar und zeigt lokal versendete Magic-Link-E-Mails an. Der Compose-Stack verwendet die offiziellen Docker-Hub-Images `minio/minio:latest` und `minio/mc:latest`, weil die zuvor eingetragenen datierten `minio/mc`-Tags nicht auf Docker Hub existierten.
 
 Für eine saubere lokale Erstinitialisierung nach Schemaänderungen:
 ```bash
@@ -60,7 +61,7 @@ pnpm db:ensure
 Dieser Befehl legt die MVP-Tabellen bei Bedarf per `create table if not exists` an und seedet den lokalen Default-User. Der Docker-Web-Service führt ihn vor `pnpm dev` automatisch aus, damit der Button "Neuen Newsletter erstellen" nicht gegen eine leere Datenbank läuft. Das Skript ist bewusst ohne Top-Level-`await` geschrieben, damit es im Docker-Container mit der von `tsx` genutzten CommonJS-Transformation läuft.
 
 ## Umgebungsvariablen
-Siehe `.env.example`. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
+Siehe `.env.example`. Für den Login sind `APP_URL`, `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS` sowie SMTP-Variablen relevant. In Produktion sollte mindestens eine Auth-Allowlist gesetzt sein; ohne Allowlist ist die Anmeldung nur außerhalb von `NODE_ENV=production` offen. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
 
 ## Tests und Qualität
 ```bash
@@ -81,9 +82,11 @@ Newsletter-Module orientieren sich am Club-Entwurf: Featured Event, Zitat, Absch
 ## Konfiguration
 Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erreichbar. Dort werden globale Header-Varianten als hochgeladene Bilder gepflegt. Die aktive Header-Variante wird nicht global gesetzt, sondern pro Newsletter im Header-Inspector ausgewählt. Nicht verwendete Header-Varianten können in den globalen Einstellungen gelöscht werden; verwendete Varianten bleiben geschützt. Der Footer wird als eingeschränkter RichText in `app_settings` gespeichert und im Editor sowie im MJML-Export global angewendet.
 
+## Login und Zugriffsschutz
+Die Anwendung nutzt Passwordless Login per Magic Link. Der Login erzeugt einen kryptografisch sicheren Einmal-Token, speichert nur dessen SHA-256-Hash in `auth_magic_links`, versendet den Link per SMTP und setzt nach erfolgreicher Verifikation ein HTTP-only Session-Cookie. Newsletter, Assets und Einstellungen werden über `ownerId` bzw. nutzerbezogene Settings eindeutig dem angemeldeten Nutzer zugeordnet. Lokale Testmails landen im Docker-Setup in Mailpit (`http://localhost:8025`).
+
 ## Annahmen und Einschränkungen
 - Next.js 16 dynamische Routen verwenden asynchrone `params`; Seiten und Route Handler warten diese daher explizit ab.
-- Ein lokaler Default-User ohne Authentifizierung.
+- In lokaler Entwicklung bleibt ein Default-User für Seeds/Kompatibilität vorhanden; produktive Zugriffe laufen über Magic-Link-Sessions.
 - Header/Footer sind systemdefiniert und gesperrt.
-- Account ist bewusst ein Platzhalter; Einstellungen sind als globaler Header-/Footer-Bereich umgesetzt.
 - Tiptap ist als eingeschränkter Rich-Text-Stack installiert; der MVP-Inspector speichert Tiptap-JSON über ein kontrolliertes Textfeld.

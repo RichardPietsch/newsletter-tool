@@ -1,19 +1,23 @@
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { db, DEFAULT_USER_ID } from '@/lib/db';
-import { newsletters, users } from '@/lib/db/schema';
+import { desc, eq } from 'drizzle-orm';
+import { requireApiUser } from '@/lib/auth/current-user';
+import { db } from '@/lib/db';
+import { newsletters } from '@/lib/db/schema';
 import { createDefaultDocument } from '@/lib/newsletter/defaults';
-import { desc } from 'drizzle-orm';
 
 export async function GET() {
-  const rows = await db.select().from(newsletters).orderBy(desc(newsletters.updatedAt));
+  const auth = await requireApiUser();
+  if (auth.response) return auth.response;
+  const rows = await db.select().from(newsletters).where(eq(newsletters.ownerId, auth.user.id)).orderBy(desc(newsletters.updatedAt));
   return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
-  await db.insert(users).values({ id: DEFAULT_USER_ID, email: 'local@example.test' }).onConflictDoNothing();
+  const auth = await requireApiUser();
+  if (auth.response) return auth.response;
   const id = nanoid();
   const document = createDefaultDocument();
-  await db.insert(newsletters).values({ id, ownerId: DEFAULT_USER_ID, title: document.title, document });
+  await db.insert(newsletters).values({ id, ownerId: auth.user.id, title: document.title, document });
   return NextResponse.redirect(new URL(`/newsletters/${id}`, request.url), 303);
 }

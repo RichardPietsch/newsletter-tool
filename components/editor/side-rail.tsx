@@ -7,7 +7,7 @@ export function SideRail({ onExport }: { onExport: () => void }) {
       <form action="/api/newsletters" method="post"><button className="rounded p-3" aria-label="Neuer Newsletter">➕</button></form>
       <a className="rounded p-3" href="/newsletters?assets=1" aria-label="Assets">🖼️</a>
       <a className="rounded p-3" href="/settings" aria-label="Einstellungen">⚙️</a>
-      <button className="rounded p-3" aria-label="Account in Vorbereitung" title="In Vorbereitung">👤</button>
+      <a className="rounded p-3" href="/account" aria-label="Account">👤</a>
       <button onClick={onExport} className="rounded p-3" aria-label="Export">⬇️</button>
     </nav>
   );
