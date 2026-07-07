@@ -25,7 +25,6 @@ export function SideRail({ onExport, onOpenMedia, onOpenSettings, onOpenAccount 
       <RailButton onClick={onOpenMedia} label="Medien"><MdiIcon name="media" /></RailButton>
       <RailButton onClick={onOpenSettings} label="Einstellungen"><MdiIcon name="cog" /></RailButton>
       <RailButton onClick={onOpenAccount} label="Account"><MdiIcon name="account" /></RailButton>
-      <div className="mt-auto" />
       <RailButton onClick={onExport} label="HTML exportieren" emphasized><MdiIcon name="download" className="h-7 w-7" /></RailButton>
     </nav>
   );
