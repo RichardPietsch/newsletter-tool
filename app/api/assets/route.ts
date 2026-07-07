@@ -1,0 +1,3 @@
+import { NextResponse } from 'next/server'; import { nanoid } from 'nanoid'; import { db, DEFAULT_USER_ID } from '@/lib/db'; import { assets, users } from '@/lib/db/schema'; import { validateAndUpload } from '@/lib/assets/upload';
+export async function GET(){return NextResponse.json(await db.select().from(assets))}
+export async function POST(req:Request){const form=await req.formData(); const file=form.get('file'); if(!(file instanceof File))return NextResponse.json({error:'Datei fehlt'},{status:400}); const data=await validateAndUpload(file); await db.insert(users).values({id:DEFAULT_USER_ID,email:'local@example.test'}).onConflictDoNothing(); const row={id:nanoid(),ownerId:DEFAULT_USER_ID,...data}; await db.insert(assets).values(row); return NextResponse.json(row)}
