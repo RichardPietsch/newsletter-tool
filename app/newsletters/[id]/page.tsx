@@ -24,6 +24,19 @@ export default async function Page({ params }: NewsletterPageProps) {
   }
 
   const settings = await getUserSettings(user.id);
+  const rows = await db.select({ document: newsletters.document }).from(newsletters).where(eq(newsletters.ownerId, user.id));
+  const usedHeaderVariantIds = rows.flatMap((row) => {
+    const document = row.document as { blocks?: Array<{ type?: string; headerVariantId?: string }> };
+    return document.blocks?.filter((block) => block.type === 'header' && block.headerVariantId).map((block) => block.headerVariantId as string) ?? [];
+  });
 
-  return <EditorShell id={newsletter.id} document={newsletterDocumentSchema.parse(newsletter.document)} settings={settings} />;
+  return (
+    <EditorShell
+      id={newsletter.id}
+      document={newsletterDocumentSchema.parse(newsletter.document)}
+      settings={settings}
+      usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))}
+      account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }}
+    />
+  );
 }

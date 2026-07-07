@@ -20,7 +20,7 @@ function docFromPlainText(text: string): GlobalSettings['footerRichText'] {
   };
 }
 
-export function SettingsEditor({ initialSettings, usedHeaderVariantIds }: { initialSettings: GlobalSettings; usedHeaderVariantIds: string[] }) {
+export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded = false }: { initialSettings: GlobalSettings; usedHeaderVariantIds: string[]; embedded?: boolean }) {
   const [settings, setSettings] = useState(initialSettings);
   const [status, setStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [uploading, setUploading] = useState(false);
@@ -63,11 +63,11 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds }: { init
   }
 
   return (
-    <main className="mx-auto max-w-5xl p-8">
+    <div className={embedded ? 'p-6' : 'mx-auto max-w-5xl p-8'}>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <a href="/newsletters" className="text-sm text-blue-700">← Zur Newsletter-Liste</a>
-          <h1 className="mt-2 text-3xl font-bold">Konfiguration</h1>
+          {!embedded ? <a href="/newsletters" className="text-sm text-blue-700">← Zur Newsletter-Liste</a> : null}
+          <h1 className={embedded ? 'text-3xl font-bold' : 'mt-2 text-3xl font-bold'}>Konfiguration</h1>
           <p className="text-slate-600">Bearbeite globale Header-Varianten und den systemweiten Footer.</p>
         </div>
         <div aria-live="polite" className="rounded bg-white px-3 py-2 text-sm text-slate-700">
@@ -124,6 +124,6 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds }: { init
         <textarea className="mt-4 min-h-48 w-full rounded border p-3" value={plainTextFromDoc(settings.footerRichText)} onChange={(event) => setSettings({ ...settings, footerRichText: docFromPlainText(event.target.value) })} onBlur={() => void save()} />
         <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>Footer speichern</button>
       </section>
-    </main>
+    </div>
   );
 }

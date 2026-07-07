@@ -1,14 +1,32 @@
 'use client';
 
-export function SideRail({ onExport }: { onExport: () => void }) {
+import type { ReactNode } from 'react';
+import { MdiIcon } from './icons';
+
+type SideRailProps = {
+  onExport: () => void;
+  onOpenMedia: () => void;
+  onOpenSettings: () => void;
+  onOpenAccount: () => void;
+};
+
+function RailButton({ label, children, onClick, href, emphasized = false }: { label: string; children: ReactNode; onClick?: () => void; href?: string; emphasized?: boolean }) {
+  const className = `rounded p-3 transition hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600 ${emphasized ? 'text-[#012aff]' : 'text-slate-700'}`;
+  if (href) {
+    return <a className={className} href={href} aria-label={label} title={label}>{children}</a>;
+  }
+  return <button type="button" onClick={onClick} className={className} aria-label={label} title={label}>{children}</button>;
+}
+
+export function SideRail({ onExport, onOpenMedia, onOpenSettings, onOpenAccount }: SideRailProps) {
   return (
     <nav className="flex w-20 flex-col items-center gap-3 border-r bg-white py-4" aria-label="Funktionsleiste">
-      <a className="rounded p-3" href="/newsletters" aria-label="Newsletter-Liste">📋</a>
-      <form action="/api/newsletters" method="post"><button className="rounded p-3" aria-label="Neuer Newsletter">➕</button></form>
-      <a className="rounded p-3" href="/newsletters?assets=1" aria-label="Assets">🖼️</a>
-      <a className="rounded p-3" href="/settings" aria-label="Einstellungen">⚙️</a>
-      <a className="rounded p-3" href="/account" aria-label="Account">👤</a>
-      <button onClick={onExport} className="rounded p-3" aria-label="Export">⬇️</button>
+      <RailButton href="/newsletters" label="Newsletter-Übersicht"><MdiIcon name="home" /></RailButton>
+      <RailButton onClick={onOpenMedia} label="Medien"><MdiIcon name="media" /></RailButton>
+      <RailButton onClick={onOpenSettings} label="Einstellungen"><MdiIcon name="cog" /></RailButton>
+      <RailButton onClick={onOpenAccount} label="Account"><MdiIcon name="account" /></RailButton>
+      <div className="mt-auto" />
+      <RailButton onClick={onExport} label="HTML exportieren" emphasized><MdiIcon name="download" className="h-7 w-7" /></RailButton>
     </nav>
   );
 }

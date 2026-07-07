@@ -38,6 +38,8 @@ async function main() {
       storage_key text not null,
       public_url text not null,
       original_filename text not null,
+      title text,
+      alt_text text,
       mime_type text not null,
       width integer not null,
       height integer not null,
@@ -45,6 +47,8 @@ async function main() {
       created_at timestamp not null default now()
     );
   `);
+  await db.execute(sql`alter table assets add column if not exists title text;`);
+  await db.execute(sql`alter table assets add column if not exists alt_text text;`);
   await db.execute(sql`create index if not exists assets_owner_idx on assets(owner_id);`);
 
   await db.execute(sql`

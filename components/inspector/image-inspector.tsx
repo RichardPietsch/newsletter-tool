@@ -25,7 +25,7 @@ export function ImageInspector({ block, onChange }: { block: ImageBlock; onChang
     onChange({
       assetId: asset.id,
       src: asset.publicUrl,
-      alt: block.alt || asset.originalFilename.replace(/\.[^.]+$/, ''),
+      alt: block.alt || asset.altText || asset.title || asset.originalFilename.replace(/\.[^.]+$/, ''),
     });
   }
 
