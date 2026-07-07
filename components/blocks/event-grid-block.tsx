@@ -1,3 +1,28 @@
 import type { EventGridBlock, EventItem } from '@/lib/newsletter/schema';
-function Card({item,wide}:{item:EventItem;wide?:boolean}){return <article className={`bg-white ${wide?'md:col-span-2':''}`}>{item.image?.src&&<img src={item.image.src} alt={item.image.decorative?'':item.image.alt||''} className="h-40 w-full object-cover"/>}<div className="p-6"><div className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#a63a3a]">{item.category}</div><h3 className="mt-3 font-serif text-xl leading-tight text-[#18303d]">{item.title}</h3>{(item.date||item.location)&&<p className="mt-3 text-sm text-[#6d7478]">{[item.date,item.location].filter(Boolean).join(' · ')}</p>}{item.description&&<p className="mt-3 text-sm leading-relaxed text-[#4f5a60]">{item.description}</p>}{item.buttonUrl&&<span className="mt-5 inline-block border border-[#17303d] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#17303d]">{item.buttonLabel}</span>}</div></article>}
-export function EventGridBlock({block}:{block:EventGridBlock}){return <div className="bg-[#f4f1ec] px-6 py-5">{block.heading&&<div className="mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.28em] text-[#a63a3a]">{block.heading}</div>}<div className="grid gap-4 md:grid-cols-2">{block.items.map((item,index)=><Card key={item.id} item={item} wide={block.items.length%2===1&&index===block.items.length-1}/>)}</div></div>}
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+
+function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
+  return (
+    <article className={wide ? 'md:col-span-2' : ''} style={{ backgroundColor: styles.cardBackground }}>
+      {item.image?.src && <img src={item.image.src} alt={item.image.decorative ? '' : item.image.alt || ''} style={{ height: styles.eventGrid.imageHeight }} className="w-full object-cover" />}
+      <div style={{ padding: styles.eventGrid.cardPadding }}>
+        <div className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: styles.red }}>{item.category}</div>
+        <h3 className="mt-3 font-serif text-xl leading-tight" style={{ color: styles.serifText }}>{item.title}</h3>
+        {(item.date || item.location) && <p className="mt-3 text-sm" style={{ color: styles.mutedText }}>{[item.date, item.location].filter(Boolean).join(' · ')}</p>}
+        {item.description && <p className="mt-3 text-sm leading-relaxed" style={{ color: styles.bodyText }}>{item.description}</p>}
+        {item.buttonUrl && <span className="mt-5 inline-block border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em]" style={{ borderColor: styles.navy, color: styles.navy }}>{item.buttonLabel}</span>}
+      </div>
+    </article>
+  );
+}
+
+export function EventGridBlock({ block }: { block: EventGridBlock }) {
+  return (
+    <div style={{ backgroundColor: styles.newsletterBackground, padding: `${styles.eventGrid.outerPaddingY}px ${styles.eventGrid.outerPaddingX}px` }}>
+      {block.heading && <div className="mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: styles.red }}>{block.heading}</div>}
+      <div className="grid md:grid-cols-2" style={{ gap: styles.eventGrid.gap }}>
+        {block.items.map((item, index) => <Card key={item.id} item={item} wide={block.items.length % 2 === 1 && index === block.items.length - 1} />)}
+      </div>
+    </div>
+  );
+}
