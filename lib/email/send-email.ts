@@ -1,0 +1,2 @@
+import nodemailer from 'nodemailer';
+export async function sendEmail({to,subject,html,text}:{to:string;subject:string;html:string;text:string}){const port=Number(process.env.SMTP_PORT||1025); const transporter=nodemailer.createTransport({host:process.env.SMTP_HOST||'localhost',port,secure:port===465,auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined}); await transporter.sendMail({from:process.env.SMTP_FROM||'Newsletter Tool <no-reply@newsletter.local>',to,subject,html,text})}
