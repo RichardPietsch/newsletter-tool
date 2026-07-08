@@ -38,7 +38,8 @@
     "@tiptap/extension-underline": "^2.5.8",
     "@tiptap/extension-text-style": "^2.5.8",
     "@tiptap/extension-color": "^2.5.8",
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "tsx": "^4.16.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.0",
@@ -54,7 +55,6 @@
     "jsdom": "^24.1.0",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.4",
-    "tsx": "^4.16.2",
     "typescript": "^5.5.3",
     "vitest": "^2.0.3",
     "@types/nodemailer": "^6.4.16"

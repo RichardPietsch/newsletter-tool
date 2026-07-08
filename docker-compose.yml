@@ -52,7 +52,9 @@ services:
       - '8025:8025'
 
   web:
-    build: .
+    build:
+      context: .
+      target: development
     env_file: .env.example
     environment:
       DATABASE_URL: postgres://newsletter:newsletter@db:5432/newsletter

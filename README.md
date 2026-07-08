@@ -47,6 +47,36 @@ Wenn der Bucket bereits existiert, bleibt der Befehl durch `mc mb --ignore-exist
 docker compose logs -f web
 ```
 
+
+## Öffentliche Testumgebung / Portainer Deployment
+
+Für eine öffentlich erreichbare Testumgebung darf nicht der lokale Dev-Server verwendet werden. Das `Dockerfile` enthält deshalb ein `development`-Target für lokale Entwicklung und ein `production`-Target, das beim Image-Build `pnpm build` ausführt und anschließend `pnpm start` nutzt.
+
+### Lokale Entwicklung
+
+```bash
+docker compose up --build
+```
+
+Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit ist nur für lokale Login-Mails gedacht und darf nicht als produktiver SMTP-Dienst verwendet werden.
+
+### Production-/Portainer-Stack
+
+1. DNS vorbereiten, z. B. `newsletter.example.com` für die App und `assets.example.com` für öffentlich erreichbare Newsletter-Bilder.
+2. `.env.production.example` kopieren und als Portainer-Env bzw. `.env.production` mit echten Werten pflegen. Keine Beispielwerte unverändert produktiv verwenden.
+3. Zwingend setzen: `APP_URL=https://newsletter.example.com`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und entweder `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS`.
+4. Stack mit Production-Compose starten:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml up --build -d
+```
+
+5. Reverse Proxy / Portainer so konfigurieren, dass HTTPS auf den internen Web-Service `web:3000` zeigt. PostgreSQL und die MinIO-Admin-Konsole sollen nicht öffentlich exposed werden.
+6. MinIO/Asset-Auslieferung so konfigurieren, dass `PUBLIC_ASSET_BASE_URL` von externen Mailclients erreichbar ist. Lokale oder private URLs funktionieren in exportierten Newslettern außerhalb des Servers nicht zuverlässig.
+7. Smoke-Test durchführen: Magic-Link anfordern, Newsletter erstellen, Bild hochladen, Export herunterladen und prüfen, ob alle Bild-URLs per HTTPS erreichbar sind.
+
+Noch offene Härtungsschritte vor einem breiteren Test: CSRF-/Origin-Schutz für mutierende APIs, Export-Validierung gegen lokale/private Bild-URLs und bessere Upload-Fehlerbehandlung.
+
 ## Datenbank
 ```bash
 pnpm db:generate
