@@ -75,7 +75,7 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up --build 
 6. MinIO/Asset-Auslieferung so konfigurieren, dass `PUBLIC_ASSET_BASE_URL` von externen Mailclients erreichbar ist. Lokale oder private URLs funktionieren in exportierten Newslettern außerhalb des Servers nicht zuverlässig.
 7. Smoke-Test durchführen: Magic-Link anfordern, Newsletter erstellen, Bild hochladen, Export herunterladen und prüfen, ob alle Bild-URLs per HTTPS erreichbar sind.
 
-Noch offene Härtungsschritte vor einem breiteren Test: CSRF-/Origin-Schutz für mutierende APIs, Export-Validierung gegen lokale/private Bild-URLs und bessere Upload-Fehlerbehandlung.
+Noch offene Härtungsschritte vor einem breiteren Test: CSRF-/Origin-Schutz für mutierende APIs und bessere Upload-Fehlerbehandlung. Der Export blockiert in Production bereits lokale/private Bild-URLs sowie nicht per HTTPS erreichbare Bildquellen.
 
 ## Datenbank
 ```bash
@@ -103,7 +103,9 @@ pnpm build
 ```
 
 ## Export-Architektur
-Pipeline: Newsletter-JSON → Zod-Validierung → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
+Pipeline: Newsletter-JSON → Zod-Validierung → Export-Preflight → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
+
+Der Export-Preflight verhindert in `NODE_ENV=production`, dass Newsletter mit lokalen, privaten oder nur per HTTP erreichbaren Bild-URLs als HTML-Datei heruntergeladen werden. `PUBLIC_ASSET_BASE_URL` muss deshalb produktiv eine öffentliche HTTPS-Adresse sein, z. B. `https://assets.example.com/newsletter-assets`. Lokale MinIO-URLs wie `http://localhost:9000/...`, interne Docker-Hostnamen wie `http://minio:9000/...` und private IP-Adressen sind nur für lokale Entwicklung geeignet und werden in Production blockiert. Nicht-dekorative Bilder benötigen außerdem weiterhin einen Alternativtext.
 
 ## Editor
 Header-Logos werden in Vorschau und Export kompakt, zentriert und mit maximal 200 px Breite dargestellt; Export-Renderer müssen sich visuell an der Canvas-Vorschau orientieren. Der Newsletter-Hintergrund ist #f4f1ec. Module mit Newsletter-Hintergrundfarbe erhalten keine eigene Outline oder Rahmenfläche. Shared Module-Style-Tokens in `lib/newsletter/module-styles.ts` sind die verbindliche Quelle für Vorschau- und Export-Abstände/Farben.

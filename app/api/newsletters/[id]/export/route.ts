@@ -4,6 +4,7 @@ import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
+import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
 import { getUserSettings } from '@/lib/settings/store';
 
@@ -25,6 +26,11 @@ export async function GET(_: Request, { params }: NewsletterExportRouteContext) 
   }
 
   const document = newsletterDocumentSchema.parse(newsletter.document);
+  const issues = validateNewsletterForExport(document);
+  if (issues.length > 0) {
+    return NextResponse.json({ error: 'Newsletter kann nicht exportiert werden.', issues }, { status: 400 });
+  }
+
   const settings = await getUserSettings(auth.user.id);
   const html = renderNewsletter(document, settings);
 
