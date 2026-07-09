@@ -14,11 +14,11 @@ export async function GET() {
   return NextResponse.json(rows);
 }
 
-export async function POST(request: Request) {
+export async function POST() {
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const id = nanoid();
   const document = createDefaultDocument();
   await db.insert(newsletters).values({ id, ownerId: auth.user.id, title: document.title, document });
-  return NextResponse.redirect(new URL(`/newsletters/${id}`, request.url), 303);
+  return new Response(null, { status: 303, headers: { Location: `/newsletters/${id}` } });
 }
