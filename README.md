@@ -63,8 +63,8 @@ Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit 
 ### Production-/Portainer-Stack
 
 1. DNS vorbereiten, z. B. `newsletter.example.com` für die App und `assets.example.com` für öffentlich erreichbare Newsletter-Bilder.
-2. `.env.production.example` kopieren und als Portainer-Env bzw. `.env.production` mit echten Werten pflegen. Keine Beispielwerte unverändert produktiv verwenden.
-3. Zwingend setzen: `APP_URL=https://newsletter.example.com`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und entweder `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS`.
+2. `.env.production.example` als Vorlage verwenden und die Werte in Portainer als Stack-Environment-Variablen oder lokal in einer nicht committeten `.env.production` pflegen. Die Production-Compose-Datei nutzt keine Beispiel-Env-Datei als Fallback mehr.
+3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten, MinIO/S3-Zugangsdaten und entweder `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS`. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
 4. Stack mit Production-Compose starten:
 
 ```bash
@@ -91,7 +91,7 @@ pnpm db:ensure
 Dieser Befehl legt die MVP-Tabellen bei Bedarf per `create table if not exists` an und seedet den lokalen Default-User. Der Docker-Web-Service führt ihn vor `pnpm dev` automatisch aus, damit der Button "Neuen Newsletter erstellen" nicht gegen eine leere Datenbank läuft. Das Skript ist bewusst ohne Top-Level-`await` geschrieben, damit es im Docker-Container mit der von `tsx` genutzten CommonJS-Transformation läuft.
 
 ## Umgebungsvariablen
-Siehe `.env.example`. Für den Login sind `APP_URL`, `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS` sowie SMTP-Variablen relevant. In Produktion sollte mindestens eine Auth-Allowlist gesetzt sein; ohne Allowlist ist die Anmeldung nur außerhalb von `NODE_ENV=production` offen. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
+Siehe `.env.example` für lokale Entwicklung und `.env.production.example` für Production. Für Portainer werden die Werte als Stack-Environment-Variablen erwartet; `docker-compose.prod.yml` verwendet keine vorausgefüllte Beispiel-Env-Datei als automatischen Fallback. Für den Login sind `APP_URL`, `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS` sowie SMTP-Variablen relevant. In Produktion sollte mindestens eine Auth-Allowlist gesetzt sein; ohne Allowlist ist die Anmeldung nur außerhalb von `NODE_ENV=production` offen. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
 
 ## Tests und Qualität
 ```bash
