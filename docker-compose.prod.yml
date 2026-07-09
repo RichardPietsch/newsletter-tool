@@ -26,6 +26,8 @@ services:
       retries: 10
     volumes:
       - minio-data:/data
+    ports:
+      - '127.0.0.1:9000:9000'
 
   createbucket:
     image: minio/mc:latest
@@ -69,6 +71,8 @@ services:
       S3_BUCKET: "${S3_BUCKET:?S3_BUCKET is required}"
       PUBLIC_ASSET_BASE_URL: "${PUBLIC_ASSET_BASE_URL:?PUBLIC_ASSET_BASE_URL is required}"
     command: sh -c "pnpm db:ensure && pnpm start"
+    ports:
+      - '127.0.0.1:3000:3000'
     expose:
       - '3000'
     depends_on:
