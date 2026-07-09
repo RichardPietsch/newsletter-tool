@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
 import { SettingsEditor } from '@/components/settings/settings-editor';
 import { requirePageUser } from '@/lib/auth/current-user';

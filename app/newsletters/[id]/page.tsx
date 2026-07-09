@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { notFound } from 'next/navigation';
 import { and, eq } from 'drizzle-orm';
 import { EditorShell } from '@/components/editor/editor-shell';

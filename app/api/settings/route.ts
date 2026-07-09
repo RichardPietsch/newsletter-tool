@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { getUserSettings, saveUserSettings } from '@/lib/settings/store';

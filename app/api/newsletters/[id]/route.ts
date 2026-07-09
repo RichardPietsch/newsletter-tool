@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { requireApiUser } from '@/lib/auth/current-user';

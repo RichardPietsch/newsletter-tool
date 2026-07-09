@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { desc, eq } from 'drizzle-orm';
 import { requirePageUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
