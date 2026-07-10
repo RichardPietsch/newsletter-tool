@@ -1,5 +1,4 @@
 import type { GlobalSettings } from '@/lib/settings/schema';
-import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (match) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[match]!);
@@ -31,5 +30,5 @@ function renderNodes(nodes: RichTextNode[] = []): string {
 
 export function renderFooter(contact: string, legal: string, settings?: GlobalSettings) {
   const content = settings ? renderNodes(settings.footerRichText.content) : `${escapeHtml(contact)}<br/>${escapeHtml(legal)}`;
-  return `<mj-section background-color="#ffffff" padding="16px 24px 32px"><mj-column><mj-divider padding="0 0 14px" border-width="1px" border-color="${styles.red}" /><mj-text align="center" font-size="12px" color="#5d6b82" line-height="1.5" padding="0">${content}</mj-text></mj-column></mj-section>`;
+  return `<mj-section padding="16px 24px 32px"><mj-column><mj-text align="center" font-size="12px" color="#5d6b82" line-height="1.5" padding="0">${content}</mj-text></mj-column></mj-section>`;
 }

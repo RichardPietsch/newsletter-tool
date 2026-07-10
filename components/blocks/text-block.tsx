@@ -30,7 +30,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
     editable: !readOnly,
     editorProps: {
       attributes: {
-        class: `min-h-32 focus:outline-none [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : 'text-slate-800'}`,
+        class: `min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : 'text-slate-800'}`,
         'aria-label': 'Textmodul direkt bearbeiten',
       },
     },

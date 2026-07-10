@@ -3,7 +3,7 @@ import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles
 
 function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
   return (
-    <article className={wide ? 'md:col-span-2' : ''} style={{ backgroundColor: styles.cardBackground }}>
+    <article className={`${wide ? 'md:col-span-2 ' : ''}overflow-hidden rounded-[2px]`} style={{ backgroundColor: styles.cardBackground }}>
       {item.image?.src && <img src={item.image.src} alt={item.image.decorative ? '' : item.image.alt || ''} style={{ height: styles.eventGrid.imageHeight }} className="w-full object-cover" />}
       <div style={{ padding: styles.eventGrid.cardPadding }}>
         <div className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: styles.red }}>{item.category}</div>

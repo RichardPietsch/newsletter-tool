@@ -9,7 +9,7 @@ export const newsletterModuleStyles = {
   eventGrid: {
     outerPaddingX: 24,
     outerPaddingY: 20,
-    gap: 16,
+    gap: 24,
     cardPadding: 24,
     imageHeight: 160,
     overlineTop: 18,

@@ -2,7 +2,7 @@ import type { FeaturedEventBlock as B } from '@/lib/newsletter/schema';
 
 export function FeaturedEventBlock({ block }: { block: B }) {
   return (
-    <div className="bg-[#17303d] text-white">
+    <div className="overflow-hidden rounded-[2px] bg-[#17303d] text-white">
       {block.image?.src && <img src={block.image.src} alt={block.image.decorative ? '' : block.image.alt || ''} className="h-48 w-full object-cover" />}
       <div className="flex flex-col px-8 py-7">
         <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#cddde3]">{block.overline}</div>
