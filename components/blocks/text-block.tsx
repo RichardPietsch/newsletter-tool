@@ -8,12 +8,14 @@ import StarterKit from '@tiptap/starter-kit';
 import { useEffect } from 'react';
 import type { TextBlock as T } from '@/lib/newsletter/schema';
 import { useNewsletterStore } from '@/lib/newsletter/store';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 
 export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: boolean }) {
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
   const isSelected = selectedId === block.id;
+  const isBlue = block.background === 'blue';
 
   const editor = useEditor({
     extensions: [
@@ -26,7 +28,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
     editable: !readOnly,
     editorProps: {
       attributes: {
-        class: 'min-h-32 bg-white text-slate-800 focus:outline-none [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
+        class: `min-h-32 focus:outline-none [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : 'text-slate-800'}`,
         'aria-label': 'Textmodul direkt bearbeiten',
       },
     },
@@ -45,7 +47,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
   }, [block.content, editor]);
 
   return (
-    <div className="bg-white p-6">
+    <div className="p-6" style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground }}>
       {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} /> : null}
       {editor ? <EditorContent editor={editor} /> : <div className="min-h-32 text-slate-500">Texteditor wird geladen …</div>}
     </div>

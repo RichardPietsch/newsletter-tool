@@ -17,11 +17,12 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
 }
 
 export function EventGridBlock({ block }: { block: EventGridBlock }) {
+  const listLayout = block.layout === 'list';
   return (
     <div style={{ backgroundColor: styles.newsletterBackground, padding: `${styles.eventGrid.outerPaddingY}px ${styles.eventGrid.outerPaddingX}px` }}>
       {block.heading && <div className="mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: styles.red }}>{block.heading}</div>}
-      <div className="grid md:grid-cols-2" style={{ gap: styles.eventGrid.gap }}>
-        {block.items.map((item, index) => <Card key={item.id} item={item} wide={block.items.length % 2 === 1 && index === block.items.length - 1} />)}
+      <div className={listLayout ? 'grid md:grid-cols-1' : 'grid md:grid-cols-2'} style={{ gap: styles.eventGrid.gap }}>
+        {block.items.map((item, index) => <Card key={item.id} item={item} wide={listLayout || (block.items.length % 2 === 1 && index === block.items.length - 1)} />)}
       </div>
     </div>
   );

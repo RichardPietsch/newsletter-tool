@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { GlobalSettings } from '@/lib/settings/schema';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 type RichTextNode = {
   type?: string;
@@ -41,7 +42,7 @@ export function FooterBlock({ contact, legal, settings }: { contact: string; leg
 
   return (
     <div className="bg-white p-8 text-center text-sm text-slate-500">
-      <div className="mb-4 border-t" />
+      <div className="mb-4 border-t" style={{ borderColor: styles.red, borderTopWidth: 1 }} />
       {paragraphs.map((paragraph, index) => <p key={index} className={paragraphHasContent(paragraph) ? undefined : 'h-4'}>{renderInlineNodes(paragraph.content, `footer-${index}`)}</p>)}
       <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">Gesperrt · global konfiguriert</span>
     </div>

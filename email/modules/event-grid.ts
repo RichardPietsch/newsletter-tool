@@ -10,6 +10,12 @@ function card(item: EventItem) {
 
 export function renderEventGrid(block: EventGridBlock) {
   let out = block.heading ? `<mj-section background-color="${styles.newsletterBackground}" padding="${px(styles.eventGrid.outerPaddingY)} ${px(styles.eventGrid.outerPaddingX)} 8px"><mj-column><mj-text padding="0" font-size="11px" font-weight="700" letter-spacing="2.8px" color="${styles.red}" text-transform="uppercase">${block.heading}</mj-text></mj-column></mj-section>` : '';
+  if (block.layout === 'list') {
+    for (const item of block.items) {
+      out += `<mj-section background-color="${styles.newsletterBackground}" padding="8px ${px(styles.eventGrid.outerPaddingX)}"><mj-column background-color="${styles.cardBackground}">${card(item)}</mj-column></mj-section>`;
+    }
+    return out;
+  }
   for (let i = 0; i < block.items.length; i += 2) {
     const remaining = block.items.length - i;
     if (remaining === 1) {
