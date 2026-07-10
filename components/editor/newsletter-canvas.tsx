@@ -24,12 +24,15 @@ export function NewsletterCanvas({ settings, readOnly = false }: { settings?: Gl
 
   return (
     <div className="mx-auto w-[600px] py-8">
-      {doc.blocks.map((block, index) => (
+      {doc.blocks.map((block, index) => {
+        const previousBlock = doc.blocks[index - 1];
+        const nextBlock = doc.blocks[index + 1];
+        return (
         <div key={block.id}>
           <div role="button" tabIndex={0} onClick={() => select(block.id)} onKeyDown={(event) => { if (event.key === 'Enter') select(block.id); }} className={`rounded ${selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}>
-            {block.type === 'header' ? <HeaderBlock branding={block.branding} settings={settings} headerVariantId={block.headerVariantId} />
+            {block.type === 'header' ? <HeaderBlock branding={block.branding} settings={settings} headerVariantId={block.headerVariantId} squareBottom={nextBlock?.type === 'text'} />
               : block.type === 'footer' ? <FooterBlock contact={block.contact} legal={block.legal} settings={settings} />
-                : block.type === 'text' ? <TextBlock block={block} readOnly={readOnly} />
+                : block.type === 'text' ? <TextBlock block={block} readOnly={readOnly} squareTop={previousBlock?.type === 'header'} />
                   : block.type === 'event' ? <EventBlock block={block} />
                     : block.type === 'featuredEvent' ? <FeaturedEventBlock block={block} />
                       : block.type === 'quote' ? <QuoteBlock block={block} />
@@ -39,7 +42,8 @@ export function NewsletterCanvas({ settings, readOnly = false }: { settings?: Gl
           </div>
           {!readOnly && index < doc.blocks.length - 1 ? <InsertionPoint index={index + 1} onOpen={setInsertionIndex} /> : null}
         </div>
-      ))}
+        );
+      })}
       <ModulePickerDialog open={!readOnly && insertionIndex !== null} onOpenChange={(value) => !value && setInsertionIndex(null)} onPick={(type) => { if (insertionIndex !== null) insert(insertionIndex, type); setInsertionIndex(null); }} />
     </div>
   );

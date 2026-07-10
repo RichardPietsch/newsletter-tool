@@ -24,13 +24,13 @@ const renderMjml = mjml2html as unknown as MjmlRender;
 export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSettings) {
   const doc = newsletterDocumentSchema.parse(input);
   const body = doc.blocks
-    .map((b) =>
+    .map((b, index) =>
       b.type === 'header'
-        ? renderHeader(b.branding, b.headerVariantId, settings)
+        ? renderHeader(b.branding, b.headerVariantId, settings, { squareBottom: doc.blocks[index + 1]?.type === 'text' })
         : b.type === 'footer'
           ? renderFooter(b.contact, b.legal, settings)
           : b.type === 'text'
-            ? renderText(b)
+            ? renderText(b, { squareTop: doc.blocks[index - 1]?.type === 'header' })
             : b.type === 'event'
               ? renderEvent(b)
               : b.type === 'featuredEvent'

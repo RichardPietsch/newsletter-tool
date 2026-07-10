@@ -7,7 +7,7 @@ function renderMarks(text: string, marks: Array<{ type: string; attrs?: Record<s
     if (mark.type === 'bold') return `<strong>${current}</strong>`;
     if (mark.type === 'italic') return `<em>${current}</em>`;
     if (mark.type === 'underline') return `<u>${current}</u>`;
-    if (mark.type === 'textStyle' && ['#dc2626', '#6d7478', '#111827'].includes(mark.attrs?.color)) return `<span style="color:${mark.attrs.color}">${current}</span>`;
+    if (mark.type === 'textStyle' && ['#dc2626', '#6d7478', '#17303d', '#111827'].includes(mark.attrs?.color)) { const color = mark.attrs.color === '#111827' ? '#17303d' : mark.attrs.color; return `<span style="color:${color}">${current}</span>`; }
     if (mark.type === 'link') return `<a href="${escapeHtml(mark.attrs?.href ?? '#')}">${current}</a>`;
     return current;
   }, text);

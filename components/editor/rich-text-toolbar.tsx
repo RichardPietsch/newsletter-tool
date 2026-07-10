@@ -96,7 +96,7 @@ function toggleLink(editor: Editor) {
   editor.chain().focus().extendMarkRange('link').setLink({ href }).run();
 }
 
-export function RichTextToolbar({ editor, automaticColor = '#111827' }: { editor: Editor; automaticColor?: string }) {
+export function RichTextToolbar({ editor, automaticColor = '#17303d' }: { editor: Editor; automaticColor?: string }) {
   return (
     <div className="mb-3 flex flex-wrap gap-1 rounded border bg-slate-50 p-2" role="toolbar" aria-label="Textformatierung">
       <IconButton label="Absatz" pressed={editor.isActive('paragraph')} onClick={() => editor.chain().focus().setParagraph().run()}><span aria-hidden="true" className="font-serif text-base">¶</span></IconButton>

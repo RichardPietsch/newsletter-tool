@@ -3,9 +3,10 @@ export const newsletterModuleStyles = {
   navy: '#17303d',
   red: '#a63a3a',
   cardBackground: '#ffffff',
+  teaserBackground: '#dae1e2',
   mutedText: '#6d7478',
-  bodyText: '#4f5a60',
-  serifText: '#18303d',
+  bodyText: '#17303d',
+  serifText: '#17303d',
   eventGrid: {
     outerPaddingX: 24,
     outerPaddingY: 20,

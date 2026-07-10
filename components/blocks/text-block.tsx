@@ -12,7 +12,7 @@ import { useNewsletterStore } from '@/lib/newsletter/store';
 import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 
-export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: boolean }) {
+export function TextBlock({ block, readOnly = false, squareTop = false }: { block: T; readOnly?: boolean; squareTop?: boolean }) {
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
   const isSelected = selectedId === block.id;
@@ -30,7 +30,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
     editable: !readOnly,
     editorProps: {
       attributes: {
-        class: `min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : 'text-slate-800'}`,
+        class: `min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : ''}`,
         'aria-label': 'Textmodul direkt bearbeiten',
       },
     },
@@ -49,8 +49,8 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
   }, [block.content, editor]);
 
   return (
-    <div className="p-6" style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground }}>
-      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : '#111827'} /> : null}
+    <div className={`overflow-hidden p-6 ${squareTop ? 'rounded-b-[4px]' : 'rounded-[4px]'}`} style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground, color: isBlue ? '#ffffff' : styles.navy }}>
+      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : styles.navy} /> : null}
       {editor ? <EditorContent editor={editor} /> : <div className="min-h-32 text-slate-500">Texteditor wird geladen …</div>}
     </div>
   );

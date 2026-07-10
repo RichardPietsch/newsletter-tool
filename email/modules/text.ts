@@ -13,7 +13,7 @@ function renderNodes(items: any[] = []): string {
         if (mark.type === 'bold') text = `<strong>${text}</strong>`;
         if (mark.type === 'italic') text = `<em>${text}</em>`;
         if (mark.type === 'underline') text = `<u>${text}</u>`;
-        if (mark.type === 'textStyle' && ['#dc2626', '#6d7478', '#111827'].includes(mark.attrs?.color)) text = `<span style="color:${mark.attrs.color}">${text}</span>`;
+        if (mark.type === 'textStyle' && ['#dc2626', '#6d7478', '#17303d', '#111827'].includes(mark.attrs?.color)) { const color = mark.attrs.color === '#111827' ? styles.navy : mark.attrs.color; text = `<span style="color:${color}">${text}</span>`; }
         if (mark.type === 'link') text = `<a href="${esc(mark.attrs?.href || '#')}">${text}</a>`;
       }
       return text;
@@ -29,7 +29,8 @@ function renderNodes(items: any[] = []): string {
   }).join('');
 }
 
-export function renderText(block: TextBlock) {
+export function renderText(block: TextBlock, options: { squareTop?: boolean } = {}) {
   const isBlue = block.background === 'blue';
-  return `<mj-section background-color="${isBlue ? styles.navy : styles.cardBackground}" padding="0"><mj-column><mj-text font-size="14px" line-height="1.8" color="${isBlue ? '#ffffff' : '#172033'}" padding="24px 32px 20px">${renderNodes(block.content.content)}</mj-text></mj-column></mj-section>`;
+  const radius = options.squareTop ? '0 0 4px 4px' : '4px';
+  return `<mj-section background-color="${isBlue ? styles.navy : styles.cardBackground}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text font-size="14px" line-height="1.8" color="${isBlue ? '#ffffff' : styles.navy}" padding="24px 32px 20px">${renderNodes(block.content.content)}</mj-text></mj-column></mj-section>`;
 }
