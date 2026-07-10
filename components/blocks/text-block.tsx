@@ -1,6 +1,7 @@
 'use client';
 
 import Color from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -23,6 +24,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
       TextStyle,
       Color.configure({ types: ['textStyle'] }),
       Underline,
+      Link.configure({ openOnClick: false }),
     ],
     content: block.content,
     editable: !readOnly,
@@ -48,7 +50,7 @@ export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: bo
 
   return (
     <div className="p-6" style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground }}>
-      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} /> : null}
+      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : '#111827'} /> : null}
       {editor ? <EditorContent editor={editor} /> : <div className="min-h-32 text-slate-500">Texteditor wird geladen …</div>}
     </div>
   );
