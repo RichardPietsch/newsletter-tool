@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { renderFooter } from '@/email/modules/footer';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 
@@ -29,12 +30,16 @@ describe('settings defaults', () => {
         alt: 'AGC Junioren Newsletter Header',
       },
     ]);
-    expect(settings.footerRichText.content?.map((node) => node.content?.[0]?.text ?? '')).toEqual([
+    expect(settings.footerRichText.content?.map((node) => node.content?.map((child: any) => child.text ?? '').join('') ?? '')).toEqual([
       'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de',
       'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de',
       '',
       'Harvestehuder Weg 44  •  20149 Hamburg  •  Germany',
     ]);
+    expect(settings.footerRichText.content?.[0]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
+    expect(settings.footerRichText.content?.[0]?.content?.[2]?.marks).toEqual([{ type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } }]);
+    expect(settings.footerRichText.content?.[1]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
+    expect(settings.footerRichText.content?.[1]?.content?.[2]?.marks).toEqual([{ type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } }]);
   });
 
   it('upgrades old placeholder defaults without overwriting custom settings', () => {
@@ -52,5 +57,14 @@ describe('settings defaults', () => {
 
     expect(upgraded.headerVariants).toEqual(settings.headerVariants);
     expect(upgraded.footerRichText).toEqual(settings.footerRichText);
+  });
+
+  it('renders footer defaults with bold labels and mailto links', () => {
+    const html = renderFooter('', '', createDefaultSettings());
+
+    expect(html).toContain('<strong>Clubbüro:</strong>');
+    expect(html).toContain('<a href="mailto:office@anglogermanclub.de">office@anglogermanclub.de</a>');
+    expect(html).toContain('<strong>Gastronomie:</strong>');
+    expect(html).toContain('<a href="mailto:gastronomie@anglogermanclub.de">gastronomie@anglogermanclub.de</a>');
   });
 });

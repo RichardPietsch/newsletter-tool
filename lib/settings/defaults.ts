@@ -26,11 +26,19 @@ export const defaultFooterRichText = {
   content: [
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de' }],
+      content: [
+        { type: 'text', text: 'Clubbüro:', marks: [{ type: 'bold' }] },
+        { type: 'text', text: '  +49 40-450 155-12/13  ' },
+        { type: 'text', text: 'office@anglogermanclub.de', marks: [{ type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } }] },
+      ],
     },
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de' }],
+      content: [
+        { type: 'text', text: 'Gastronomie:', marks: [{ type: 'bold' }] },
+        { type: 'text', text: '  +49 40-450 155-0  ' },
+        { type: 'text', text: 'gastronomie@anglogermanclub.de', marks: [{ type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } }] },
+      ],
     },
     {
       type: 'paragraph',
