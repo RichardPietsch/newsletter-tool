@@ -37,6 +37,7 @@ export default async function Page({ params }: NewsletterPageProps) {
       document={newsletterDocumentSchema.parse(newsletter.document)}
       settings={settings}
       usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))}
+      sentAt={newsletter.sentAt?.toISOString() ?? null}
       account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }}
     />
   );

@@ -29,6 +29,12 @@ describe('settings defaults', () => {
         imageUrl: 'https://newsletter.example.com/assets/headers/header-agc-junioren.jpg',
         alt: 'AGC Junioren Newsletter Header',
       },
+      {
+        id: 'agc-gastro',
+        name: 'AGC Gastro',
+        imageUrl: 'https://newsletter.example.com/assets/headers/header-agc-gastronomie.jpg',
+        alt: 'AGC Gastro Newsletter Header',
+      },
     ]);
     expect(settings.footerRichText.content?.map((node) => node.content?.map((child: any) => child.text ?? '').join('') ?? '')).toEqual([
       'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de',

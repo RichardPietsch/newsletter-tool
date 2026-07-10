@@ -1,23 +1,57 @@
 'use client';
 
+import Color from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
+import TextStyle from '@tiptap/extension-text-style';
+import Underline from '@tiptap/extension-underline';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
 import { nanoid } from 'nanoid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 import type { GlobalSettings } from '@/lib/settings/schema';
 
-function plainTextFromDoc(doc: GlobalSettings['footerRichText']) {
-  return (doc.content ?? [])
-    .map((node: any) => (node.content ?? []).map((child: any) => child.text ?? '').join(''))
-    .join('\n');
-}
+function FooterRichTextEditor({
+  value,
+  onChange,
+  onBlur,
+}: {
+  value: GlobalSettings['footerRichText'];
+  onChange: (value: GlobalSettings['footerRichText']) => void;
+  onBlur: (value: GlobalSettings['footerRichText']) => void;
+}) {
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      TextStyle,
+      Color.configure({ types: ['textStyle'] }),
+      Underline,
+      Link.configure({ openOnClick: false }),
+    ],
+    content: value,
+    editorProps: {
+      attributes: {
+        class: 'min-h-48 rounded border bg-white p-3 text-slate-800 focus:outline-none [&_a]:text-blue-700 [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
+        'aria-label': 'Globalen Footer als RichText bearbeiten',
+      },
+    },
+    onUpdate: ({ editor }) => onChange(editor.getJSON() as GlobalSettings['footerRichText']),
+    onBlur: ({ editor }) => onBlur(editor.getJSON() as GlobalSettings['footerRichText']),
+  });
 
-function docFromPlainText(text: string): GlobalSettings['footerRichText'] {
-  return {
-    type: 'doc',
-    content: text.split('\n').map((line) => ({
-      type: 'paragraph',
-      content: line ? [{ type: 'text', text: line }] : [],
-    })),
-  };
+  useEffect(() => {
+    if (!editor || editor.isFocused) return;
+    if (JSON.stringify(editor.getJSON()) !== JSON.stringify(value)) editor.commands.setContent(value, false);
+  }, [editor, value]);
+
+  if (!editor) return <div className="mt-4 min-h-48 rounded border p-3 text-slate-500">RichText-Editor wird geladen …</div>;
+
+  return (
+    <div className="mt-4">
+      <RichTextToolbar editor={editor} />
+      <EditorContent editor={editor} />
+    </div>
+  );
 }
 
 export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded = false }: { initialSettings: GlobalSettings; usedHeaderVariantIds: string[]; embedded?: boolean }) {
@@ -58,6 +92,16 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded
       ...settings,
       headerVariants: [...settings.headerVariants, variant],
     };
+    setSettings(next);
+    await save(next);
+  }
+
+  function updateFooterRichText(footerRichText: GlobalSettings['footerRichText']) {
+    setSettings((current) => ({ ...current, footerRichText }));
+  }
+
+  async function saveFooterRichText(footerRichText: GlobalSettings['footerRichText']) {
+    const next = { ...settings, footerRichText };
     setSettings(next);
     await save(next);
   }
@@ -120,8 +164,8 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded
 
       <section className="mt-8 rounded-xl bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">Globaler Footer</h2>
-        <p className="mt-1 text-sm text-slate-600">Der Footer wird als eingeschränkter RichText gespeichert. Im MVP wird er als Absatzstruktur gepflegt.</p>
-        <textarea className="mt-4 min-h-48 w-full rounded border p-3" value={plainTextFromDoc(settings.footerRichText)} onChange={(event) => setSettings({ ...settings, footerRichText: docFromPlainText(event.target.value) })} onBlur={() => void save()} />
+        <p className="mt-1 text-sm text-slate-600">Der Footer nutzt dieselben eingeschränkten RichText-Funktionen wie ein normales Textmodul und bleibt damit E-Mail-kompatibel.</p>
+        <FooterRichTextEditor value={settings.footerRichText} onChange={updateFooterRichText} onBlur={(footerRichText) => void saveFooterRichText(footerRichText)} />
         <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>Footer speichern</button>
       </section>
     </div>

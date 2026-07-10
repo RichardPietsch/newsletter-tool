@@ -18,6 +18,12 @@ export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] 
       imageUrl: appAssetUrl('/assets/headers/header-agc-junioren.jpg'),
       alt: 'AGC Junioren Newsletter Header',
     },
+    {
+      id: 'agc-gastro',
+      name: 'AGC Gastro',
+      imageUrl: appAssetUrl('/assets/headers/header-agc-gastronomie.jpg'),
+      alt: 'AGC Gastro Newsletter Header',
+    },
   ];
 }
 
@@ -69,9 +75,13 @@ export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalS
     currentFooterLines.join('\n') === 'AGC · Newsletter\nImpressum und Datenschutz werden zentral gepflegt.' ||
     currentFooterLines.join('\n') === 'ACME GmbH · Musterstraße 1 · 12345 Berlin\nImpressum und Datenschutz werden zentral gepflegt.';
 
+  const missingDefaultHeaderVariants = defaults.headerVariants.filter(
+    (defaultVariant) => !settings.headerVariants.some((variant) => variant.id === defaultVariant.id),
+  );
+
   return {
     ...settings,
-    headerVariants: settings.headerVariants.length > 0 ? settings.headerVariants : defaults.headerVariants,
+    headerVariants: [...settings.headerVariants, ...missingDefaultHeaderVariants],
     footerRichText: usesPreviousDefaultFooter ? defaults.footerRichText : settings.footerRichText,
   };
 }

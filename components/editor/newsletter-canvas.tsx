@@ -1,3 +1,46 @@
-'use client'; import { useState } from 'react'; import { useNewsletterStore } from '@/lib/newsletter/store'; import { InsertionPoint } from './insertion-point'; import { ModulePickerDialog } from './module-picker-dialog'; import { HeaderBlock } from '../blocks/header-block'; import { FooterBlock } from '../blocks/footer-block'; import { TextBlock } from '../blocks/text-block'; import { EventBlock } from '../blocks/event-block'; import { ImageBlock } from '../blocks/image-block'; import { FeaturedEventBlock } from '../blocks/featured-event-block'; import { QuoteBlock } from '../blocks/quote-block'; import { SectionHeadingBlock } from '../blocks/section-heading-block'; import { EventGridBlock } from '../blocks/event-grid-block';
+'use client';
+
+import { useState } from 'react';
 import type { GlobalSettings } from '@/lib/settings/schema';
-export function NewsletterCanvas({ settings }: { settings?: GlobalSettings }){const doc=useNewsletterStore(s=>s.doc), sel=useNewsletterStore(s=>s.selectedId), select=useNewsletterStore(s=>s.select), insert=useNewsletterStore(s=>s.insert); const [at,setAt]=useState<number|null>(null); return <div className="mx-auto w-[600px] py-8">{doc.blocks.map((b,i)=><div key={b.id}><div role="button" tabIndex={0} onClick={()=>select(b.id)} onKeyDown={e=>{if(e.key==='Enter')select(b.id)}} className={`rounded ${sel===b.id?'ring-4 ring-blue-600':'ring-1 ring-slate-200'} hover:ring-blue-400`}>{b.type==='header'?<HeaderBlock branding={b.branding} settings={settings} headerVariantId={b.headerVariantId}/>:b.type==='footer'?<FooterBlock contact={b.contact} legal={b.legal} settings={settings}/>:b.type==='text'?<TextBlock block={b}/>:b.type==='event'?<EventBlock block={b}/>:b.type==='featuredEvent'?<FeaturedEventBlock block={b}/>:b.type==='quote'?<QuoteBlock block={b}/>:b.type==='sectionHeading'?<SectionHeadingBlock block={b}/>:b.type==='eventGrid'?<EventGridBlock block={b}/>:<ImageBlock block={b}/>}</div>{i<doc.blocks.length-1&&<InsertionPoint index={i+1} onOpen={setAt}/>}</div>)}<ModulePickerDialog open={at!==null} onOpenChange={v=>!v&&setAt(null)} onPick={t=>{if(at!==null)insert(at,t);setAt(null)}}/></div>}
+import { useNewsletterStore } from '@/lib/newsletter/store';
+import { InsertionPoint } from './insertion-point';
+import { ModulePickerDialog } from './module-picker-dialog';
+import { HeaderBlock } from '../blocks/header-block';
+import { FooterBlock } from '../blocks/footer-block';
+import { TextBlock } from '../blocks/text-block';
+import { EventBlock } from '../blocks/event-block';
+import { ImageBlock } from '../blocks/image-block';
+import { FeaturedEventBlock } from '../blocks/featured-event-block';
+import { QuoteBlock } from '../blocks/quote-block';
+import { SectionHeadingBlock } from '../blocks/section-heading-block';
+import { EventGridBlock } from '../blocks/event-grid-block';
+
+export function NewsletterCanvas({ settings, readOnly = false }: { settings?: GlobalSettings; readOnly?: boolean }) {
+  const doc = useNewsletterStore((state) => state.doc);
+  const selectedId = useNewsletterStore((state) => state.selectedId);
+  const select = useNewsletterStore((state) => state.select);
+  const insert = useNewsletterStore((state) => state.insert);
+  const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
+
+  return (
+    <div className="mx-auto w-[600px] py-8">
+      {doc.blocks.map((block, index) => (
+        <div key={block.id}>
+          <div role="button" tabIndex={0} onClick={() => select(block.id)} onKeyDown={(event) => { if (event.key === 'Enter') select(block.id); }} className={`rounded ${selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}>
+            {block.type === 'header' ? <HeaderBlock branding={block.branding} settings={settings} headerVariantId={block.headerVariantId} />
+              : block.type === 'footer' ? <FooterBlock contact={block.contact} legal={block.legal} settings={settings} />
+                : block.type === 'text' ? <TextBlock block={block} readOnly={readOnly} />
+                  : block.type === 'event' ? <EventBlock block={block} />
+                    : block.type === 'featuredEvent' ? <FeaturedEventBlock block={block} />
+                      : block.type === 'quote' ? <QuoteBlock block={block} />
+                        : block.type === 'sectionHeading' ? <SectionHeadingBlock block={block} />
+                          : block.type === 'eventGrid' ? <EventGridBlock block={block} />
+                            : <ImageBlock block={block} />}
+          </div>
+          {!readOnly && index < doc.blocks.length - 1 ? <InsertionPoint index={index + 1} onOpen={setInsertionIndex} /> : null}
+        </div>
+      ))}
+      <ModulePickerDialog open={!readOnly && insertionIndex !== null} onOpenChange={(value) => !value && setInsertionIndex(null)} onPick={(type) => { if (insertionIndex !== null) insert(insertionIndex, type); setInsertionIndex(null); }} />
+    </div>
+  );
+}

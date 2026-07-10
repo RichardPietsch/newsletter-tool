@@ -10,7 +10,7 @@ import type { TextBlock as T } from '@/lib/newsletter/schema';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 
-export function TextBlock({ block }: { block: T }) {
+export function TextBlock({ block, readOnly = false }: { block: T; readOnly?: boolean }) {
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
   const isSelected = selectedId === block.id;
@@ -23,14 +23,19 @@ export function TextBlock({ block }: { block: T }) {
       Underline,
     ],
     content: block.content,
+    editable: !readOnly,
     editorProps: {
       attributes: {
         class: 'min-h-32 bg-white text-slate-800 focus:outline-none [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
         'aria-label': 'Textmodul direkt bearbeiten',
       },
     },
-    onUpdate: ({ editor }) => update(block.id, { content: editor.getJSON() as T['content'] } as any),
+    onUpdate: ({ editor }) => { if (!readOnly) update(block.id, { content: editor.getJSON() as T['content'] } as any); },
   });
+
+  useEffect(() => {
+    editor?.setEditable(!readOnly);
+  }, [editor, readOnly]);
 
   useEffect(() => {
     if (!editor || editor.isFocused) return;
@@ -41,7 +46,7 @@ export function TextBlock({ block }: { block: T }) {
 
   return (
     <div className="bg-white p-6">
-      {isSelected && editor ? <RichTextToolbar editor={editor} /> : null}
+      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} /> : null}
       {editor ? <EditorContent editor={editor} /> : <div className="min-h-32 text-slate-500">Texteditor wird geladen …</div>}
     </div>
   );

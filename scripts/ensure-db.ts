@@ -25,10 +25,12 @@ async function main() {
       owner_id text not null references users(id),
       title text not null,
       document jsonb not null,
+      sent_at timestamp,
       created_at timestamp not null default now(),
       updated_at timestamp not null default now()
     );
   `);
+  await db.execute(sql`alter table newsletters add column if not exists sent_at timestamp;`);
   await db.execute(sql`create index if not exists newsletters_owner_idx on newsletters(owner_id);`);
 
   await db.execute(sql`
