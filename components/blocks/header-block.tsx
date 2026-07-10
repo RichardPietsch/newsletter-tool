@@ -1,7 +1,7 @@
 import type { GlobalSettings } from '@/lib/settings/schema';
 
 export function HeaderBlock({ branding, settings, headerVariantId }: { branding: string; settings?: GlobalSettings; headerVariantId?: string }) {
-  const variant = settings?.headerVariants.find((item) => item.id === headerVariantId);
+  const variant = settings?.headerVariants.find((item) => item.id === headerVariantId) ?? settings?.headerVariants[0];
 
   return (
     <div className="bg-white px-8 py-5 text-center">

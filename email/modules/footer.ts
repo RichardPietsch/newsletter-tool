@@ -15,5 +15,5 @@ function renderNodes(nodes: any[] = []): string {
 
 export function renderFooter(contact: string, legal: string, settings?: GlobalSettings) {
   const content = settings ? renderNodes(settings.footerRichText.content) : `${escapeHtml(contact)}<br/>${escapeHtml(legal)}`;
-  return `<mj-section background-color="#ffffff" padding="20px 24px 32px"><mj-column><mj-divider border-color="#d7dee8" /><mj-text font-size="12px" color="#5d6b82" line-height="1.5">${content}</mj-text></mj-column></mj-section>`;
+  return `<mj-section background-color="#ffffff" padding="20px 24px 32px"><mj-column><mj-divider border-color="#d7dee8" /><mj-text align="center" font-size="12px" color="#5d6b82" line-height="1.5">${content}</mj-text></mj-column></mj-section>`;
 }

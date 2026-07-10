@@ -26,11 +26,19 @@ export const defaultFooterRichText = {
   content: [
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'AGC · Newsletter' }],
+      content: [{ type: 'text', text: 'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de' }],
     },
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'Impressum und Datenschutz werden zentral gepflegt.' }],
+      content: [{ type: 'text', text: 'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de' }],
+    },
+    {
+      type: 'paragraph',
+      content: [],
+    },
+    {
+      type: 'paragraph',
+      content: [{ type: 'text', text: 'Harvestehuder Weg 44  •  20149 Hamburg  •  Germany' }],
     },
   ],
 };
@@ -39,5 +47,23 @@ export function createDefaultSettings(): GlobalSettings {
   return {
     headerVariants: createDefaultHeaderVariants(),
     footerRichText: defaultFooterRichText,
+  };
+}
+
+function footerLines(settings: GlobalSettings) {
+  return (settings.footerRichText.content ?? []).map((node: any) => (node.content ?? []).map((child: any) => child.text ?? '').join(''));
+}
+
+export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalSettings {
+  const defaults = createDefaultSettings();
+  const currentFooterLines = footerLines(settings);
+  const usesPreviousDefaultFooter =
+    currentFooterLines.join('\n') === 'AGC · Newsletter\nImpressum und Datenschutz werden zentral gepflegt.' ||
+    currentFooterLines.join('\n') === 'ACME GmbH · Musterstraße 1 · 12345 Berlin\nImpressum und Datenschutz werden zentral gepflegt.';
+
+  return {
+    ...settings,
+    headerVariants: settings.headerVariants.length > 0 ? settings.headerVariants : defaults.headerVariants,
+    footerRichText: usesPreviousDefaultFooter ? defaults.footerRichText : settings.footerRichText,
   };
 }

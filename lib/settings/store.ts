@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { db, DEFAULT_USER_ID } from '@/lib/db';
 import { appSettings } from '@/lib/db/schema';
-import { createDefaultSettings } from './defaults';
+import { applyDefaultSettingsFallbacks, createDefaultSettings } from './defaults';
 import { globalSettingsSchema, type GlobalSettings } from './schema';
 
 export const GLOBAL_SETTINGS_ID = 'global';
@@ -9,7 +9,7 @@ export const GLOBAL_SETTINGS_ID = 'global';
 export async function getUserSettings(ownerId: string): Promise<GlobalSettings> {
   const [row] = await db.select().from(appSettings).where(eq(appSettings.id, ownerId));
   if (!row) return createDefaultSettings();
-  return globalSettingsSchema.parse(row.settings);
+  return applyDefaultSettingsFallbacks(globalSettingsSchema.parse(row.settings));
 }
 
 export async function saveUserSettings(ownerId: string, settings: GlobalSettings): Promise<GlobalSettings> {

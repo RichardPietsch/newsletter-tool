@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDefaultSettings } from '@/lib/settings/defaults';
+import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 
 describe('settings defaults', () => {
@@ -29,5 +29,28 @@ describe('settings defaults', () => {
         alt: 'AGC Junioren Newsletter Header',
       },
     ]);
+    expect(settings.footerRichText.content?.map((node) => node.content?.[0]?.text ?? '')).toEqual([
+      'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de',
+      'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de',
+      '',
+      'Harvestehuder Weg 44  •  20149 Hamburg  •  Germany',
+    ]);
+  });
+
+  it('upgrades old placeholder defaults without overwriting custom settings', () => {
+    const settings = createDefaultSettings();
+    const upgraded = applyDefaultSettingsFallbacks({
+      headerVariants: [],
+      footerRichText: {
+        type: 'doc',
+        content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'AGC · Newsletter' }] },
+          { type: 'paragraph', content: [{ type: 'text', text: 'Impressum und Datenschutz werden zentral gepflegt.' }] },
+        ],
+      },
+    });
+
+    expect(upgraded.headerVariants).toEqual(settings.headerVariants);
+    expect(upgraded.footerRichText).toEqual(settings.footerRichText);
   });
 });
