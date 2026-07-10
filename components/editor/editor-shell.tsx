@@ -56,31 +56,47 @@ export function EditorShell({
     return () => clearTimeout(timeout);
   }, [doc, id, isReadOnly, setStatus]);
 
+  async function downloadNewsletterExport(format: 'html' | 'yml') {
+    const response = await fetch(`/api/newsletters/${id}/export${format === 'yml' ? '?format=yml' : ''}`);
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null) as { error?: string; issues?: ExportValidationIssue[] } | null;
+      setExportError(payload?.error ?? 'Newsletter kann nicht exportiert werden.');
+      setExportIssues(payload?.issues ?? []);
+      return;
+    }
+
+    const blob = await response.blob();
+    const disposition = response.headers.get('content-disposition');
+    const filename = disposition?.match(/filename="?([^";]+)"?/i)?.[1] ?? (format === 'yml' ? 'newsletter.yml' : 'newsletter.html');
+    const url = URL.createObjectURL(blob);
+    const link = window.document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   async function handleExport() {
     setExportError(null);
     setExportIssues([]);
     try {
-      const response = await fetch(`/api/newsletters/${id}/export`);
-      if (!response.ok) {
-        const payload = await response.json().catch(() => null) as { error?: string; issues?: ExportValidationIssue[] } | null;
-        setExportError(payload?.error ?? 'Newsletter kann nicht exportiert werden.');
-        setExportIssues(payload?.issues ?? []);
-        return;
-      }
-
-      const blob = await response.blob();
-      const disposition = response.headers.get('content-disposition');
-      const filename = disposition?.match(/filename="?([^";]+)"?/i)?.[1] ?? 'newsletter.html';
-      const url = URL.createObjectURL(blob);
-      const link = window.document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      window.document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
+      await downloadNewsletterExport('html');
     } catch {
       setExportError('Der Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.');
+      setExportIssues([]);
+    }
+  }
+
+
+  async function handleTemplateExport() {
+    setExportError(null);
+    setExportIssues([]);
+    try {
+      await downloadNewsletterExport('yml');
+    } catch {
+      setExportError('Der Template-Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.');
       setExportIssues([]);
     }
   }
@@ -124,6 +140,7 @@ export function EditorShell({
     <div className="flex min-h-screen">
       <SideRail
         onExport={handleExport}
+        onExportTemplate={process.env.NODE_ENV === 'production' ? undefined : handleTemplateExport}
         onOpenNewsletterSettings={() => setOverlay('newsletter')}
         onOpenMedia={() => setOverlay('media')}
         onOpenSettings={() => setOverlay('settings')}

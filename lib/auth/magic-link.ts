@@ -2,6 +2,7 @@ import { and, count, eq, gt, gte, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
 import { authMagicLinks, users } from '@/lib/db/schema';
+import { seedNewsletterTemplatesForUser } from '@/lib/newsletter/template-files';
 import { sendEmail } from '@/lib/email/send-email';
 import { magicLinkEmail } from '@/lib/email/templates/magic-link';
 import { createSession } from './session';
@@ -33,6 +34,7 @@ export async function requestMagicLink(emailInput: string, metadata: { ip?: stri
   let [user] = await db.select().from(users).where(eq(users.email, email));
   if (!user) {
     [user] = await db.insert(users).values({ id: nanoid(), email }).returning();
+    await seedNewsletterTemplatesForUser(user.id);
   }
 
   const token = createSecureToken();
