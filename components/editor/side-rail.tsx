@@ -20,7 +20,7 @@ function RailButton({ label, children, onClick, href, emphasized = false }: { la
 
 export function SideRail({ onExport, onOpenMedia, onOpenSettings, onOpenAccount }: SideRailProps) {
   return (
-    <nav className="flex w-20 flex-col items-center gap-3 border-r bg-white py-4" aria-label="Funktionsleiste">
+    <nav className="sticky top-0 flex h-screen w-20 shrink-0 flex-col items-center gap-3 border-r bg-white py-4" aria-label="Funktionsleiste">
       <RailButton href="/newsletters" label="Newsletter-Übersicht"><MdiIcon name="home" /></RailButton>
       <RailButton onClick={onOpenMedia} label="Medien"><MdiIcon name="media" /></RailButton>
       <RailButton onClick={onOpenSettings} label="Einstellungen"><MdiIcon name="cog" /></RailButton>
