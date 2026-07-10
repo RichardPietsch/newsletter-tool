@@ -92,13 +92,24 @@ export function EditorShell({
     setTitle(nextTitle);
   }
 
-  async function markNewsletterSent() {
-    if (!window.confirm('Newsletter wirklich als versendet markieren? Danach kann er nicht mehr bearbeitet werden.')) return;
-    const response = await fetch(`/api/newsletters/${id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sent: true }) });
+  async function toggleNewsletterSent() {
+    const nextSent = !sentAtState;
+    const message = nextSent
+      ? 'Newsletter wirklich als versendet markieren? Danach ist er schreibgeschützt, kann aber bei Bedarf wieder freigegeben werden.'
+      : 'Versendet-Markierung wirklich aufheben? Danach kann der Newsletter wieder bearbeitet werden.';
+    if (!window.confirm(message)) return;
+    const response = await fetch(`/api/newsletters/${id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sent: nextSent }) });
     if (!response.ok) return;
-    const payload = await response.json() as { sentAt?: string };
-    setSentAtState(payload.sentAt ?? new Date().toISOString());
+    const payload = await response.json() as { sentAt?: string | null };
+    setSentAtState(payload.sentAt ?? null);
     setStatus('saved');
+  }
+
+  async function cloneNewsletter() {
+    const response = await fetch(`/api/newsletters/${id}`, { method: 'POST' });
+    if (!response.ok) return;
+    const payload = await response.json() as { location?: string };
+    window.location.href = payload.location ?? '/newsletters';
   }
 
   async function deleteNewsletter() {
@@ -132,7 +143,7 @@ export function EditorShell({
       <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
       {settings ? <SettingsOverlay open={overlay === 'settings'} onClose={() => setOverlay(null)} settings={settings} usedHeaderVariantIds={usedHeaderVariantIds} /> : null}
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
-      <NewsletterSettingsOverlay open={overlay === 'newsletter'} title={doc.title} sentAt={sentAtState} onClose={() => setOverlay(null)} onRename={renameNewsletter} onMarkSent={markNewsletterSent} onDelete={deleteNewsletter} />
+      <NewsletterSettingsOverlay open={overlay === 'newsletter'} title={doc.title} sentAt={sentAtState} onClose={() => setOverlay(null)} onRename={renameNewsletter} onToggleSent={toggleNewsletterSent} onClone={cloneNewsletter} onDelete={deleteNewsletter} />
       <ExportIssuesOverlay open={exportError !== null} error={exportError ?? ''} issues={exportIssues} onClose={() => setExportError(null)} />
     </div>
   );

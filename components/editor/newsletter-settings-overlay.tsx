@@ -9,7 +9,8 @@ export function NewsletterSettingsOverlay({
   sentAt,
   onClose,
   onRename,
-  onMarkSent,
+  onToggleSent,
+  onClone,
   onDelete,
 }: {
   open: boolean;
@@ -17,7 +18,8 @@ export function NewsletterSettingsOverlay({
   sentAt: string | null;
   onClose: () => void;
   onRename: (title: string) => Promise<void>;
-  onMarkSent: () => Promise<void>;
+  onToggleSent: () => Promise<void>;
+  onClone: () => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
   const [draftTitle, setDraftTitle] = useState(title);
@@ -59,9 +61,16 @@ export function NewsletterSettingsOverlay({
         </section>
         <section className="rounded-xl bg-white p-5 shadow-sm">
           <h3 className="text-lg font-semibold">Status</h3>
-          <p className="text-sm text-slate-600">Als versendet markierte Newsletter können nicht mehr bearbeitet werden.</p>
-          <button type="button" className="mt-4 rounded border border-green-700 px-4 py-2 text-green-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400" disabled={isSent} onClick={() => void onMarkSent()}>
-            Als versendet markieren
+          <p className="text-sm text-slate-600">Als versendet markierte Newsletter sind schreibgeschützt. Die Markierung kann bei Bedarf wieder aufgehoben werden.</p>
+          <button type="button" className={isSent ? 'mt-4 rounded border border-slate-600 px-4 py-2 text-slate-700' : 'mt-4 rounded border border-green-700 px-4 py-2 text-green-800'} onClick={() => void onToggleSent()}>
+            {isSent ? 'Versendet-Markierung aufheben' : 'Als versendet markieren'}
+          </button>
+        </section>
+        <section className="rounded-xl bg-white p-5 shadow-sm">
+          <h3 className="text-lg font-semibold">Newsletter klonen</h3>
+          <p className="text-sm text-slate-600">Erstellt eine bearbeitbare Kopie dieses Newsletters, z. B. als neue Ausgabe auf Basis einer versendeten Vorlage.</p>
+          <button type="button" className="mt-4 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void onClone()}>
+            Newsletter klonen
           </button>
         </section>
         <section className="rounded-xl bg-white p-5 shadow-sm">
