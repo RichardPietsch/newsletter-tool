@@ -1,11 +1,32 @@
 import type { GlobalSettings } from './schema';
 
+function appAssetUrl(path: string) {
+  return new URL(path, process.env.APP_URL || 'http://localhost:3000').toString();
+}
+
+export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] {
+  return [
+    {
+      id: 'agc',
+      name: 'AGC',
+      imageUrl: appAssetUrl('/assets/headers/header-agc.jpg'),
+      alt: 'AGC Newsletter Header',
+    },
+    {
+      id: 'agc-junioren',
+      name: 'AGC Junioren',
+      imageUrl: appAssetUrl('/assets/headers/header-agc-junioren.jpg'),
+      alt: 'AGC Junioren Newsletter Header',
+    },
+  ];
+}
+
 export const defaultFooterRichText = {
   type: 'doc' as const,
   content: [
     {
       type: 'paragraph',
-      content: [{ type: 'text', text: 'ACME GmbH · Musterstraße 1 · 12345 Berlin' }],
+      content: [{ type: 'text', text: 'AGC · Newsletter' }],
     },
     {
       type: 'paragraph',
@@ -16,7 +37,7 @@ export const defaultFooterRichText = {
 
 export function createDefaultSettings(): GlobalSettings {
   return {
-    headerVariants: [],
+    headerVariants: createDefaultHeaderVariants(),
     footerRichText: defaultFooterRichText,
   };
 }
