@@ -1,0 +1,22 @@
+export const newsletterModuleStyles = {
+  newsletterBackground: '#f4f1ec',
+  navy: '#17303d',
+  red: '#a63a3a',
+  cardBackground: '#ffffff',
+  mutedText: '#6d7478',
+  bodyText: '#4f5a60',
+  serifText: '#18303d',
+  eventGrid: {
+    outerPaddingX: 24,
+    outerPaddingY: 20,
+    gap: 24,
+    cardPadding: 24,
+    imageHeight: 160,
+    overlineTop: 18,
+    titleTop: 8,
+    metaTop: 10,
+    descriptionTop: 10,
+    ctaTop: 18,
+    ctaBottom: 24,
+  },
+} as const;
