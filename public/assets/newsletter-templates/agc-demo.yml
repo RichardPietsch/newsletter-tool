@@ -48,6 +48,12 @@ documentJson: |
         "id": "template-featured-event",
         "type": "featuredEvent",
         "overline": "Highlight",
+        "background": "blue",
+        "image": {
+          "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-whisky.jpg",
+          "alt": "Whiskytasting im Anglo-German Club",
+          "decorative": false
+        },
         "title": "Sommerabend im Club",
         "date": "Donnerstag, 23. Juli · 19:00 Uhr",
         "description": "Ein geselliger Abend auf der Terrasse mit kulinarischer Begleitung und Gelegenheit zum Austausch.",
@@ -72,6 +78,11 @@ documentJson: |
           {
             "id": "template-event-2",
             "category": "Clubleben",
+            "image": {
+              "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-gaense.jpg",
+              "alt": "Traditionelles Gänseessen der Junioren",
+              "decorative": false
+            },
             "title": "After Work im Club",
             "date": "Freitag, 14. August · 18:00 Uhr",
             "location": "Clubräume",
