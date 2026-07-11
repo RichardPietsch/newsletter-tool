@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { ExportValidationIssue } from '@/lib/newsletter/export-validation';
 import type { NewsletterDocument } from '@/lib/newsletter/schema';
+import { validateNewsletterForSave, type NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import { initStore, useNewsletterStore } from '@/lib/newsletter/store';
 import type { GlobalSettings } from '@/lib/settings/schema';
 import { AccountOverlay } from './account-overlay';
@@ -41,6 +42,7 @@ export function EditorShell({
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportIssues, setExportIssues] = useState<ExportValidationIssue[]>([]);
   const [sentAtState, setSentAtState] = useState<string | null>(sentAt);
+  const [saveIssues, setSaveIssues] = useState<NewsletterSaveIssue[]>([]);
   useEffect(() => initStore(id, document), [id, document]);
   const doc = useNewsletterStore((state) => state.doc);
   const setStatus = useNewsletterStore((state) => state.setStatus);
@@ -50,9 +52,21 @@ export function EditorShell({
   useEffect(() => {
     if (!doc || isReadOnly) return;
     const timeout = setTimeout(async () => {
+      const issues = validateNewsletterForSave(doc);
+      if (issues.length > 0) {
+        setSaveIssues(issues);
+        setStatus('error');
+        return;
+      }
       setStatus('saving');
       const response = await fetch(`/api/newsletters/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: doc.title, document: doc }) });
-      setStatus(response.ok ? 'saved' : 'error');
+      if (response.ok) {
+        setSaveIssues([]);
+        setStatus('saved');
+      } else {
+        setSaveIssues([{ path: 'server', message: 'Der Server hat das Speichern abgelehnt. Bitte prüfe deine Eingaben und versuche es erneut.', blockLabel: 'Newsletter' }]);
+        setStatus('error');
+      }
     }, 900);
     return () => clearTimeout(timeout);
   }, [doc, id, isReadOnly, setStatus]);
@@ -157,14 +171,14 @@ export function EditorShell({
       <main className="flex-1 bg-[#f4f1ec]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
           <div>
-            <input aria-label="Newsletter-Titel" className="text-xl font-bold disabled:bg-transparent disabled:text-slate-700" value={doc.title} disabled={isReadOnly} onChange={(event) => setTitle(event.target.value)} />
+            <input aria-label="Newsletter-Titel" className={`text-xl font-bold disabled:bg-transparent disabled:text-slate-700 ${saveIssues.some((issue) => issue.fieldKey === 'document.title') ? 'rounded outline outline-2 outline-red-500' : ''}`} value={doc.title} disabled={isReadOnly} onChange={(event) => setTitle(event.target.value)} />
             {isReadOnly ? <p className="mt-1 text-sm text-green-700">Als versendet markiert · schreibgeschützt</p> : null}
           </div>
-          <div className="flex items-center gap-4"><UndoRedoControls disabled={isReadOnly} /><SaveStatus /></div>
+          <div className="flex items-center gap-4"><UndoRedoControls disabled={isReadOnly} /><SaveStatus issues={saveIssues} /></div>
         </div>
-        <NewsletterCanvas settings={settings} readOnly={isReadOnly} />
+        <NewsletterCanvas settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       </main>
-      <InspectorPanel settings={settings} readOnly={isReadOnly} />
+      <InspectorPanel settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
       {settings ? <SettingsOverlay open={overlay === 'settings'} onClose={() => setOverlay(null)} settings={settings} usedHeaderVariantIds={usedHeaderVariantIds} /> : null}
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />

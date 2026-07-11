@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { ImageBlock } from '@/lib/newsletter/schema';
 import { AssetPickerDialog } from './asset-picker-dialog';
 
@@ -12,8 +13,9 @@ type Asset = {
   altText?: string | null;
 };
 
-export function ImageInspector({ block, onChange }: { block: ImageBlock; onChange: (patch: Partial<ImageBlock>) => void }) {
+export function ImageInspector({ block, onChange, validationIssues = [] }: { block: ImageBlock; onChange: (patch: Partial<ImageBlock>) => void; validationIssues?: NewsletterSaveIssue[] }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const hasIssue = (field: string) => validationIssues.some((issue) => issue.fieldKey === field);
 
   function selectAsset(asset: Asset) {
     onChange({
@@ -31,8 +33,8 @@ export function ImageInspector({ block, onChange }: { block: ImageBlock; onChang
       </div>
       <button type="button" className="rounded bg-blue-700 px-4 py-2 text-sm text-white" onClick={() => setPickerOpen(true)}>Bild auswählen</button>
       {block.src ? <img src={block.src} alt={block.decorative ? '' : block.alt || ''} className="max-h-40 w-full rounded border object-contain" /> : <p className="rounded border border-dashed p-4 text-sm text-slate-600">Noch kein Bild ausgewählt.</p>}
-      <label className="block text-sm font-medium">Alternativtext
-        <input className="mt-1 w-full rounded border p-2" value={block.alt || ''} disabled={block.decorative} onChange={(event) => onChange({ alt: event.target.value })} />
+      <label className="block text-sm font-medium">Alternativtext{block.decorative ? '' : ' *'}
+        <input className={`mt-1 w-full rounded border p-2 ${hasIssue('alt') ? 'border-red-500 outline outline-2 outline-red-500' : ''}`} value={block.alt || ''} disabled={block.decorative} onChange={(event) => onChange({ alt: event.target.value })} />
       </label>
       <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={block.decorative} onChange={(event) => onChange({ decorative: event.target.checked, alt: event.target.checked ? '' : block.alt })} /> Dekoratives Bild</label>
       <label className="block text-sm font-medium">Optionale Ziel-URL
