@@ -1,8 +1,9 @@
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile, stat } from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
-import { newsletters } from '@/lib/db/schema';
+import { assets as assetTable, newsletters } from '@/lib/db/schema';
 import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
 
 type NewsletterTemplateFile = {
@@ -12,7 +13,25 @@ type NewsletterTemplateFile = {
   document: NewsletterDocument;
 };
 
+type DemoAssetDefinition = {
+  filename: string;
+  title: string;
+  altText: string;
+};
+
+export type DemoAssetSeed = DemoAssetDefinition & {
+  id: string;
+  publicUrl: string;
+};
+
+export type DemoAssetSeedMap = Record<string, DemoAssetSeed>;
+
 const TEMPLATE_DIRECTORY = path.join(process.cwd(), 'public', 'assets', 'newsletter-templates');
+const DEMO_ASSET_DIRECTORY = path.join(TEMPLATE_DIRECTORY, 'demo-assets');
+const DEMO_ASSETS: DemoAssetDefinition[] = [
+  { filename: 'demo-whisky.jpg', title: 'Whiskytasting', altText: 'Whiskytasting im Anglo-German Club' },
+  { filename: 'demo-gaense.jpg', title: 'Gänseessen', altText: 'Traditionelles Gänseessen der Junioren' },
+];
 
 function readYamlString(lines: string[], key: string) {
   const prefix = `${key}:`;
@@ -21,6 +40,46 @@ function readYamlString(lines: string[], key: string) {
   const value = line.slice(prefix.length).trim();
   if (!value) return undefined;
   return JSON.parse(value) as string;
+}
+
+function publicDemoAssetUrl(filename: string) {
+  const appUrl = process.env.APP_URL || 'http://localhost:3000';
+  return new URL(`/assets/newsletter-templates/demo-assets/${filename}`, appUrl).toString();
+}
+
+function demoFilenameFromUrl(src?: string) {
+  if (!src) return undefined;
+  return DEMO_ASSETS.find((asset) => src.endsWith(`/demo-assets/${asset.filename}`) || src.endsWith(asset.filename))?.filename;
+}
+
+function applyDemoImage(image: { src?: string; alt?: string; decorative?: boolean; assetId?: string; href?: string } | undefined, demoAssets: DemoAssetSeedMap) {
+  const filename = demoFilenameFromUrl(image?.src);
+  if (!filename || !demoAssets[filename]) return image;
+  const asset = demoAssets[filename];
+  return {
+    ...image,
+    assetId: asset.id,
+    src: asset.publicUrl,
+    alt: asset.altText,
+    decorative: false,
+  };
+}
+
+export function applyDemoAssetsToDocument(document: NewsletterDocument, demoAssets: DemoAssetSeedMap): NewsletterDocument {
+  if (Object.keys(demoAssets).length === 0) return document;
+  return {
+    ...document,
+    blocks: document.blocks.map((block) => {
+      if (block.type === 'image') {
+        const image = applyDemoImage(block, demoAssets);
+        return image ? { ...block, ...image } : block;
+      }
+      if (block.type === 'event') return { ...block, image: applyDemoImage(block.image, demoAssets) };
+      if (block.type === 'featuredEvent') return { ...block, image: applyDemoImage(block.image, demoAssets) };
+      if (block.type === 'eventGrid') return { ...block, items: block.items.map((item) => ({ ...item, image: applyDemoImage(item.image, demoAssets) })) };
+      return block;
+    }),
+  };
 }
 
 export function serializeNewsletterTemplate({ title, createdAt, updatedAt, document }: NewsletterTemplateFile) {
@@ -92,13 +151,54 @@ function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument 
   };
 }
 
+async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap> {
+  const rows = await Promise.all(DEMO_ASSETS.map(async (asset) => {
+    const filePath = path.join(DEMO_ASSET_DIRECTORY, asset.filename);
+    let fileStats;
+    try {
+      fileStats = await stat(filePath);
+    } catch {
+      return undefined;
+    }
+    const metadata = await sharp(filePath).metadata();
+    const id = nanoid();
+    const publicUrl = publicDemoAssetUrl(asset.filename);
+    return {
+      id,
+      ownerId,
+      storageKey: `newsletter-templates/demo-assets/${asset.filename}`,
+      publicUrl,
+      originalFilename: asset.filename,
+      title: asset.title,
+      altText: asset.altText,
+      mimeType: 'image/jpeg',
+      width: metadata.width ?? 0,
+      height: metadata.height ?? 0,
+      sizeBytes: fileStats.size,
+    };
+  }));
+
+  const assetRows = rows.filter((row): row is NonNullable<typeof row> => row !== undefined);
+  if (assetRows.length > 0) await db.insert(assetTable).values(assetRows);
+
+  return Object.fromEntries(assetRows.map((row) => [row.originalFilename, {
+    id: row.id,
+    filename: row.originalFilename,
+    title: row.title ?? row.originalFilename,
+    altText: row.altText ?? '',
+    publicUrl: row.publicUrl,
+  } satisfies DemoAssetSeed]));
+}
+
 export async function seedNewsletterTemplatesForUser(ownerId: string) {
   const templates = await readTemplateFiles();
   if (templates.length === 0) return;
 
+  const demoAssets = await seedDemoAssetsForUser(ownerId);
+
   await db.insert(newsletters).values(
     templates.map((template) => {
-      const document = documentWithFreshIds(template.document);
+      const document = applyDemoAssetsToDocument(documentWithFreshIds(template.document), demoAssets);
       return {
         id: nanoid(),
         ownerId,

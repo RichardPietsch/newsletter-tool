@@ -2,26 +2,20 @@
 
 import { useState } from 'react';
 import type { ImageBlock } from '@/lib/newsletter/schema';
+import { AssetPickerDialog } from './asset-picker-dialog';
+
+type Asset = {
+  id: string;
+  publicUrl: string;
+  originalFilename: string;
+  title?: string | null;
+  altText?: string | null;
+};
 
 export function ImageInspector({ block, onChange }: { block: ImageBlock; onChange: (patch: Partial<ImageBlock>) => void }) {
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string>();
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-  async function upload(file: File) {
-    setUploading(true);
-    setError(undefined);
-    const formData = new FormData();
-    formData.append('file', file);
-    const response = await fetch('/api/assets', { method: 'POST', body: formData });
-    setUploading(false);
-
-    if (!response.ok) {
-      const payload = await response.json().catch(() => ({ error: 'Upload fehlgeschlagen.' }));
-      setError(payload.error ?? 'Upload fehlgeschlagen.');
-      return;
-    }
-
-    const asset = await response.json();
+  function selectAsset(asset: Asset) {
     onChange({
       assetId: asset.id,
       src: asset.publicUrl,
@@ -33,13 +27,9 @@ export function ImageInspector({ block, onChange }: { block: ImageBlock; onChang
     <div className="space-y-4">
       <div>
         <h2 className="font-bold">Bildmodul</h2>
-        <p className="text-sm text-slate-600">Lade JPEG, PNG oder GIF hoch. Bilder werden serverseitig auf maximal 600 px Breite skaliert.</p>
+        <p className="text-sm text-slate-600">Wähle ein Bild aus der Medienbibliothek aus oder lade im Dialog ein neues JPEG, PNG oder GIF hoch.</p>
       </div>
-      <label className="inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-sm text-white">
-        {uploading ? 'Upload läuft …' : 'Bild hochladen'}
-        <input className="sr-only" type="file" accept="image/jpeg,image/png,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file); }} />
-      </label>
-      {error ? <p className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700" role="alert">{error}</p> : null}
+      <button type="button" className="rounded bg-blue-700 px-4 py-2 text-sm text-white" onClick={() => setPickerOpen(true)}>Bild auswählen</button>
       {block.src ? <img src={block.src} alt={block.decorative ? '' : block.alt || ''} className="max-h-40 w-full rounded border object-contain" /> : <p className="rounded border border-dashed p-4 text-sm text-slate-600">Noch kein Bild ausgewählt.</p>}
       <label className="block text-sm font-medium">Alternativtext
         <input className="mt-1 w-full rounded border p-2" value={block.alt || ''} disabled={block.decorative} onChange={(event) => onChange({ alt: event.target.value })} />
@@ -52,6 +42,7 @@ export function ImageInspector({ block, onChange }: { block: ImageBlock; onChang
         <summary>Manuelle Bild-URL anzeigen</summary>
         <input className="mt-2 w-full rounded border p-2" value={block.src || ''} onChange={(event) => onChange({ src: event.target.value })} />
       </details>
+      <AssetPickerDialog open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={selectAsset} />
     </div>
   );
 }
