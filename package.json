@@ -3,14 +3,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-ui-copy.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx drizzle/seed.ts",
-    "db:ensure": "tsx scripts/ensure-db.ts"
+    "db:ensure": "tsx scripts/ensure-db.ts",
+    "check:copy": "node scripts/check-ui-copy.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.600.0",
