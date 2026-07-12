@@ -52,6 +52,16 @@ describe('newsletter core', () => {
     expect(html).not.toMatch(/class="(?:flex|p-|text-|bg-)/);
   });
 
+  it('renders 32px gaps between exported modules except seamless header text connection', () => {
+    let d = createDefaultDocument('Spacing Test');
+    d = insertBlock(d, 1, createBlock('text'));
+    d = insertBlock(d, 2, createBlock('event'));
+    const html = renderNewsletter(d);
+
+    expect(html).toContain('height:32px');
+    expect(html.match(/height:32px/g)).toHaveLength(2);
+  });
+
   it('reports missing required fields for autosave feedback', () => {
     const document = insertBlock(createDefaultDocument('Valid title'), 1, { ...createBlock('event'), title: '' });
     const issues = validateNewsletterForSave(document);
