@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 import type { ReactNode } from 'react';
 import type { GlobalSettings } from '@/lib/settings/schema';
 
@@ -42,7 +43,7 @@ export function FooterBlock({ contact, legal, settings }: { contact: string; leg
   return (
     <div className="p-8 text-center text-sm text-slate-500">
       {paragraphs.map((paragraph, index) => <p key={index} className={paragraphHasContent(paragraph) ? undefined : 'h-4'}>{renderInlineNodes(paragraph.content, `footer-${index}`)}</p>)}
-      <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">Gesperrt · global konfiguriert</span>
+      <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">{t('shared.lockedGlobal')}</span>
     </div>
   );
 }

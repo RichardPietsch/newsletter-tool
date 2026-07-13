@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect } from 'react';
 
@@ -29,7 +31,7 @@ export function ModulePickerDialog({ open, onOpenChange, onPick }: { open: boole
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[100] bg-slate-950/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-[101] w-[720px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-8 shadow-xl">
-          <Dialog.Title className="text-2xl font-bold">Modul hinzufügen</Dialog.Title>
+          <Dialog.Title className="text-2xl font-bold">{t('misc.addModule')}</Dialog.Title>
           <div className="mt-6 grid grid-cols-3 gap-4">
             {cards.map((card) => (
               <button key={card[0]} onClick={() => onPick(card[0])} className="rounded-lg border p-5 text-left hover:border-blue-600 focus:border-blue-600">
@@ -39,7 +41,7 @@ export function ModulePickerDialog({ open, onOpenChange, onPick }: { open: boole
               </button>
             ))}
           </div>
-          <Dialog.Close className="mt-6 rounded border px-4 py-2">Schließen</Dialog.Close>
+          <Dialog.Close className="mt-6 rounded border px-4 py-2">{t('shared.close')}</Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

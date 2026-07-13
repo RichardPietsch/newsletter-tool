@@ -1,13 +1,22 @@
-import { readFileSync } from 'node:fs';
-import { globSync } from 'node:fs';
+import { globSync, readFileSync } from 'node:fs';
 
-const dictionarySource = readFileSync('lib/i18n/ui-text.ts', 'utf8');
-const registered = new Set([...dictionarySource.matchAll(/:\s*'([^']+)'/g)].map((match) => match[1]));
 const roots = ['app', 'components'];
 const files = roots.flatMap((root) => globSync(`${root}/**/*.{ts,tsx}`, { exclude: ['**/*.test.ts', '**/*.test.tsx'] }));
-const textPattern = />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder)=(?:\"([^\"]+)\"|'([^']+)')/g;
-const technical = [/^use client$/, /^#[0-9a-fA-F]{3,8}$/, /^https?:/, /^mailto:/, /^de-DE$/, /^text\//, /^image\//, /^application\//, /^[/a-z0-9_.?=&:-]+$/i, /^(GET|POST|PUT|PATCH|DELETE)$/];
-const unknown = [];
+const textPattern = />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder|alt)=(?:"([^"]+)"|'([^']+)')/g;
+const technical = [
+  /^use client$/,
+  /^#[0-9a-fA-F]{3,8}$/,
+  /^https?:/,
+  /^mailto:/,
+  /^de-DE$/,
+  /^text\//,
+  /^image\//,
+  /^application\//,
+  /^[/a-z0-9_.?=&:…-]+$/i,
+  /^(GET|POST|PUT|PATCH|DELETE)$/,
+  /^[A-Z0-9¶↗]+$/,
+];
+const raw = [];
 
 for (const file of files) {
   const source = readFileSync(file, 'utf8');
@@ -16,14 +25,13 @@ for (const file of files) {
     if (!value || value.length < 2) continue;
     if (/[;{}=>]/.test(value)) continue;
     if (technical.some((regex) => regex.test(value))) continue;
-    if (registered.has(value)) continue;
-    unknown.push(`${file}: ${value}`);
+    raw.push(`${file}: ${value}`);
   }
 }
 
-if (unknown.length > 0) {
-  console.error('Nicht zentralisierte UI-Texte gefunden:');
-  for (const item of unknown.slice(0, 80)) console.error(`- ${item}`);
-  if (unknown.length > 80) console.error(`… ${unknown.length - 80} weitere`);
+if (raw.length > 0) {
+  console.error('Dezentral gepflegte UI-Texte gefunden. Bitte in lib/i18n/locales/de.ts hinterlegen und per t(...) referenzieren:');
+  for (const item of raw.slice(0, 120)) console.error(`- ${item}`);
+  if (raw.length > 120) console.error(`… ${raw.length - 120} weitere`);
   process.exit(1);
 }

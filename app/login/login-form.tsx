@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -20,7 +22,7 @@ export function LoginForm() {
     });
     setIsSubmitting(false);
     if (!response.ok) {
-      setError('Bitte gib eine gültige E-Mail-Adresse ein.');
+      setError(t('misc.invalidEmail'));
       return;
     }
     router.push('/auth/check-email');
@@ -28,9 +30,7 @@ export function LoginForm() {
 
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
-      <label className="block text-sm font-medium">
-        E-Mail
-        <input
+      <label className="block text-sm font-medium">{t('account.email')}<input
           name="email"
           type="email"
           required
@@ -42,7 +42,7 @@ export function LoginForm() {
       </label>
       {error ? <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
       <button disabled={isSubmitting} className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-60">
-        {isSubmitting ? 'Sende Link …' : 'Zugangslink senden'}
+        {isSubmitting ? t('misc.sendingLink') : t('misc.sendLoginLink')}
       </button>
     </form>
   );

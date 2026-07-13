@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
-import { t } from '@/lib/i18n/ui-text';
+import { t } from '@/lib/i18n';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 import { Overlay } from './overlay';
 

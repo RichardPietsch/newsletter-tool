@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { t } from '@/lib/i18n/ui-text';
+import { t } from '@/lib/i18n';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { ImageBlock } from '@/lib/newsletter/schema';
 import { AssetPickerDialog } from './asset-picker-dialog';

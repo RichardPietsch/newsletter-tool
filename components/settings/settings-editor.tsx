@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import Color from '@tiptap/extension-color';
 import Link from '@tiptap/extension-link';
 import TextStyle from '@tiptap/extension-text-style';
@@ -44,7 +46,7 @@ function FooterRichTextEditor({
     if (JSON.stringify(editor.getJSON()) !== JSON.stringify(value)) editor.commands.setContent(value, false);
   }, [editor, value]);
 
-  if (!editor) return <div className="mt-4 min-h-48 rounded border p-3 text-slate-500">RichText-Editor wird geladen …</div>;
+  if (!editor) return <div className="mt-4 min-h-48 rounded border p-3 text-slate-500">{t('shared.loadRichText')}</div>;
 
   return (
     <div className="mt-4">
@@ -110,18 +112,18 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded
     <div className={embedded ? 'p-6' : 'mx-auto max-w-5xl p-8'}>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          {!embedded ? <a href="/newsletters" className="text-sm text-blue-700">← Zur Newsletter-Liste</a> : null}
-          <h1 className={embedded ? 'text-3xl font-bold' : 'mt-2 text-3xl font-bold'}>Konfiguration</h1>
-          <p className="text-slate-600">Bearbeite globale Header-Varianten und den systemweiten Footer.</p>
+          {!embedded ? <a href="/newsletters" className="text-sm text-blue-700">{t('misc.backToNewsletterList')}</a> : null}
+          <h1 className={embedded ? 'text-3xl font-bold' : 'mt-2 text-3xl font-bold'}>{t('misc.configuration')}</h1>
+          <p className="text-slate-600">{t('misc.settingsIntro')}</p>
         </div>
         <div aria-live="polite" className="rounded bg-white px-3 py-2 text-sm text-slate-700">
-          {status === 'saved' ? 'Gespeichert' : status === 'saving' ? 'Speichern …' : 'Speichern fehlgeschlagen'}
+          {status === 'saved' ? t('save.saved') : status === 'saving' ? t('save.saving') : t('save.failed')}
         </div>
       </div>
 
       <section className="rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">Header-Varianten</h2>
-        <p className="mt-1 text-sm text-slate-600">Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.</p>
+        <h2 className="text-xl font-semibold">{t('misc.headerVariants')}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t('misc.headerVariantsDescription')}</p>
         <label className="mt-4 inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-white">
           {uploading ? 'Upload läuft …' : 'Header-Bild hochladen'}
           <input className="sr-only" type="file" accept="image/jpeg,image/png,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadHeaderImage(file); }} />
@@ -137,8 +139,7 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded
                   setSettings(next);
                 }} onBlur={() => void save()} />
               </label>
-              <label className="mt-3 block text-sm font-medium">Alternativtext
-                <input className="mt-1 w-full rounded border p-2" value={variant.alt} onChange={(event) => {
+              <label className="mt-3 block text-sm font-medium">{t('image.alt')}<input className="mt-1 w-full rounded border p-2" value={variant.alt} onChange={(event) => {
                   const next = { ...settings, headerVariants: settings.headerVariants.map((item) => item.id === variant.id ? { ...item, alt: event.target.value } : item) };
                   setSettings(next);
                 }} onBlur={() => void save()} />
@@ -158,15 +159,15 @@ export function SettingsEditor({ initialSettings, usedHeaderVariantIds, embedded
               </button>
             </article>
           ))}
-          {settings.headerVariants.length === 0 && <p className="rounded border border-dashed p-6 text-slate-600">Noch keine Header-Variante vorhanden. Lade ein JPEG, PNG oder GIF hoch.</p>}
+          {settings.headerVariants.length === 0 && <p className="rounded border border-dashed p-6 text-slate-600">{t('misc.noHeaderVariant')}</p>}
         </div>
       </section>
 
       <section className="mt-8 rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">Globaler Footer</h2>
-        <p className="mt-1 text-sm text-slate-600">Der Footer nutzt dieselben eingeschränkten RichText-Funktionen wie ein normales Textmodul und bleibt damit E-Mail-kompatibel.</p>
+        <h2 className="text-xl font-semibold">{t('misc.globalFooter')}</h2>
+        <p className="mt-1 text-sm text-slate-600">{t('misc.globalFooterDescription')}</p>
         <FooterRichTextEditor value={settings.footerRichText} onChange={updateFooterRichText} onBlur={(footerRichText) => void saveFooterRichText(footerRichText)} />
-        <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>Footer speichern</button>
+        <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>{t('misc.saveFooter')}</button>
       </section>
     </div>
   );

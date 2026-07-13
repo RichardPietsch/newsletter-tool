@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import { useEffect, useState } from 'react';
 import { Overlay } from '@/components/editor/overlay';
 
@@ -53,18 +55,18 @@ export function AssetPickerDialog({ open, onClose, onSelect }: { open: boolean; 
   if (!open) return null;
 
   return (
-    <Overlay title="Bild auswählen" onClose={onClose}>
+    <Overlay title={t('image.choose')} onClose={onClose}>
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-600">Wähle ein vorhandenes Medium aus oder lade ein neues Bild hoch.</p>
+          <p className="text-sm text-slate-600">{t('misc.assetPickerIntro')}</p>
           <label className="shrink-0 cursor-pointer rounded bg-blue-700 px-4 py-2 text-sm font-medium text-white">
             {uploading ? 'Upload läuft …' : 'Bild hochladen'}
             <input className="sr-only" type="file" accept="image/jpeg,image/png,image/gif" onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file); }} />
           </label>
         </div>
         {error ? <p className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-700" role="alert">{error}</p> : null}
-        {loading ? <p className="text-sm text-slate-600">Medien werden geladen …</p> : null}
-        {!loading && assets.length === 0 ? <p className="rounded border border-dashed p-4 text-sm text-slate-600">Noch keine Medien vorhanden.</p> : null}
+        {loading ? <p className="text-sm text-slate-600">{t('misc.mediaLoading')}</p> : null}
+        {!loading && assets.length === 0 ? <p className="rounded border border-dashed p-4 text-sm text-slate-600">{t('misc.noMedia')}</p> : null}
         <div className="grid grid-cols-2 gap-3">
           {assets.map((asset) => (
             <button key={asset.id} className="overflow-hidden rounded border bg-white text-left hover:border-blue-600" onClick={() => { onSelect(asset); onClose(); }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { t } from '@/lib/i18n/ui-text';
+import { t } from '@/lib/i18n';
 import { Overlay } from './overlay';
 
 type AccountInfo = {

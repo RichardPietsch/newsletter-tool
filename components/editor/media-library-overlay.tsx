@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import { useEffect, useState } from 'react';
 import { Overlay } from './overlay';
 
@@ -46,10 +48,10 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
   if (!open) return null;
 
   return (
-    <Overlay title="Medien" onClose={onClose}>
+    <Overlay title={t('misc.mediaTitle')} onClose={onClose}>
       <div className="p-6">
         <div className="mb-4 flex items-center justify-between gap-4">
-          <p className="text-sm text-slate-600">Pflege hier zentrale Titel und Alternativtexte für hochgeladene Bilder.</p>
+          <p className="text-sm text-slate-600">{t('misc.mediaLibraryIntro')}</p>
           <p aria-live="polite" className="text-sm text-slate-500">
             {status === 'loading' ? 'Lade Medien …' : status === 'saving' ? 'Speichere …' : status === 'error' ? 'Fehler beim Speichern oder Laden' : `${assets.length} Medien`}
           </p>
@@ -68,9 +70,7 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
                   onBlur={(event) => void updateAsset(asset.id, { title: event.target.value })}
                 />
               </label>
-              <label className="mt-3 block text-sm font-medium">
-                Alternativtext
-                <textarea
+              <label className="mt-3 block text-sm font-medium">{t('image.alt')}<textarea
                   className="mt-1 min-h-20 w-full rounded border p-2"
                   value={asset.altText ?? ''}
                   onChange={(event) => setAssets((items) => items.map((item) => item.id === asset.id ? { ...item, altText: event.target.value } : item))}
@@ -80,7 +80,7 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
             </article>
           ))}
           {assets.length === 0 && status !== 'loading' ? (
-            <p className="rounded border border-dashed bg-white p-6 text-slate-600">Noch keine Medien vorhanden. Lade Bilder über ein Bildmodul oder eine Header-Variante hoch.</p>
+            <p className="rounded border border-dashed bg-white p-6 text-slate-600">{t('misc.emptyMediaLibrary')}</p>
           ) : null}
         </div>
       </div>

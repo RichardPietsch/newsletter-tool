@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import { useEffect, useState } from 'react';
 import type { ExportValidationIssue } from '@/lib/newsletter/export-validation';
 import type { NewsletterDocument } from '@/lib/newsletter/schema';
@@ -64,7 +66,7 @@ export function EditorShell({
         setSaveIssues([]);
         setStatus('saved');
       } else {
-        setSaveIssues([{ path: 'server', message: 'Der Server hat das Speichern abgelehnt. Bitte prüfe deine Eingaben und versuche es erneut.', blockLabel: 'Newsletter' }]);
+        setSaveIssues([{ path: 'server', message: t('misc.serverSaveRejected'), blockLabel: 'Newsletter' }]);
         setStatus('error');
       }
     }, 900);
@@ -75,7 +77,7 @@ export function EditorShell({
     const response = await fetch(`/api/newsletters/${id}/export${format === 'yml' ? '?format=yml' : ''}`);
     if (!response.ok) {
       const payload = await response.json().catch(() => null) as { error?: string; issues?: ExportValidationIssue[] } | null;
-      setExportError(payload?.error ?? 'Newsletter kann nicht exportiert werden.');
+      setExportError(payload?.error ?? t('export.cannotExport'));
       setExportIssues(payload?.issues ?? []);
       return;
     }
@@ -108,7 +110,7 @@ export function EditorShell({
     try {
       await downloadNewsletterExport('html');
     } catch {
-      setExportError('Der Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.');
+      setExportError(t('export.htmlStartError'));
       setExportIssues([]);
     }
   }
@@ -119,7 +121,7 @@ export function EditorShell({
     try {
       await downloadNewsletterExport('yml');
     } catch {
-      setExportError('Der Template-Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.');
+      setExportError(t('export.templateStartError'));
       setExportIssues([]);
     }
   }
@@ -134,8 +136,8 @@ export function EditorShell({
   async function toggleNewsletterSent() {
     const nextSent = !sentAtState;
     const message = nextSent
-      ? 'Newsletter wirklich als versendet markieren? Danach ist er schreibgeschützt, kann aber bei Bedarf wieder freigegeben werden.'
-      : 'Versendet-Markierung wirklich aufheben? Danach kann der Newsletter wieder bearbeitet werden.';
+      ? t('newsletterSettings.confirmSent')
+      : t('newsletterSettings.confirmUnsent');
     if (!window.confirm(message)) return;
     const response = await fetch(`/api/newsletters/${id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sent: nextSent }) });
     if (!response.ok) return;
@@ -152,7 +154,7 @@ export function EditorShell({
   }
 
   async function deleteNewsletter() {
-    if (!window.confirm('Newsletter wirklich dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
+    if (!window.confirm(t('newsletterSettings.confirmDelete'))) return;
     const response = await fetch(`/api/newsletters/${id}`, { method: 'DELETE' });
     if (response.ok) window.location.href = '/newsletters';
   }
@@ -171,8 +173,8 @@ export function EditorShell({
       <main className="flex-1 bg-[#f4f1ec]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
           <div>
-            <input aria-label="Newsletter-Titel" className={`text-xl font-bold disabled:bg-transparent disabled:text-slate-700 ${saveIssues.some((issue) => issue.fieldKey === 'document.title') ? 'rounded outline outline-2 outline-red-500' : ''}`} value={doc.title} disabled={isReadOnly} onChange={(event) => setTitle(event.target.value)} />
-            {isReadOnly ? <p className="mt-1 text-sm text-green-700">Als versendet markiert · schreibgeschützt</p> : null}
+            <input aria-label={t('editor.titleLabel')} className={`text-xl font-bold disabled:bg-transparent disabled:text-slate-700 ${saveIssues.some((issue) => issue.fieldKey === 'document.title') ? 'rounded outline outline-2 outline-red-500' : ''}`} value={doc.title} disabled={isReadOnly} onChange={(event) => setTitle(event.target.value)} />
+            {isReadOnly ? <p className="mt-1 text-sm text-green-700">{t('editor.sentReadonly')}</p> : null}
           </div>
           <div className="flex items-center gap-4"><UndoRedoControls disabled={isReadOnly} /><SaveStatus issues={saveIssues} /></div>
         </div>
@@ -184,16 +186,16 @@ export function EditorShell({
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
       <NewsletterSettingsOverlay open={overlay === 'newsletter'} title={doc.title} sentAt={sentAtState} onClose={() => setOverlay(null)} onRename={renameNewsletter} onToggleSent={toggleNewsletterSent} onClone={cloneNewsletter} onDelete={deleteNewsletter} />
       {overlay === 'export' ? (
-        <Overlay title="Newsletter exportieren" onClose={() => setOverlay(null)}>
+        <Overlay title={t('export.dialogTitle')} onClose={() => setOverlay(null)}>
           <div className="mx-auto max-w-xl space-y-4 p-6">
-            <p className="text-sm text-slate-600">Wähle das Exportformat für diese Test- bzw. Entwicklungsumgebung.</p>
+            <p className="text-sm text-slate-600">{t('export.dialogIntro')}</p>
             <button type="button" className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50" onClick={() => { setOverlay(null); void handleHtmlExport(); }}>
-              <span className="block font-semibold">Export als HTML</span>
-              <span className="text-sm text-slate-600">Erzeugt die finale Newsletter-Datei für den Versand.</span>
+              <span className="block font-semibold">{t('export.html')}</span>
+              <span className="text-sm text-slate-600">{t('export.htmlDescription')}</span>
             </button>
             <button type="button" className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50" onClick={() => { setOverlay(null); void handleTemplateExport(); }}>
-              <span className="block font-semibold">Export als YML</span>
-              <span className="text-sm text-slate-600">Speichert den Newsletter als wiederverwendbares Template für Testnutzer.</span>
+              <span className="block font-semibold">{t('export.yml')}</span>
+              <span className="text-sm text-slate-600">{t('export.ymlDescription')}</span>
             </button>
           </div>
         </Overlay>

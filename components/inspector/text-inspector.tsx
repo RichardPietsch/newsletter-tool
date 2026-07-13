@@ -1,5 +1,7 @@
 'use client';
 
+import { t } from '@/lib/i18n';
+
 import type { TextBlock as TextBlockType } from '@/lib/newsletter/schema';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 
@@ -23,8 +25,8 @@ export function TextInspector() {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-bold">Textmodul</h2>
-      <p className="text-sm text-slate-600">Bearbeite den Text direkt im Newsletter-Canvas. So siehst du Überschriften, Hervorhebungen und Listen unmittelbar im Layout.</p>
+      <h2 className="font-bold">{t('misc.textModule')}</h2>
+      <p className="text-sm text-slate-600">{t('misc.textInspectorIntro')}</p>
       {block ? (
         <label className="block text-sm font-medium">Hintergrund
           <select
@@ -32,13 +34,13 @@ export function TextInspector() {
             value={block.background ?? 'white'}
             onChange={(event) => update(block.id, { background: event.target.value as TextBlockType['background'], content: removeAutomaticTextColors(block.content) } as any)}
           >
-            <option value="white">Standard · Weiß</option>
-            <option value="blue">Blau · Feature-Teaser</option>
+            <option value="white">{t('misc.defaultWhite')}</option>
+            <option value="blue">{t('misc.featureBlue')}</option>
           </select>
         </label>
       ) : null}
-      <p className="rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">Wähle Text im Canvas aus und nutze die Symbol-Toolbar oberhalb des Textmoduls für Absatz, H2, H3, Fett, Kursiv, Unterstreichen, Link, Textfarbe sowie Listen.</p>
-      <p className="text-xs text-slate-500">Die Standard-Textfarbe passt sich automatisch an den Hintergrund an; Rot und Grau sind nur für einzelne Hervorhebungen vorgesehen.</p>
+      <p className="rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">{t('misc.textToolbarHint')}</p>
+      <p className="text-xs text-slate-500">{t('misc.textColorAutoHint')}</p>
     </div>
   );
 }

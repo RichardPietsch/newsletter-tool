@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flattenUiText, t } from '@/lib/i18n/ui-text';
+import { flattenUiText, t } from '@/lib/i18n';
 
 describe('ui text dictionary', () => {
   it('resolves typed UI copy keys from the central dictionary', () => {

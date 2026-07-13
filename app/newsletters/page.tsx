@@ -1,3 +1,4 @@
+import { t } from '@/lib/i18n';
 export const dynamic = 'force-dynamic';
 import { desc, eq } from 'drizzle-orm';
 import { MdiIcon } from '@/components/editor/icons';
@@ -20,11 +21,11 @@ export default async function Page() {
     <NewsletterOverviewShell settings={settings} usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))} account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }}>
       <main className="mx-auto max-w-3xl p-8">
         <div className="flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold">Newsletter</h1>
+          <h1 className="text-3xl font-bold">{t('misc.newslettersTitle')}</h1>
           <a className="text-sm text-slate-600 underline" href="/account">{user.email}</a>
         </div>
         <form action="/api/newsletters" method="post">
-          <button className="my-6 rounded bg-blue-700 px-4 py-2 text-white">Neuen Newsletter erstellen</button>
+          <button className="my-6 rounded bg-blue-700 px-4 py-2 text-white">{t('misc.createNewsletter')}</button>
         </form>
         <div className="space-y-3">
           {rows.map((newsletter) => (
@@ -33,10 +34,10 @@ export default async function Page() {
                 <span className="font-medium">{newsletter.title}</span>
                 <span className="block text-sm text-slate-500">{new Date(newsletter.updatedAt).toLocaleString('de-DE')}</span>
               </span>
-              {newsletter.sentAt ? <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700"><MdiIcon name="emailCheck" className="h-5 w-5" /> Versendet</span> : null}
+              {newsletter.sentAt ? <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700"><MdiIcon name="emailCheck" className="h-5 w-5" /> {t('misc.sent')}</span> : null}
             </a>
           ))}
-          {rows.length === 0 && <p>Keine Newsletter vorhanden. Erstelle deinen ersten Newsletter.</p>}
+          {rows.length === 0 && <p>{t('misc.noNewsletters')}</p>}
         </div>
       </main>
     </NewsletterOverviewShell>
