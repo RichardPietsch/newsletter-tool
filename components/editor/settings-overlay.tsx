@@ -1,5 +1,6 @@
 'use client';
 
+import { t } from '@/lib/i18n';
 import type { GlobalSettings } from '@/lib/settings/schema';
 import { SettingsEditor } from '@/components/settings/settings-editor';
 import { Overlay } from './overlay';
