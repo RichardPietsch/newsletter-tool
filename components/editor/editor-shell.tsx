@@ -172,8 +172,14 @@ export function EditorShell({
       />
       <main className="flex-1 bg-[#f4f1ec]">
         <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white p-4">
-          <div>
-            <input aria-label={t('editor.titleLabel')} className={`text-xl font-bold disabled:bg-transparent disabled:text-slate-700 ${saveIssues.some((issue) => issue.fieldKey === 'document.title') ? 'rounded outline outline-2 outline-red-500' : ''}`} value={doc.title} disabled={isReadOnly} onChange={(event) => setTitle(event.target.value)} />
+          <div className="min-w-0 flex-1 pr-6">
+            <input
+              aria-label={t('editor.titleLabel')}
+              className={`w-[min(42rem,55vw)] max-w-full overflow-hidden text-ellipsis whitespace-nowrap bg-transparent pr-10 text-xl font-bold [mask-image:linear-gradient(to_right,#000_calc(100%-2.5rem),transparent)] focus:[mask-image:none] disabled:bg-transparent disabled:text-slate-700 ${saveIssues.some((issue) => issue.fieldKey === 'document.title') ? 'rounded outline outline-2 outline-red-500' : ''}`}
+              value={doc.title}
+              disabled={isReadOnly}
+              onChange={(event) => setTitle(event.target.value)}
+            />
             {isReadOnly ? <p className="mt-1 text-sm text-green-700">{t('editor.sentReadonly')}</p> : null}
           </div>
           <div className="flex items-center gap-4"><UndoRedoControls disabled={isReadOnly} /><SaveStatus issues={saveIssues} /></div>

@@ -57,11 +57,13 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
 
   const settings = await getUserSettings(auth.user.id);
   const html = renderNewsletter(document, settings);
+  const exportHtml = `<!--email_off-->${html}<!--/email_off-->`;
 
-  return new NextResponse(html, {
+  return new NextResponse(exportHtml, {
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'content-disposition': `attachment; filename="${safeFilename(document.title)}"`,
+      'cache-control': 'private, no-store, no-transform',
     },
   });
 }
