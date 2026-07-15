@@ -67,7 +67,7 @@ function applyDemoImage(image: { src?: string; alt?: string; decorative?: boolea
 
 export function applyDemoAssetsToDocument(document: NewsletterDocument, demoAssets: DemoAssetSeedMap): NewsletterDocument {
   if (Object.keys(demoAssets).length === 0) return document;
-  return {
+  const nextDocument = {
     ...document,
     blocks: document.blocks.map((block) => {
       if (block.type === 'image') {
@@ -80,6 +80,7 @@ export function applyDemoAssetsToDocument(document: NewsletterDocument, demoAsse
       return block;
     }),
   };
+  return newsletterDocumentSchema.parse(nextDocument);
 }
 
 export function serializeNewsletterTemplate({ title, createdAt, updatedAt, document }: NewsletterTemplateFile) {
@@ -141,7 +142,7 @@ async function readTemplateFiles() {
 }
 
 function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument {
-  return {
+  const nextDocument = {
     ...document,
     blocks: document.blocks.map((block) => ({
       ...block,
@@ -149,6 +150,7 @@ function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument 
       ...(block.type === 'eventGrid' ? { items: block.items.map((item) => ({ ...item, id: nanoid() })) } : {}),
     })),
   };
+  return newsletterDocumentSchema.parse(nextDocument);
 }
 
 async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap> {
