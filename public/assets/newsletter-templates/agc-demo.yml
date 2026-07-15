@@ -50,7 +50,7 @@ documentJson: |
         "overline": "Highlight",
         "background": "blue",
         "image": {
-          "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-whisky.jpg",
+          "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-whisky.jpg",
           "alt": "Whiskytasting im Anglo-German Club",
           "decorative": false
         },
@@ -79,7 +79,7 @@ documentJson: |
             "id": "template-event-2",
             "category": "Clubleben",
             "image": {
-              "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-gaense.jpg",
+              "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-gaense.jpg",
               "alt": "Traditionelles Gänseessen der Junioren",
               "decorative": false
             },
