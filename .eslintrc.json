@@ -1,5 +1,28 @@
 {
-  "extends": ["plugin:@next/next/recommended", "plugin:@next/next/core-web-vitals"],
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "ignorePatterns": [".next/", "node_modules/", "coverage/", "playwright-report/", "test-results/"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["@next/next"],
+  "settings": {
+    "next": {
+      "rootDir": ["./"]
+    }
+  },
+  "rules": {
+    "@next/next/no-html-link-for-pages": "warn",
+    "@next/next/no-img-element": "warn"
+  },
   "overrides": [
     {
       "files": ["**/*.{ts,tsx}"],
