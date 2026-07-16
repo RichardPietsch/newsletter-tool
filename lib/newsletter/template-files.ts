@@ -3,6 +3,7 @@ import path from 'path';
 import sharp from 'sharp';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
+import { serverEnv } from '@/lib/env';
 import { assets as assetTable, newsletters } from '@/lib/db/schema';
 import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
 
@@ -43,8 +44,7 @@ function readYamlString(lines: string[], key: string) {
 }
 
 function publicDemoAssetUrl(filename: string) {
-  const appUrl = process.env.APP_URL || 'http://localhost:3000';
-  return new URL(`/assets/newsletter-templates/demo-assets/${filename}`, appUrl).toString();
+  return new URL(`/assets/newsletter-templates/demo-assets/${filename}`, serverEnv.appUrl).toString();
 }
 
 function demoFilenameFromUrl(src?: string) {

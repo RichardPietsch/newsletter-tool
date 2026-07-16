@@ -1,3 +1,17 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-export const s3=new S3Client({region:process.env.S3_REGION||'us-east-1',endpoint:process.env.S3_ENDPOINT,forcePathStyle:true,credentials:{accessKeyId:process.env.S3_ACCESS_KEY_ID||'minioadmin',secretAccessKey:process.env.S3_SECRET_ACCESS_KEY||'minioadmin'}});
-export async function putAsset(key:string,body:Buffer,mimeType:string){await s3.send(new PutObjectCommand({Bucket:process.env.S3_BUCKET||'newsletter-assets',Key:key,Body:body,ContentType:mimeType})); return `${process.env.PUBLIC_ASSET_BASE_URL||'http://localhost:9000/newsletter-assets'}/${key}`}
+import { serverEnv } from '@/lib/env';
+
+export const s3 = new S3Client({
+  region: serverEnv.s3.region,
+  endpoint: serverEnv.s3.endpoint,
+  forcePathStyle: true,
+  credentials: {
+    accessKeyId: serverEnv.s3.accessKeyId,
+    secretAccessKey: serverEnv.s3.secretAccessKey,
+  },
+});
+
+export async function putAsset(key: string, body: Buffer, mimeType: string) {
+  await s3.send(new PutObjectCommand({ Bucket: serverEnv.s3.bucket, Key: key, Body: body, ContentType: mimeType }));
+  return `${serverEnv.s3.publicAssetBaseUrl}/${key}`;
+}

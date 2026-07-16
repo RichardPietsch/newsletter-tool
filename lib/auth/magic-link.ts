@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email/send-email';
 import { magicLinkEmail } from '@/lib/email/templates/magic-link';
 import { createSession } from './session';
 import { isEmailAllowed, MAGIC_LINK_TTL_MINUTES, normalizeEmail } from './config';
+import { serverEnv } from '@/lib/env';
 import { createSecureToken, hashToken } from './tokens';
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -49,8 +50,7 @@ export async function requestMagicLink(emailInput: string, metadata: { ip?: stri
     userAgent: metadata.userAgent || null,
   });
 
-  const base = process.env.APP_URL || 'http://localhost:3000';
-  const url = new URL('/auth/magic-link/verify', base);
+  const url = new URL('/auth/magic-link/verify', serverEnv.appUrl);
   url.searchParams.set('token', token);
   const message = magicLinkEmail({ url: url.toString(), ttlMinutes: MAGIC_LINK_TTL_MINUTES });
   await sendEmail({ to: email, subject: 'Dein Zugangslink zum Newsletter Tool', ...message });

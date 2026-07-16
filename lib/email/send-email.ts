@@ -1,2 +1,12 @@
 import nodemailer from 'nodemailer';
-export async function sendEmail({to,subject,html,text}:{to:string;subject:string;html:string;text:string}){const port=Number(process.env.SMTP_PORT||1025); const transporter=nodemailer.createTransport({host:process.env.SMTP_HOST||'localhost',port,secure:port===465,auth:process.env.SMTP_USER?{user:process.env.SMTP_USER,pass:process.env.SMTP_PASSWORD}:undefined}); await transporter.sendMail({from:process.env.SMTP_FROM||'Newsletter Tool <no-reply@newsletter.local>',to,subject,html,text})}
+import { serverEnv } from '@/lib/env';
+
+export async function sendEmail({ to, subject, html, text }: { to: string; subject: string; html: string; text: string }) {
+  const transporter = nodemailer.createTransport({
+    host: serverEnv.smtp.host,
+    port: serverEnv.smtp.port,
+    secure: serverEnv.smtp.port === 465,
+    auth: serverEnv.smtp.user ? { user: serverEnv.smtp.user, pass: serverEnv.smtp.password } : undefined,
+  });
+  await transporter.sendMail({ from: serverEnv.smtp.from, to, subject, html, text });
+}

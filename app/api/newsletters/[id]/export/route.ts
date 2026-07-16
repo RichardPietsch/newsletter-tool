@@ -4,6 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
+import { serverEnv } from '@/lib/env';
 import { newsletters } from '@/lib/db/schema';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
@@ -31,7 +32,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
   const format = request.nextUrl.searchParams.get('format');
 
   if (format === 'yml') {
-    if (process.env.NODE_ENV === 'production') {
+    if (serverEnv.isProduction) {
       return NextResponse.json({ error: 'YML-Template-Export ist nur in der lokalen Entwicklungsumgebung verfügbar.' }, { status: 403 });
     }
 

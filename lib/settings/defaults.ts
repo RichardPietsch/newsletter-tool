@@ -1,7 +1,8 @@
+import { serverEnv } from '@/lib/env';
 import type { GlobalSettings } from './schema';
 
 function appAssetUrl(path: string) {
-  return new URL(path, process.env.APP_URL || 'http://localhost:3000').toString();
+  return new URL(path, serverEnv.appUrl).toString();
 }
 
 export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] {
