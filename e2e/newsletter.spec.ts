@@ -124,6 +124,7 @@ test('covers the main authenticated editor flow', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Newsletter' })).toBeVisible();
 
   await page.getByRole('link', { name: /E2E Demo Newsletter/ }).click();
+  await expect(page).toHaveURL(/\/newsletters\/e2e-demo-newsletter$/);
   await expect(page.getByLabel('Newsletter-Titel')).toHaveValue('E2E Demo Newsletter');
 
   await page.getByText('E2E Veranstaltungsabend').click();
@@ -156,6 +157,7 @@ test('covers the main authenticated editor flow', async ({ page }) => {
 test('allows restarting and completing the onboarding tour manually', async ({ page }) => {
   await page.goto('/newsletters');
   await page.getByLabel('Account').click();
+  await expect(page.getByRole('dialog', { name: 'Account' })).toBeVisible();
   await page.getByRole('button', { name: 'Einführung erneut starten' }).click();
 
   await expect(page.getByRole('dialog', { name: 'Willkommen im Newsletter Tool' })).toBeVisible();
