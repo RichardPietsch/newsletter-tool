@@ -3,7 +3,7 @@ import { renderNewsletter } from '@/email/render-newsletter';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { deleteBlock, History, insertBlock, moveBlock, updateBlock } from '@/lib/newsletter/operations';
 import { validateNewsletterForSave } from '@/lib/newsletter/save-validation';
-import { allowedUrl, imageBlockSchema, newsletterDocumentSchema } from '@/lib/newsletter/schema';
+import { allowedUrl, imageBlockSchema, newsletterDocumentSchema, tiptapDocSchema } from '@/lib/newsletter/schema';
 
 describe('newsletter core', () => {
   it('validates block schemas and defaults', () => {
@@ -47,6 +47,71 @@ describe('newsletter core', () => {
   it('validates links', () => {
     expect(allowedUrl('https://example.com')).toBe(true);
     expect(allowedUrl('javascript:alert(1)')).toBe(false);
+  });
+
+  it('validates supported TipTap rich-text structures', () => {
+    const result = tiptapDocSchema.safeParse({
+      type: 'doc',
+      content: [
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: 'Headline', marks: [{ type: 'bold' }] }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Mehr Informationen ', marks: [{ type: 'textStyle', attrs: { color: '#6d7478' } }] },
+            {
+              type: 'text',
+              text: 'online',
+              marks: [
+                {
+                  type: 'link',
+                  attrs: { href: 'https://example.com', target: null, rel: 'noopener noreferrer nofollow' },
+                },
+              ],
+            },
+            { type: 'hardBreak' },
+          ],
+        },
+        {
+          type: 'bulletList',
+          content: [{ type: 'listItem', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Punkt' }] }] }],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects unsupported TipTap nodes, unsafe links and unknown colors', () => {
+    expect(
+      tiptapDocSchema.safeParse({ type: 'doc', content: [{ type: 'image', attrs: { src: 'https://x.test/a.png' } }] })
+        .success,
+    ).toBe(false);
+    expect(
+      tiptapDocSchema.safeParse({
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'X', marks: [{ type: 'link', attrs: { href: 'javascript:alert(1)' } }] }],
+          },
+        ],
+      }).success,
+    ).toBe(false);
+    expect(
+      tiptapDocSchema.safeParse({
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'X', marks: [{ type: 'textStyle', attrs: { color: '#000000' } }] }],
+          },
+        ],
+      }).success,
+    ).toBe(false);
   });
 
   it('renders complete html without tailwind output', () => {

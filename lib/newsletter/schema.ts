@@ -9,7 +9,61 @@ export const allowedUrl = (v: string) => {
 };
 const url = z.string().trim().refine(allowedUrl, 'Nur http, https oder mailto erlaubt');
 const base = z.object({ id: z.string().min(1), locked: z.boolean().optional() });
-export const tiptapDocSchema = z.object({ type: z.literal('doc'), content: z.array(z.any()).optional() });
+
+export const allowedTextColors = ['#dc2626', '#6d7478', '#17303d', '#111827'] as const;
+const allowedTextColorSchema = z.enum(allowedTextColors);
+const headingAttrsSchema = z.object({ level: z.union([z.literal(2), z.literal(3)]) }).strict();
+const linkAttrsSchema = z
+  .object({
+    href: url,
+    target: z.string().nullable().optional(),
+    rel: z.string().nullable().optional(),
+    class: z.string().nullable().optional(),
+  })
+  .strict();
+const textStyleAttrsSchema = z.object({ color: allowedTextColorSchema.optional() }).strict();
+
+const boldMarkSchema = z.object({ type: z.literal('bold') }).strict();
+const italicMarkSchema = z.object({ type: z.literal('italic') }).strict();
+const underlineMarkSchema = z.object({ type: z.literal('underline') }).strict();
+const linkMarkSchema = z.object({ type: z.literal('link'), attrs: linkAttrsSchema }).strict();
+const textStyleMarkSchema = z.object({ type: z.literal('textStyle'), attrs: textStyleAttrsSchema.optional() }).strict();
+export const tiptapMarkSchema = z.union([
+  boldMarkSchema,
+  italicMarkSchema,
+  underlineMarkSchema,
+  linkMarkSchema,
+  textStyleMarkSchema,
+]);
+export type TiptapMark = z.infer<typeof tiptapMarkSchema>;
+
+export type TiptapNode =
+  | { type: 'paragraph'; content?: TiptapNode[] }
+  | { type: 'heading'; attrs: z.infer<typeof headingAttrsSchema>; content?: TiptapNode[] }
+  | { type: 'text'; text: string; marks?: TiptapMark[] }
+  | { type: 'hardBreak' }
+  | { type: 'bulletList'; content?: TiptapNode[] }
+  | { type: 'orderedList'; content?: TiptapNode[] }
+  | { type: 'listItem'; content?: TiptapNode[] };
+
+const tiptapNodeSchema: z.ZodType<TiptapNode> = z.lazy(() =>
+  z.union([
+    z.object({ type: z.literal('paragraph'), content: z.array(tiptapNodeSchema).optional() }).strict(),
+    z
+      .object({ type: z.literal('heading'), attrs: headingAttrsSchema, content: z.array(tiptapNodeSchema).optional() })
+      .strict(),
+    z.object({ type: z.literal('text'), text: z.string(), marks: z.array(tiptapMarkSchema).optional() }).strict(),
+    z.object({ type: z.literal('hardBreak') }).strict(),
+    z.object({ type: z.literal('bulletList'), content: z.array(tiptapNodeSchema).optional() }).strict(),
+    z.object({ type: z.literal('orderedList'), content: z.array(tiptapNodeSchema).optional() }).strict(),
+    z.object({ type: z.literal('listItem'), content: z.array(tiptapNodeSchema).optional() }).strict(),
+  ]),
+);
+
+export const tiptapDocSchema = z
+  .object({ type: z.literal('doc'), content: z.array(tiptapNodeSchema).optional() })
+  .strict();
+export type TiptapDoc = z.infer<typeof tiptapDocSchema>;
 export const headerBlockSchema = base.extend({
   type: z.literal('header'),
   locked: z.literal(true),
