@@ -1,0 +1,1 @@
+export const emailTheme={container:600,font:'Arial, Helvetica, sans-serif',colors:{bg:'#f4f1ec',surface:'#ffffff',text:'#17303d',muted:'#5d6b82',brand:'#1d4ed8',border:'#d7dee8'},space:{sm:12,md:20,lg:32}};
