@@ -53,7 +53,7 @@ export const de = {
     delete: 'Löschen',
     addComponentHere: 'Komponente an dieser Stelle hinzufügen',
     textEditAria: 'Textmodul direkt bearbeiten',
-    textLoading: 'Texteditor wird geladen …',
+    textLoading: 'Editor wird geladen …',
   },
   newsletterSettings: {
     save: 'Speichern',
