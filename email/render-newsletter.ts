@@ -7,8 +7,8 @@ import { renderFeaturedEvent } from './modules/featured-event';
 import { renderFooter } from './modules/footer';
 import { renderHeader } from './modules/header';
 import { renderImage } from './modules/image';
-import { renderQuote } from './modules/quote';
-import { renderSectionHeading } from './modules/section-heading';
+import { renderRegisteredEmailModule } from '@/email/module-render-registry';
+import { isRegisteredNewsletterBlock } from '@/lib/newsletter/module-registry';
 import { renderText } from './modules/text';
 import { emailTheme } from './theme';
 
@@ -43,13 +43,11 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
                 ? renderEvent(b)
                 : b.type === 'featuredEvent'
                   ? renderFeaturedEvent(b)
-                  : b.type === 'quote'
-                    ? renderQuote(b)
-                    : b.type === 'sectionHeading'
-                      ? renderSectionHeading(b)
-                      : b.type === 'eventGrid'
-                        ? renderEventGrid(b)
-                        : renderImage(b);
+                  : isRegisteredNewsletterBlock(b)
+                    ? renderRegisteredEmailModule(b)
+                    : b.type === 'eventGrid'
+                      ? renderEventGrid(b)
+                      : renderImage(b);
       return `${needsGap ? `${MODULE_GAP}\n` : ''}${rendered}`;
     })
     .join('\n');

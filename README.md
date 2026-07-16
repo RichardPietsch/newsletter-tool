@@ -6,7 +6,7 @@ Desktop-orientierter Next.js Newsletter-Editor. Der Stack verwendet Next.js 16.2
 
 - `app/`: App Router Pages und API Route Handler für Login, Newsletter, Assets, nutzerbezogene Einstellungen und Export.
 - `components/`: dreispaltiger Editor mit Side-Rail, Canvas, Einfügeflächen, Overlay und Inspector.
-- `lib/newsletter/`: Zod-Schemas, Defaults, Operationen, Zustand Store und Undo/Redo.
+- `lib/newsletter/`: Zod-Schemas, Defaults, Operationen, Zustand Store und Undo/Redo. Die Modul-Registry in `lib/newsletter/module-registry.ts` sammelt neue Modul-Metadaten inkrementell; aktuell sind `quote` und `sectionHeading` registriert. Neue Module sollen dort künftig Label-Key, Default-Erzeugung und Schema-Referenz ergänzen; serverseitige E-Mail-Renderer werden separat über `email/module-render-registry.ts` angebunden, bevor Canvas-/Inspector-Registries nachgezogen werden.
 - `email/`: zentrale E-Mail-Theme-Werte und MJML-Modulrenderer. `theme.css` ist die menschlich lesbare Referenz; `theme.ts` enthält dieselben Token für die Pipeline.
 - `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets`, `app_settings`, Magic Links und Sessions.
 - `lib/auth/`: Passwordless Authentifizierung mit gehashten Einmal-Token, HTTP-only Session-Cookies und Zugriffsschutz für Pages/API-Routen.

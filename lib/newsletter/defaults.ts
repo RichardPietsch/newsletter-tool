@@ -1,4 +1,5 @@
 import { nanoid } from 'nanoid';
+import { createRegisteredModule, isRegisteredModuleType } from './module-registry';
 import type { NewsletterBlock, NewsletterDocument, EventItem } from './schema';
 export const emptyTiptapDoc = {
   type: 'doc' as const,
@@ -50,15 +51,7 @@ export function createBlock(
       date: 'Datum und Uhrzeit',
       buttonLabel: 'Mehr erfahren',
     };
-  if (type === 'quote')
-    return {
-      id: nanoid(),
-      type: 'quote',
-      quote: 'Ein prägnantes Zitat für den Newsletter.',
-      author: 'Name',
-      role: 'Funktion',
-    };
-  if (type === 'sectionHeading') return { id: nanoid(), type: 'sectionHeading', label: 'Abschnitt' };
+  if (isRegisteredModuleType(type)) return createRegisteredModule(type);
   if (type === 'eventGrid')
     return {
       id: nanoid(),
