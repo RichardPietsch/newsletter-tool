@@ -1,58 +1,67 @@
 'use client';
 
+import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
+import { t } from '@/lib/i18n';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+import type { TextBlock } from '@/lib/newsletter/schema';
+import { useNewsletterStore } from '@/lib/newsletter/store';
 import Color from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
 import TextStyle from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { useEffect } from 'react';
-import type { TextBlock } from '@/lib/newsletter/schema';
 
-const buttonClass = 'rounded border px-2 py-1 text-sm hover:border-blue-600 aria-pressed:bg-blue-50 aria-pressed:border-blue-600';
+type TextRichEditorProps = {
+  block: TextBlock;
+  readOnly: boolean;
+  isBlue: boolean;
+};
 
-export function TextRichEditor({ block, onChange }: { block: TextBlock; onChange: (content: TextBlock['content']) => void }) {
+export function TextRichEditor({ block, readOnly, isBlue }: TextRichEditorProps) {
+  const selectedId = useNewsletterStore((state) => state.selectedId);
+  const update = useNewsletterStore((state) => state.update);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       TextStyle,
       Color.configure({ types: ['textStyle'] }),
       Underline,
+      Link.configure({ openOnClick: false }),
     ],
     content: block.content,
+    editable: !readOnly,
     editorProps: {
       attributes: {
-        class: 'min-h-48 rounded border bg-white p-3 prose prose-sm max-w-none focus:outline-none',
-        'aria-label': 'Rich-Text-Inhalt',
+        class: `min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h1+p]:mt-2 [&_h2]:mb-2 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h2+p]:mt-2 [&_h3]:mb-2 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_h3+p]:mt-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6 ${isBlue ? 'text-white' : ''}`,
+        'aria-label': t('editor.textEditAria'),
       },
     },
-    onUpdate: ({ editor }) => onChange(editor.getJSON() as TextBlock['content']),
+    onUpdate: ({ editor: updatedEditor }) => {
+      if (!readOnly) update(block.id, { content: updatedEditor.getJSON() as TextBlock['content'] });
+    },
   });
 
   useEffect(() => {
-    if (!editor) return;
-    const current = JSON.stringify(editor.getJSON());
-    const next = JSON.stringify(block.content);
-    if (current !== next) editor.commands.setContent(block.content, false);
+    editor?.setEditable(!readOnly);
+  }, [editor, readOnly]);
+
+  useEffect(() => {
+    if (!editor || editor.isFocused) return;
+    if (JSON.stringify(editor.getJSON()) !== JSON.stringify(block.content)) {
+      editor.commands.setContent(block.content, false);
+    }
   }, [block.content, editor]);
 
-  if (!editor) return <div className="rounded border p-3 text-sm text-slate-600">Editor wird geladen …</div>;
+  if (!editor) return <div className="min-h-32 text-slate-500">{t('editor.textLoading')}</div>;
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2" role="toolbar" aria-label="Textformatierung">
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('paragraph')} onClick={() => editor.chain().focus().setParagraph().run()}>Absatz</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>H2</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>H3</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>Fett</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>Kursiv</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()}>Unterstrichen</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('textStyle', { color: '#111827' })} onClick={() => editor.chain().focus().setColor('#111827').run()}>Schwarz</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('textStyle', { color: '#dc2626' })} onClick={() => editor.chain().focus().setColor('#dc2626').run()}>Rot</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>Liste</button>
-        <button type="button" className={buttonClass} aria-pressed={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>Nummeriert</button>
-      </div>
+    <>
+      {selectedId === block.id && !readOnly ? (
+        <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : styles.navy} />
+      ) : null}
       <EditorContent editor={editor} />
-      <p className="text-xs text-slate-500">Rot ist nur zum Hervorheben einzelner Begriffe vorgesehen; Layout, Abstände und Schriftgrößen bleiben systemdefiniert.</p>
-    </div>
+    </>
   );
 }
