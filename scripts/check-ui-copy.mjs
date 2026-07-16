@@ -58,7 +58,6 @@ if (raw.length > 0) {
   console.error(
     'Dezentral gepflegte UI-Texte gefunden. Bitte in lib/i18n/locales/de.ts hinterlegen und per t(...) referenzieren:',
   );
-  for (const item of raw.slice(0, 120)) console.error(`- ${item}`);
-  if (raw.length > 120) console.error(`… ${raw.length - 120} weitere`);
+  for (const item of raw) console.error(`- ${item}`);
   process.exit(1);
 }
