@@ -9,6 +9,7 @@ import Underline from '@tiptap/extension-underline';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { nanoid } from 'nanoid';
+import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 import type { GlobalSettings } from '@/lib/settings/schema';
@@ -122,9 +123,9 @@ export function SettingsEditor({
       <div className="mb-8 flex items-center justify-between">
         <div>
           {!embedded ? (
-            <a href="/newsletters" className="text-sm text-blue-700">
+            <NextLink href="/newsletters" className="text-sm text-blue-700">
               {t('misc.backToNewsletterList')}
-            </a>
+            </NextLink>
           ) : null}
           <h1 className={embedded ? 'text-3xl font-bold' : 'mt-2 text-3xl font-bold'}>{t('misc.configuration')}</h1>
           <p className="text-slate-600">{t('misc.settingsIntro')}</p>

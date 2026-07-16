@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { renderFooter } from '@/email/modules/footer';
+import type { TiptapNode } from '@/lib/newsletter/schema';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import { globalSettingsSchema } from '@/lib/settings/schema';
+
+function textFromNode(node: TiptapNode): string {
+  if (node.type === 'text') return node.text;
+  if (!('content' in node)) return '';
+  return (node.content ?? []).map(textFromNode).join('');
+}
 
 describe('settings defaults', () => {
   it('prefills AGC header variants with public app asset URLs', () => {
@@ -27,11 +34,7 @@ describe('settings defaults', () => {
         alt: 'AGC Gastro Newsletter Header',
       },
     ]);
-    expect(
-      settings.footerRichText.content?.map(
-        (node) => node.content?.map((child: any) => child.text ?? '').join('') ?? '',
-      ),
-    ).toEqual([
+    expect(settings.footerRichText.content?.map(textFromNode)).toEqual([
       'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de',
       'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de',
       '',

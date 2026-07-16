@@ -2,20 +2,22 @@
 
 import { t } from '@/lib/i18n';
 
-import type { TextBlock as TextBlockType } from '@/lib/newsletter/schema';
+import type { TextBlock as TextBlockType, TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 
-function removeAutomaticTextColors(node: any): any {
+function isAutomaticTextColor(mark: TiptapMark) {
+  return mark.type === 'textStyle' && ['#111827', '#ffffff'].includes(mark.attrs?.color ?? '');
+}
+
+function removeAutomaticTextColors(node: TiptapNode): TiptapNode {
   if (!node || typeof node !== 'object') return node;
   const next = { ...node };
-  if (Array.isArray(next.marks)) {
-    const marks = next.marks.filter(
-      (mark: any) => !(mark.type === 'textStyle' && ['#111827', '#ffffff'].includes(mark.attrs?.color)),
-    );
+  if (next.type === 'text' && Array.isArray(next.marks)) {
+    const marks = next.marks.filter((mark) => !isAutomaticTextColor(mark));
     if (marks.length > 0) next.marks = marks;
     else delete next.marks;
   }
-  if (Array.isArray(next.content)) next.content = next.content.map(removeAutomaticTextColors);
+  if ('content' in next && Array.isArray(next.content)) next.content = next.content.map(removeAutomaticTextColors);
   return next;
 }
 

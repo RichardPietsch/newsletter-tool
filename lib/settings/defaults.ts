@@ -1,4 +1,5 @@
 import { serverEnv } from '@/lib/env';
+import type { TiptapNode } from '@/lib/newsletter/schema';
 import type { GlobalSettings } from './schema';
 
 function appAssetUrl(path: string) {
@@ -73,10 +74,14 @@ export function createDefaultSettings(): GlobalSettings {
   };
 }
 
+function textFromNode(node: TiptapNode): string {
+  if (node.type === 'text') return node.text;
+  if (!('content' in node)) return '';
+  return (node.content ?? []).map(textFromNode).join('');
+}
+
 function footerLines(settings: GlobalSettings) {
-  return (settings.footerRichText.content ?? []).map((node: any) =>
-    (node.content ?? []).map((child: any) => child.text ?? '').join(''),
-  );
+  return (settings.footerRichText.content ?? []).map(textFromNode);
 }
 
 export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalSettings {

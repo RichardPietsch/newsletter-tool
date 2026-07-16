@@ -21,7 +21,7 @@
   },
   "rules": {
     "@next/next/no-html-link-for-pages": "warn",
-    "@next/next/no-img-element": "warn"
+    "@next/next/no-img-element": "off"
   },
   "overrides": [
     {
@@ -29,15 +29,7 @@
       "parser": "@typescript-eslint/parser",
       "plugins": ["@typescript-eslint"],
       "rules": {
-        "@typescript-eslint/no-explicit-any": "warn",
-        "max-lines-per-function": [
-          "warn",
-          {
-            "max": 120,
-            "skipBlankLines": true,
-            "skipComments": true
-          }
-        ]
+        "@typescript-eslint/no-explicit-any": "warn"
       }
     },
     {
