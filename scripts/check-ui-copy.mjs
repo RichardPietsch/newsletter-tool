@@ -23,7 +23,7 @@ for (const file of files) {
   for (const match of source.matchAll(textPattern)) {
     const value = (match[1] ?? match[2] ?? match[3] ?? '').trim().replace(/\s+/g, ' ');
     if (!value || value.length < 2) continue;
-    if (/[;{}=>]/.test(value)) continue;
+    if (/[;{}=>&|]/.test(value)) continue;
     if (technical.some((regex) => regex.test(value))) continue;
     raw.push(`${file}: ${value}`);
   }

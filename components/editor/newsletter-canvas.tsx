@@ -24,7 +24,7 @@ export function NewsletterCanvas({ settings, readOnly = false, validationIssues 
   const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
 
   return (
-    <div className="mx-auto w-[600px] py-8">
+    <div className="mx-auto w-[600px] py-8" data-tour="editor-canvas">
       {doc.blocks.map((block, index) => {
         const previousBlock = doc.blocks[index - 1];
         const nextBlock = doc.blocks[index + 1];
@@ -33,7 +33,7 @@ export function NewsletterCanvas({ settings, readOnly = false, validationIssues 
         const hasValidationIssue = validationIssues.some((issue) => issue.blockId === block.id);
         return (
         <div key={block.id} className={moduleSpacing}>
-          <div role="button" tabIndex={0} onClick={() => select(block.id)} onKeyDown={(event) => { if (event.key === 'Enter') select(block.id); }} className={`rounded ${hasValidationIssue ? 'ring-4 ring-red-500' : selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}>
+          <div role="button" tabIndex={0} data-tour="newsletter-module" onClick={() => select(block.id)} onKeyDown={(event) => { if (event.key === 'Enter') select(block.id); }} className={`rounded ${hasValidationIssue ? 'ring-4 ring-red-500' : selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}>
             {block.type === 'header' ? <HeaderBlock branding={block.branding} settings={settings} headerVariantId={block.headerVariantId} squareBottom={nextBlock?.type === 'text'} />
               : block.type === 'footer' ? <FooterBlock contact={block.contact} legal={block.legal} settings={settings} />
                 : block.type === 'text' ? <TextBlock block={block} readOnly={readOnly} squareTop={previousBlock?.type === 'header'} />

@@ -18,7 +18,7 @@ export default async function Page() {
   });
 
   return (
-    <NewsletterOverviewShell settings={settings} usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))} account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }}>
+    <NewsletterOverviewShell settings={settings} usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))} account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }} firstNewsletterHref={rows[0] ? `/newsletters/${rows[0].id}` : undefined}>
       <main className="mx-auto max-w-3xl p-8">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-3xl font-bold">{t('misc.newslettersTitle')}</h1>
@@ -29,7 +29,7 @@ export default async function Page() {
         </form>
         <div className="space-y-3">
           {rows.map((newsletter) => (
-            <a key={newsletter.id} className="flex items-center justify-between gap-4 rounded border bg-white p-4 transition hover:border-blue-600" href={`/newsletters/${newsletter.id}`}>
+            <a key={newsletter.id} data-tour="newsletter-card" className="flex items-center justify-between gap-4 rounded border bg-white p-4 transition hover:border-blue-600" href={`/newsletters/${newsletter.id}`}>
               <span>
                 <span className="font-medium">{newsletter.title}</span>
                 <span className="block text-sm text-slate-500">{new Date(newsletter.updatedAt).toLocaleString('de-DE')}</span>

@@ -7,6 +7,7 @@ import { AccountOverlay } from './account-overlay';
 import { MediaLibraryOverlay } from './media-library-overlay';
 import { SettingsOverlay } from './settings-overlay';
 import { SideRail } from './side-rail';
+import { OnboardingTour } from './onboarding-tour';
 
 type AccountInfo = {
   email: string;
@@ -18,11 +19,13 @@ export function NewsletterOverviewShell({
   settings,
   account,
   usedHeaderVariantIds,
+  firstNewsletterHref,
 }: {
   children: ReactNode;
   settings: GlobalSettings;
   account: AccountInfo;
   usedHeaderVariantIds: string[];
+  firstNewsletterHref?: string;
 }) {
   const [overlay, setOverlay] = useState<'media' | 'settings' | 'account' | null>(null);
 
@@ -37,6 +40,7 @@ export function NewsletterOverviewShell({
       <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
       <SettingsOverlay open={overlay === 'settings'} onClose={() => setOverlay(null)} settings={settings} usedHeaderVariantIds={usedHeaderVariantIds} />
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
+      <OnboardingTour variant="overview" accountEmail={account.email} firstNewsletterHref={firstNewsletterHref} />
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { SaveStatus } from './save-status';
 import { SettingsOverlay } from './settings-overlay';
 import { SideRail } from './side-rail';
 import { UndoRedoControls } from './undo-redo-controls';
+import { OnboardingTour } from './onboarding-tour';
 
 type AccountInfo = {
   email: string;
@@ -207,6 +208,7 @@ export function EditorShell({
         </Overlay>
       ) : null}
       <ExportIssuesOverlay open={exportError !== null} error={exportError ?? ''} issues={exportIssues} onClose={() => setExportError(null)} />
+      <OnboardingTour variant="editor" accountEmail={account.email} />
     </div>
   );
 }

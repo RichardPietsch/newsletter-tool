@@ -2,6 +2,7 @@
 
 import { t } from '@/lib/i18n';
 import { Overlay } from './overlay';
+import { restartOnboardingTour } from './onboarding-tour';
 
 type AccountInfo = {
   email: string;
@@ -19,7 +20,10 @@ export function AccountOverlay({ open, onClose, account }: { open: boolean; onCl
           <dt className="mt-4 text-sm text-slate-500">{t('account.lastLogin')}</dt>
           <dd>{account.lastLoginAt ? new Date(account.lastLoginAt).toLocaleString('de-DE') : '—'}</dd>
         </dl>
-        <a href="/logout" className="mt-6 inline-block rounded border px-4 py-2 text-red-700 hover:bg-red-50">{t('account.logout')}</a>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button type="button" className="rounded border px-4 py-2 text-blue-700 hover:bg-blue-50" onClick={restartOnboardingTour}>{t('onboarding.restart')}</button>
+          <a href="/logout" className="inline-block rounded border px-4 py-2 text-red-700 hover:bg-red-50">{t('account.logout')}</a>
+        </div>
       </div>
     </Overlay>
   );
