@@ -1,64 +1,122 @@
 'use client';
+
 import { create } from 'zustand';
-import type { NewsletterDocument, NewsletterBlock } from './schema';
+import type { NewsletterBlock, NewsletterDocument } from './schema';
 import { createBlock } from './defaults';
-import { deleteBlock, insertBlock, moveBlock, updateBlock, History } from './operations';
+import { deleteBlock, History, insertBlock, moveBlock, updateBlock } from './operations';
+
 type SaveStatus = 'saved' | 'saving' | 'error';
-type S = {
+type InsertableBlockType = 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid';
+
+type UninitializedState = {
+  initialized: false;
+  id: null;
+  doc: null;
+  selectedId?: undefined;
+  history: null;
+};
+
+type InitializedState = {
+  initialized: true;
   id: string;
   doc: NewsletterDocument;
   selectedId?: string;
-  status: SaveStatus;
   history: History<NewsletterDocument>;
-  setTitle: (t: string) => void;
+};
+
+type StoreData = UninitializedState | InitializedState;
+
+type StoreActions = {
+  status: SaveStatus;
+  setTitle: (title: string) => void;
   select: (id?: string) => void;
-  insert: (
-    i: number,
-    t: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid',
-  ) => void;
+  insert: (index: number, type: InsertableBlockType) => void;
   delete: (id: string) => void;
-  move: (id: string, d: -1 | 1) => void;
-  update: (id: string, p: Partial<NewsletterBlock>) => void;
+  move: (id: string, direction: -1 | 1) => void;
+  update: (id: string, patch: Partial<NewsletterBlock>) => void;
   undo: () => void;
   redo: () => void;
-  setStatus: (s: SaveStatus) => void;
+  setStatus: (status: SaveStatus) => void;
 };
-export const useNewsletterStore = create<S>((set, get) => ({
-  id: '',
-  doc: null as any,
+
+type NewsletterStore = StoreData & StoreActions;
+
+const uninitializedState: UninitializedState = {
+  initialized: false,
+  id: null,
+  doc: null,
+  selectedId: undefined,
+  history: null,
+};
+
+function commitDocument(state: InitializedState, doc: NewsletterDocument) {
+  state.history.commit(doc);
+  return doc;
+}
+
+export const useNewsletterStore = create<NewsletterStore>((set, get) => ({
+  ...uninitializedState,
   status: 'saved',
-  history: null as any,
   setTitle: (title) => {
-    const doc = { ...get().doc, title };
-    get().history.commit(doc);
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, { ...state.doc, title });
     set({ doc });
   },
-  select: (selectedId) => set({ selectedId }),
-  insert: (i, t) => {
-    const b = createBlock(t);
-    const doc = insertBlock(get().doc, i, b);
-    get().history.commit(doc);
-    set({ doc, selectedId: b.id });
+  select: (selectedId) => {
+    const state = get();
+    if (!state.initialized) return;
+    set({ selectedId });
+  },
+  insert: (index, type) => {
+    const state = get();
+    if (!state.initialized) return;
+    const block = createBlock(type);
+    const doc = commitDocument(state, insertBlock(state.doc, index, block));
+    set({ doc, selectedId: block.id });
   },
   delete: (id) => {
-    const doc = deleteBlock(get().doc, id);
-    get().history.commit(doc);
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, deleteBlock(state.doc, id));
     set({ doc, selectedId: undefined });
   },
-  move: (id, d) => {
-    const doc = moveBlock(get().doc, id, d);
-    get().history.commit(doc);
+  move: (id, direction) => {
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, moveBlock(state.doc, id, direction));
     set({ doc });
   },
-  update: (id, p) => {
-    const doc = updateBlock(get().doc, id, p);
-    get().history.commit(doc);
+  update: (id, patch) => {
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, updateBlock(state.doc, id, patch));
     set({ doc });
   },
-  undo: () => set({ doc: get().history.undo() }),
-  redo: () => set({ doc: get().history.redo() }),
+  undo: () => {
+    const state = get();
+    if (!state.initialized) return;
+    set({ doc: state.history.undo() });
+  },
+  redo: () => {
+    const state = get();
+    if (!state.initialized) return;
+    set({ doc: state.history.redo() });
+  },
   setStatus: (status) => set({ status }),
 }));
+
 export function initStore(id: string, doc: NewsletterDocument) {
-  useNewsletterStore.setState({ id, doc, history: new History(doc), selectedId: doc.blocks[0]?.id, status: 'saved' });
+  useNewsletterStore.setState({
+    initialized: true,
+    id,
+    doc,
+    history: new History(doc),
+    selectedId: doc.blocks[0]?.id,
+    status: 'saved',
+  });
+}
+
+export function resetStore() {
+  useNewsletterStore.setState({ ...uninitializedState, status: 'saved' });
 }

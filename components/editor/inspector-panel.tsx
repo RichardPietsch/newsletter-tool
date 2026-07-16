@@ -166,6 +166,9 @@ export function InspectorPanel({
     update = useNewsletterStore((s) => s.update),
     del = useNewsletterStore((s) => s.delete),
     move = useNewsletterStore((s) => s.move);
+
+  if (!doc) return null;
+
   const b = doc.blocks.find((x) => x.id === id);
   const blockIssues = b ? validationIssues.filter((issue) => issue.blockId === b.id) : [];
   const hasIssue = (field: string) => blockIssues.some((issue) => issue.fieldKey === field);

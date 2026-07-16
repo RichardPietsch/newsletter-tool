@@ -23,6 +23,9 @@ export function TextInspector() {
   const doc = useNewsletterStore((state) => state.doc);
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
+
+  if (!doc) return null;
+
   const block = doc.blocks.find((item) => item.id === selectedId && item.type === 'text') as TextBlockType | undefined;
 
   return (

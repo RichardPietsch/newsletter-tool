@@ -31,6 +31,8 @@ export function NewsletterCanvas({
   const insert = useNewsletterStore((state) => state.insert);
   const [insertionIndex, setInsertionIndex] = useState<number | null>(null);
 
+  if (!doc) return null;
+
   return (
     <div className="mx-auto w-[600px] py-8" data-tour="editor-canvas">
       {doc.blocks.map((block, index) => {
