@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { badRequest, notFound } from '@/lib/api/api-error';
 import { parseJson } from '@/lib/api/parse-json';
 import { validateMutationOrigin } from '@/lib/api/origin';
-import { validateAndUpload } from '@/lib/assets/upload';
+import { UploadValidationError, validateAndUpload } from '@/lib/assets/upload';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { assets } from '@/lib/db/schema';
@@ -38,7 +38,13 @@ export async function POST(req: Request) {
 
   const file = form.get('file');
   if (!(file instanceof File)) return badRequest('Datei fehlt');
-  const data = await validateAndUpload(file);
+  let data: Awaited<ReturnType<typeof validateAndUpload>>;
+  try {
+    data = await validateAndUpload(file);
+  } catch (error) {
+    if (error instanceof UploadValidationError) return badRequest(error.message);
+    throw error;
+  }
   const title = data.originalFilename.replace(/\.[^.]+$/, '') || data.originalFilename;
   const row = { id: nanoid(), ownerId: auth.user.id, title, altText: '', ...data };
   await db.insert(assets).values(row);
