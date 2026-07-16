@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { conflict, notFound, validationError, zodIssues } from '@/lib/api/api-error';
 import { parseJson } from '@/lib/api/parse-json';
+import { validateMutationOrigin } from '@/lib/api/origin';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
@@ -36,6 +37,8 @@ export async function GET(_: Request, { params }: NewsletterRouteContext) {
 }
 
 export async function PUT(request: Request, { params }: NewsletterRouteContext) {
+  const originError = validateMutationOrigin(request);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
@@ -56,6 +59,8 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
 }
 
 export async function PATCH(request: Request, { params }: NewsletterRouteContext) {
+  const originError = validateMutationOrigin(request);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
@@ -77,7 +82,9 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
   return NextResponse.json({ ...newsletter, sentAt: responseSentAt });
 }
 
-export async function DELETE(_: Request, { params }: NewsletterRouteContext) {
+export async function DELETE(request: Request, { params }: NewsletterRouteContext) {
+  const originError = validateMutationOrigin(request);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
@@ -100,7 +107,9 @@ function cloneDocumentWithFreshIds(document: NewsletterDocument) {
   };
 }
 
-export async function POST(_: Request, { params }: NewsletterRouteContext) {
+export async function POST(request: Request, { params }: NewsletterRouteContext) {
+  const originError = validateMutationOrigin(request);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;

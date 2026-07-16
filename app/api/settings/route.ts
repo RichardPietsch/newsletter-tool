@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { parseJson } from '@/lib/api/parse-json';
+import { validateMutationOrigin } from '@/lib/api/origin';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { getUserSettings, saveUserSettings } from '@/lib/settings/store';
 import { globalSettingsSchema } from '@/lib/settings/schema';
@@ -12,6 +13,8 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const originError = validateMutationOrigin(request);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const parsed = await parseJson(request, globalSettingsSchema);

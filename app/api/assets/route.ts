@@ -5,6 +5,7 @@ import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { badRequest, notFound } from '@/lib/api/api-error';
 import { parseJson } from '@/lib/api/parse-json';
+import { validateMutationOrigin } from '@/lib/api/origin';
 import { validateAndUpload } from '@/lib/assets/upload';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
@@ -23,6 +24,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const originError = validateMutationOrigin(req);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
 
@@ -43,6 +46,8 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+  const originError = validateMutationOrigin(req);
+  if (originError) return originError;
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const parsed = await parseJson(req, assetUpdateSchema);
