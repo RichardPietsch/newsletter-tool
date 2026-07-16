@@ -1,9 +1,30 @@
-import { globSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 
 const roots = ['app', 'components'];
-const files = roots.flatMap((root) =>
-  globSync(`${root}/**/*.{ts,tsx}`, { exclude: ['**/*.test.ts', '**/*.test.tsx'] }),
-);
+const sourceExtensions = new Set(['.ts', '.tsx']);
+
+function collectSourceFiles(directory) {
+  const entries = readdirSync(directory, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectSourceFiles(fullPath));
+      continue;
+    }
+
+    const extension = path.extname(entry.name);
+    if (!sourceExtensions.has(extension)) continue;
+    if (entry.name.endsWith('.test.ts') || entry.name.endsWith('.test.tsx')) continue;
+    files.push(fullPath);
+  }
+
+  return files;
+}
+
+const files = roots.flatMap((root) => collectSourceFiles(root));
 const textPattern =
   />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder|alt)=(?:"([^"]+)"|'([^']+)')/g;
 const technical = [
