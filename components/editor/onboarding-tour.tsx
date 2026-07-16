@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { t } from '@/lib/i18n';
 
@@ -21,9 +22,49 @@ type HighlightRect = {
   height: number;
 };
 
+type PopoverPosition = Pick<CSSProperties, 'top' | 'left' | 'transform'>;
+
 const completedKey = (email: string) => `newsletter:onboarding:completed:${email}`;
 const stepKey = (email: string) => `newsletter:onboarding:step:${email}`;
 const restartEventName = 'newsletter:onboarding:start';
+const popoverWidth = 448;
+const popoverHeight = 280;
+const popoverGap = 20;
+const viewportMargin = 24;
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
+const centeredPopover = (): PopoverPosition => ({
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+});
+
+const positionPopoverNear = (rect: HighlightRect | null): PopoverPosition => {
+  if (!rect) return centeredPopover();
+
+  const maxLeft = Math.max(viewportMargin, window.innerWidth - popoverWidth - viewportMargin);
+  const maxTop = Math.max(viewportMargin, window.innerHeight - popoverHeight - viewportMargin);
+  const centeredTop = clamp(rect.top + rect.height / 2 - popoverHeight / 2, viewportMargin, maxTop);
+  const rightLeft = rect.left + rect.width + popoverGap;
+  const leftLeft = rect.left - popoverWidth - popoverGap;
+
+  if (rightLeft + popoverWidth <= window.innerWidth - viewportMargin) {
+    return { top: centeredTop, left: rightLeft };
+  }
+
+  if (leftLeft >= viewportMargin) {
+    return { top: centeredTop, left: leftLeft };
+  }
+
+  const centeredLeft = clamp(rect.left + rect.width / 2 - popoverWidth / 2, viewportMargin, maxLeft);
+  const belowTop = rect.top + rect.height + popoverGap;
+  if (belowTop + popoverHeight <= window.innerHeight - viewportMargin) {
+    return { top: belowTop, left: centeredLeft };
+  }
+
+  return { top: clamp(rect.top - popoverHeight - popoverGap, viewportMargin, maxTop), left: centeredLeft };
+};
 
 export function restartOnboardingTour() {
   window.dispatchEvent(new Event(restartEventName));
@@ -47,6 +88,7 @@ export function OnboardingTour({ variant, accountEmail, firstNewsletterHref }: {
   const [active, setActive] = useState(false);
   const [index, setIndex] = useState(0);
   const [highlight, setHighlight] = useState<HighlightRect | null>(null);
+  const [popoverPosition, setPopoverPosition] = useState<PopoverPosition>(centeredPopover);
   const step = steps[index];
 
   const complete = useCallback(() => {
@@ -89,16 +131,20 @@ export function OnboardingTour({ variant, accountEmail, firstNewsletterHref }: {
     const updateHighlight = () => {
       if (!step.selector) {
         setHighlight(null);
+        setPopoverPosition(centeredPopover());
         return;
       }
       const target = document.querySelector<HTMLElement>(step.selector);
       if (!target) {
         setHighlight(null);
+        setPopoverPosition(centeredPopover());
         return;
       }
       target.scrollIntoView({ block: 'center', inline: 'center', behavior: 'smooth' });
       const rect = target.getBoundingClientRect();
-      setHighlight({ top: rect.top - 8, left: rect.left - 8, width: rect.width + 16, height: rect.height + 16 });
+      const nextHighlight = { top: rect.top - 12, left: rect.left - 12, width: rect.width + 24, height: rect.height + 24 };
+      setHighlight(nextHighlight);
+      setPopoverPosition(positionPopoverNear(nextHighlight));
     };
     updateHighlight();
     window.addEventListener('resize', updateHighlight);
@@ -139,8 +185,8 @@ export function OnboardingTour({ variant, accountEmail, firstNewsletterHref }: {
   return (
     <div className="fixed inset-0 z-[120] pointer-events-none" aria-live="polite">
       <div className="absolute inset-0 bg-slate-950/40" />
-      {highlight ? <div className="absolute rounded-xl border-2 border-white shadow-[0_0_0_9999px_rgba(15,23,42,0.35)] transition-all" style={highlight} /> : null}
-      <section className="pointer-events-auto fixed bottom-6 right-6 w-[min(28rem,calc(100vw-3rem))] rounded-2xl bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+      {highlight ? <div className="absolute rounded-xl border-4 border-[#012aff] bg-[#012aff]/10 shadow-[0_0_0_9999px_rgba(15,23,42,0.45),0_0_0_8px_rgba(1,42,255,0.18)] transition-all" style={highlight} /> : null}
+      <section className="pointer-events-auto fixed w-[min(28rem,calc(100vw-3rem))] rounded-2xl border border-[#012aff]/20 bg-white p-6 shadow-2xl ring-4 ring-[#012aff]/10 transition-all" style={popoverPosition} role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">{t('onboarding.progress').replace('{current}', String(index + 1)).replace('{total}', String(steps.length))}</p>
         <h2 id="onboarding-title" className="mt-2 text-xl font-semibold text-slate-950">{step.title}</h2>
         <p className="mt-3 text-sm leading-6 text-slate-700">{step.body}</p>
