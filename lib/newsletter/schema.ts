@@ -183,6 +183,7 @@ export const newsletterDocumentSchema = z
 export type NewsletterDocument = z.infer<typeof newsletterDocumentSchema>;
 export type NewsletterBlock = z.infer<typeof newsletterBlockSchema>;
 export type HeaderBlock = z.infer<typeof headerBlockSchema>;
+export type FooterBlock = z.infer<typeof footerBlockSchema>;
 export type TextBlock = z.infer<typeof textBlockSchema>;
 export type EventBlock = z.infer<typeof eventBlockSchema>;
 export type FeaturedEventBlock = z.infer<typeof featuredEventBlockSchema>;
@@ -191,4 +192,14 @@ export type SectionHeadingBlock = z.infer<typeof sectionHeadingBlockSchema>;
 export type EventGridBlock = z.infer<typeof eventGridBlockSchema>;
 export type EventItem = z.infer<typeof eventItemSchema>;
 export type ImageBlock = z.infer<typeof imageBlockSchema>;
+export type NewsletterBlockPatch =
+  | Partial<HeaderBlock>
+  | Partial<TextBlock>
+  | Partial<EventBlock>
+  | Partial<FeaturedEventBlock>
+  | Partial<QuoteBlock>
+  | Partial<SectionHeadingBlock>
+  | Partial<EventGridBlock>
+  | Partial<ImageBlock>
+  | Partial<FooterBlock>;
 export const isLocked = (b: NewsletterBlock) => b.type === 'header' || b.type === 'footer' || b.locked === true;

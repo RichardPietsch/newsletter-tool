@@ -45,7 +45,7 @@ export function TextBlock({
       },
     },
     onUpdate: ({ editor }) => {
-      if (!readOnly) update(block.id, { content: editor.getJSON() as T['content'] } as any);
+      if (!readOnly) update(block.id, { content: editor.getJSON() as T['content'] });
     },
   });
 

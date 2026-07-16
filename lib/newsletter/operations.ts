@@ -1,4 +1,4 @@
-import type { NewsletterBlock, NewsletterDocument } from './schema';
+import type { NewsletterBlock, NewsletterBlockPatch, NewsletterDocument } from './schema';
 import { isLocked } from './schema';
 export function insertBlock(doc: NewsletterDocument, index: number, block: NewsletterBlock): NewsletterDocument {
   const safe = Math.max(1, Math.min(index, doc.blocks.length - 1));
@@ -18,7 +18,7 @@ export function moveBlock(doc: NewsletterDocument, id: string, dir: -1 | 1): New
   [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
   return { ...doc, blocks };
 }
-export function updateBlock(doc: NewsletterDocument, id: string, patch: Partial<NewsletterBlock>): NewsletterDocument {
+export function updateBlock(doc: NewsletterDocument, id: string, patch: NewsletterBlockPatch): NewsletterDocument {
   return { ...doc, blocks: doc.blocks.map((b) => (b.id === id ? ({ ...b, ...patch } as NewsletterBlock) : b)) };
 }
 export class History<T> {

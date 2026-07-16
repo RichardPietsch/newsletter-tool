@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { NewsletterBlock, NewsletterDocument } from './schema';
+import type { NewsletterBlockPatch, NewsletterDocument } from './schema';
 import { createBlock } from './defaults';
 import { deleteBlock, History, insertBlock, moveBlock, updateBlock } from './operations';
 
@@ -33,7 +33,7 @@ type StoreActions = {
   insert: (index: number, type: InsertableBlockType) => void;
   delete: (id: string) => void;
   move: (id: string, direction: -1 | 1) => void;
-  update: (id: string, patch: Partial<NewsletterBlock>) => void;
+  update: (id: string, patch: NewsletterBlockPatch) => void;
   undo: () => void;
   redo: () => void;
   setStatus: (status: SaveStatus) => void;

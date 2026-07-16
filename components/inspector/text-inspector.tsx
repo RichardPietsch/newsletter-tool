@@ -42,7 +42,7 @@ export function TextInspector() {
               update(block.id, {
                 background: event.target.value as TextBlockType['background'],
                 content: removeAutomaticTextColors(block.content),
-              } as any)
+              })
             }
           >
             <option value="white">{t('misc.defaultWhite')}</option>

@@ -40,8 +40,9 @@ describe('newsletter core', () => {
     h.commit(changed);
     expect(h.undo().blocks).toHaveLength(2);
     expect(h.redo().blocks).toHaveLength(3);
-    h.commit(updateBlock(changed, changed.blocks[1].id, { title: 'X' } as any));
-    expect((h.present.blocks[1] as any).title).toBe('X');
+    h.commit(updateBlock(changed, changed.blocks[1].id, { title: 'X' }));
+    const updatedBlock = h.present.blocks[1];
+    expect(updatedBlock.type === 'event' ? updatedBlock.title : undefined).toBe('X');
   });
 
   it('validates links', () => {

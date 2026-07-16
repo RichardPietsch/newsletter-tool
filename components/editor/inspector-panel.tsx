@@ -2,152 +2,71 @@
 
 import { t } from '@/lib/i18n';
 import { useNewsletterStore } from '@/lib/newsletter/store';
-import { createEventItem } from '@/lib/newsletter/defaults';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
-import type { EventGridBlock, EventItem } from '@/lib/newsletter/schema';
+import type { NewsletterBlock, NewsletterBlockPatch } from '@/lib/newsletter/schema';
 import type { GlobalSettings } from '@/lib/settings/schema';
-import { HeaderInspector } from '../inspector/header-inspector';
+import { EventGridInspector } from '../inspector/event-grid-inspector';
+import { EventInspector } from '../inspector/event-inspector';
 import { FeaturedEventInspector } from '../inspector/featured-event-inspector';
+import { HeaderInspector } from '../inspector/header-inspector';
 import { ImageInspector } from '../inspector/image-inspector';
 import { LockedBlockInspector } from '../inspector/locked-block-inspector';
+import { QuoteInspector } from '../inspector/quote-inspector';
+import { SectionHeadingInspector } from '../inspector/section-heading-inspector';
 import { TextInspector } from '../inspector/text-inspector';
 
-function Field({
-  label,
-  value,
-  onChange,
-  required = false,
-  invalid = false,
-}: {
-  label: string;
-  value?: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  invalid?: boolean;
-}) {
-  return (
-    <label className="block text-sm font-medium">
-      {label}
-      {required ? ' *' : ''}
-      <input
-        className={`mt-1 w-full rounded border p-2 ${invalid ? 'border-red-500 outline outline-2 outline-red-500' : ''}`}
-        value={value || ''}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
-  );
+type InspectorContentProps = {
+  block: NewsletterBlock;
+  settings?: GlobalSettings;
+  issues: NewsletterSaveIssue[];
+  onChange: (patch: NewsletterBlockPatch) => void;
+};
+
+function InspectorContent({ block, settings, issues, onChange }: InspectorContentProps) {
+  switch (block.type) {
+    case 'header':
+      return <HeaderInspector block={block} settings={settings} onChange={onChange} />;
+    case 'footer':
+      return <LockedBlockInspector />;
+    case 'text':
+      return <TextInspector />;
+    case 'featuredEvent':
+      return <FeaturedEventInspector block={block} validationIssues={issues} onChange={onChange} />;
+    case 'quote':
+      return <QuoteInspector block={block} issues={issues} onChange={onChange} />;
+    case 'sectionHeading':
+      return <SectionHeadingInspector block={block} issues={issues} onChange={onChange} />;
+    case 'eventGrid':
+      return <EventGridInspector block={block} issues={issues} onChange={onChange} />;
+    case 'event':
+      return <EventInspector block={block} issues={issues} onChange={onChange} />;
+    case 'image':
+      return <ImageInspector block={block} validationIssues={issues} onChange={onChange} />;
+  }
 }
-function Area({
-  label,
-  value,
-  onChange,
-  required = false,
-  invalid = false,
-}: {
-  label: string;
-  value?: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  invalid?: boolean;
-}) {
-  return (
-    <label className="block text-sm font-medium">
-      {label}
-      {required ? ' *' : ''}
-      <textarea
-        className={`mt-1 w-full rounded border p-2 ${invalid ? 'border-red-500 outline outline-2 outline-red-500' : ''}`}
-        value={value || ''}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
-  );
-}
-function EventGridInspector({
+
+function InspectorToolbar({
   block,
-  onChange,
-  issues = [],
+  onMove,
+  onDelete,
 }: {
-  block: EventGridBlock;
-  onChange: (patch: Partial<EventGridBlock>) => void;
-  issues?: NewsletterSaveIssue[];
+  block: NewsletterBlock;
+  onMove: (direction: -1 | 1) => void;
+  onDelete: () => void;
 }) {
-  const updateItem = (id: string, patch: Partial<EventItem>) =>
-    onChange({ items: block.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
-  const hasItemIssue = (index: number, field: string) =>
-    issues.some((issue) => issue.fieldKey === `items.${index}.${field}`);
   return (
-    <div className="space-y-4">
-      <Field label={t('misc.sectionHeading')} value={block.heading} onChange={(heading) => onChange({ heading })} />
-      <label className="block text-sm font-medium">
-        {t('misc.layout')}
-        <select
-          className="mt-1 w-full rounded border p-2"
-          value={block.layout ?? 'grid'}
-          onChange={(event) => onChange({ layout: event.target.value as EventGridBlock['layout'] })}
-        >
-          <option value="grid">{t('misc.teaserGrid')}</option>
-          <option value="list">{t('misc.listLayout')}</option>
-        </select>
-      </label>
-      <p className="text-sm text-slate-600">{t('misc.gridLayoutHint')}</p>
-      {block.items.map((item, index) => (
-        <div key={item.id} className="space-y-2 rounded border p-3">
-          <div className="flex items-center justify-between">
-            <strong className="text-sm">
-              {t('misc.event')} {index + 1}
-            </strong>
-            {block.items.length > 1 && (
-              <button
-                className="text-sm text-red-700"
-                onClick={() => onChange({ items: block.items.filter((entry) => entry.id !== item.id) })}
-              >
-                {t('misc.remove')}
-              </button>
-            )}
-          </div>
-          <Field
-            label={t('misc.category')}
-            value={item.category}
-            onChange={(category) => updateItem(item.id, { category })}
-          />
-          <Field
-            label={t('editor.titleLabel')}
-            value={item.title}
-            required
-            invalid={hasItemIssue(index, 'title')}
-            onChange={(title) => updateItem(item.id, { title })}
-          />
-          <Field label={t('misc.dateTime')} value={item.date} onChange={(date) => updateItem(item.id, { date })} />
-          <Field
-            label={t('misc.place')}
-            value={item.location}
-            onChange={(location) => updateItem(item.id, { location })}
-          />
-          <Area
-            label={t('misc.description')}
-            value={item.description}
-            onChange={(description) => updateItem(item.id, { description })}
-          />
-          <Field
-            label={t('misc.buttonLabel')}
-            value={item.buttonLabel}
-            required={Boolean(item.buttonUrl)}
-            invalid={hasItemIssue(index, 'buttonLabel')}
-            onChange={(buttonLabel) => updateItem(item.id, { buttonLabel })}
-          />
-          <Field
-            label={t('misc.buttonUrl')}
-            value={item.buttonUrl}
-            onChange={(buttonUrl) => updateItem(item.id, { buttonUrl })}
-          />
-        </div>
-      ))}
-      <button
-        className="rounded bg-blue-700 px-3 py-2 text-sm text-white"
-        onClick={() => onChange({ items: [...block.items, createEventItem()] })}
-      >
-        {t('misc.addEvent')}
+    <div className="mb-4 flex gap-2">
+      <button onClick={() => onMove(-1)} className="rounded border px-2">
+        {t('editor.moveUp')}
       </button>
+      <button onClick={() => onMove(1)} className="rounded border px-2">
+        {t('editor.moveDown')}
+      </button>
+      {block.type !== 'header' && block.type !== 'footer' && (
+        <button onClick={onDelete} className="rounded border px-2 text-red-700">
+          {t('editor.delete')}
+        </button>
+      )}
     </div>
   );
 }
@@ -161,115 +80,47 @@ export function InspectorPanel({
   readOnly?: boolean;
   validationIssues?: NewsletterSaveIssue[];
 }) {
-  const doc = useNewsletterStore((s) => s.doc),
-    id = useNewsletterStore((s) => s.selectedId),
-    update = useNewsletterStore((s) => s.update),
-    del = useNewsletterStore((s) => s.delete),
-    move = useNewsletterStore((s) => s.move);
+  const doc = useNewsletterStore((store) => store.doc);
+  const id = useNewsletterStore((store) => store.selectedId);
+  const update = useNewsletterStore((store) => store.update);
+  const del = useNewsletterStore((store) => store.delete);
+  const move = useNewsletterStore((store) => store.move);
 
   if (!doc) return null;
 
-  const b = doc.blocks.find((x) => x.id === id);
-  const blockIssues = b ? validationIssues.filter((issue) => issue.blockId === b.id) : [];
-  const hasIssue = (field: string) => blockIssues.some((issue) => issue.fieldKey === field);
-  if (readOnly)
+  const block = doc.blocks.find((item) => item.id === id);
+  const blockIssues = block ? validationIssues.filter((issue) => issue.blockId === block.id) : [];
+
+  if (readOnly) {
     return (
       <aside data-tour="inspector" className="sticky top-0 h-screen w-96 overflow-y-auto border-l bg-white p-6">
         <h2 className="text-lg font-semibold">{t('editor.readonlyTitle')}</h2>
         <p className="mt-2 text-sm text-slate-600">{t('editor.readonlyDescription')}</p>
       </aside>
     );
-  if (!b)
+  }
+
+  if (!block) {
     return (
       <aside data-tour="inspector" className="sticky top-0 h-screen w-96 overflow-y-auto border-l bg-white p-6">
         {t('editor.selectModule')}
       </aside>
     );
+  }
+
   return (
     <aside data-tour="inspector" className="sticky top-0 h-screen w-96 overflow-y-auto border-l bg-white p-6">
-      <div className="mb-4 flex gap-2">
-        <button onClick={() => move(b.id, -1)} className="rounded border px-2">
-          {t('editor.moveUp')}
-        </button>
-        <button onClick={() => move(b.id, 1)} className="rounded border px-2">
-          {t('editor.moveDown')}
-        </button>
-        {b.type !== 'header' && b.type !== 'footer' && (
-          <button onClick={() => del(b.id)} className="rounded border px-2 text-red-700">
-            {t('editor.delete')}
-          </button>
-        )}
-      </div>
-      {b.type === 'header' ? (
-        <HeaderInspector block={b} settings={settings} onChange={(patch) => update(b.id, patch as any)} />
-      ) : b.type === 'footer' ? (
-        <LockedBlockInspector />
-      ) : b.type === 'text' ? (
-        <TextInspector />
-      ) : b.type === 'featuredEvent' ? (
-        <FeaturedEventInspector
-          block={b}
-          validationIssues={blockIssues}
-          onChange={(patch) => update(b.id, patch as any)}
-        />
-      ) : b.type === 'quote' ? (
-        <div className="space-y-3">
-          <Area
-            label={t('misc.quote')}
-            value={b.quote}
-            required
-            invalid={hasIssue('quote')}
-            onChange={(quote) => update(b.id, { quote } as any)}
-          />
-          <Field label={t('misc.author')} value={b.author} onChange={(author) => update(b.id, { author } as any)} />
-          <Field label={t('misc.role')} value={b.role} onChange={(role) => update(b.id, { role } as any)} />
-        </div>
-      ) : b.type === 'sectionHeading' ? (
-        <Field
-          label={t('misc.section')}
-          value={b.label}
-          required
-          invalid={hasIssue('label')}
-          onChange={(label) => update(b.id, { label } as any)}
-        />
-      ) : b.type === 'eventGrid' ? (
-        <EventGridInspector block={b} issues={blockIssues} onChange={(patch) => update(b.id, patch as any)} />
-      ) : b.type === 'event' ? (
-        <div className="space-y-3">
-          <Field
-            label={t('editor.titleLabel')}
-            value={b.title}
-            required
-            invalid={hasIssue('title')}
-            onChange={(title) => update(b.id, { title } as any)}
-          />
-          <Field label={t('misc.date')} value={b.date} onChange={(date) => update(b.id, { date } as any)} />
-          <Field
-            label={t('misc.place')}
-            value={b.location}
-            onChange={(location) => update(b.id, { location } as any)}
-          />
-          <Area
-            label={t('misc.shortDescription')}
-            value={b.description}
-            onChange={(description) => update(b.id, { description } as any)}
-          />
-          <Field
-            label={t('misc.buttonUrl')}
-            value={b.buttonUrl}
-            onChange={(buttonUrl) => update(b.id, { buttonUrl } as any)}
-          />
-          <Field
-            label={t('misc.buttonLabel')}
-            value={b.buttonLabel}
-            required={Boolean(b.buttonUrl)}
-            invalid={hasIssue('buttonLabel')}
-            onChange={(buttonLabel) => update(b.id, { buttonLabel } as any)}
-          />
-        </div>
-      ) : (
-        <ImageInspector block={b} validationIssues={blockIssues} onChange={(patch) => update(b.id, patch as any)} />
-      )}
+      <InspectorToolbar
+        block={block}
+        onMove={(direction) => move(block.id, direction)}
+        onDelete={() => del(block.id)}
+      />
+      <InspectorContent
+        block={block}
+        settings={settings}
+        issues={blockIssues}
+        onChange={(patch) => update(block.id, patch)}
+      />
     </aside>
   );
 }
