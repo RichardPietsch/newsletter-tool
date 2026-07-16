@@ -4,6 +4,7 @@ import { t } from '@/lib/i18n';
 
 import { useEffect, useState } from 'react';
 import { Overlay } from '@/components/editor/overlay';
+import { getApiErrorMessage } from '@/lib/api/error-message';
 
 type Asset = {
   id: string;
@@ -42,7 +43,7 @@ export function AssetPickerDialog({ open, onClose, onSelect }: { open: boolean; 
 
     if (!response.ok) {
       const payload = await response.json().catch(() => ({ error: 'Upload fehlgeschlagen.' }));
-      setError(payload.error ?? 'Upload fehlgeschlagen.');
+      setError(getApiErrorMessage(payload, 'Upload fehlgeschlagen.'));
       return;
     }
 

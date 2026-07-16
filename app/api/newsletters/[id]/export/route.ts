@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
+import { forbidden, notFound, validationError, zodIssues } from '@/lib/api/api-error';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { serverEnv } from '@/lib/env';
@@ -25,15 +26,17 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
 
   if (!newsletter) {
-    return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+    return notFound();
   }
 
-  const document = newsletterDocumentSchema.parse(newsletter.document);
+  const parsedDocument = newsletterDocumentSchema.safeParse(newsletter.document);
+  if (!parsedDocument.success) return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
+  const document = parsedDocument.data;
   const format = request.nextUrl.searchParams.get('format');
 
   if (format === 'yml') {
     if (serverEnv.isProduction) {
-      return NextResponse.json({ error: 'YML-Template-Export ist nur in der lokalen Entwicklungsumgebung verfügbar.' }, { status: 403 });
+      return forbidden('YML-Template-Export ist nur in der lokalen Entwicklungsumgebung verfügbar.');
     }
 
     const yml = serializeNewsletterTemplate({
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
 
   const issues = validateNewsletterForExport(document);
   if (issues.length > 0) {
-    return NextResponse.json({ error: 'Newsletter kann nicht exportiert werden.', issues }, { status: 400 });
+    return validationError('Newsletter kann nicht exportiert werden.', issues);
   }
 
   const settings = await getUserSettings(auth.user.id);

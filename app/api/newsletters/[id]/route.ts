@@ -3,14 +3,21 @@ import { NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
+import { conflict, notFound, validationError, zodIssues } from '@/lib/api/api-error';
+import { parseJson } from '@/lib/api/parse-json';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
-import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+import { newsletterDocumentSchema, type NewsletterDocument } from '@/lib/newsletter/schema';
 
 type NewsletterRouteContext = {
   params: Promise<{ id: string }>;
 };
+
+const putSchema = z.object({
+  title: z.string().trim().min(1).optional(),
+  document: newsletterDocumentSchema,
+});
 
 const patchSchema = z.object({
   title: z.string().trim().min(1).optional(),
@@ -25,7 +32,7 @@ export async function GET(_: Request, { params }: NewsletterRouteContext) {
     .select()
     .from(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
-  return newsletter ? NextResponse.json(newsletter) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  return newsletter ? NextResponse.json(newsletter) : notFound();
 }
 
 export async function PUT(request: Request, { params }: NewsletterRouteContext) {
@@ -33,28 +40,31 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
   if (auth.response) return auth.response;
   const { id } = await params;
   const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
-  if (!current) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
-  if (current.sentAt) return NextResponse.json({ error: 'Versendete Newsletter können nicht mehr bearbeitet werden.' }, { status: 409 });
+  if (!current) return notFound();
+  if (current.sentAt) return conflict('Versendete Newsletter können nicht mehr bearbeitet werden.');
 
-  const body = await request.json();
-  const document = newsletterDocumentSchema.parse(body.document);
+  const parsed = await parseJson(request, putSchema);
+  if (parsed.response) return parsed.response;
+
   const [newsletter] = await db
     .update(newsletters)
-    .set({ title: body.title || document.title, document, updatedAt: new Date() })
+    .set({ title: parsed.data.title || parsed.data.document.title, document: parsed.data.document, updatedAt: new Date() })
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning();
 
-  return newsletter ? NextResponse.json(newsletter) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  return newsletter ? NextResponse.json(newsletter) : notFound();
 }
 
 export async function PATCH(request: Request, { params }: NewsletterRouteContext) {
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
-  const patch = patchSchema.parse(await request.json());
+  const parsed = await parseJson(request, patchSchema);
+  if (parsed.response) return parsed.response;
+  const patch = parsed.data;
   const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
-  if (!current) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
-  if (current.sentAt && patch.title) return NextResponse.json({ error: 'Versendete Newsletter können nicht umbenannt werden.' }, { status: 409 });
+  if (!current) return notFound();
+  if (current.sentAt && patch.title) return conflict('Versendete Newsletter können nicht umbenannt werden.');
 
   const sentAt = patch.sent === true ? (current.sentAt ?? new Date()) : patch.sent === false ? null : current.sentAt;
   const [newsletter] = await db
@@ -75,16 +85,14 @@ export async function DELETE(_: Request, { params }: NewsletterRouteContext) {
     .delete(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning({ id: newsletters.id });
-  return newsletter ? NextResponse.json({ ok: true }) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  return newsletter ? NextResponse.json({ ok: true }) : notFound();
 }
 
-
-function cloneDocumentWithFreshIds(document: unknown) {
-  const cloned = newsletterDocumentSchema.parse(document);
+function cloneDocumentWithFreshIds(document: NewsletterDocument) {
   return {
-    ...cloned,
-    title: `Kopie von ${cloned.title}`,
-    blocks: cloned.blocks.map((block) => ({
+    ...document,
+    title: `Kopie von ${document.title}`,
+    blocks: document.blocks.map((block) => ({
       ...block,
       id: nanoid(),
       ...(block.type === 'eventGrid' ? { items: block.items.map((item) => ({ ...item, id: nanoid() })) } : {}),
@@ -97,9 +105,12 @@ export async function POST(_: Request, { params }: NewsletterRouteContext) {
   if (auth.response) return auth.response;
   const { id } = await params;
   const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
-  if (!current) return NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  if (!current) return notFound();
 
-  const clonedDocument = cloneDocumentWithFreshIds(current.document);
+  const parsedDocument = newsletterDocumentSchema.safeParse(current.document);
+  if (!parsedDocument.success) return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
+
+  const clonedDocument = cloneDocumentWithFreshIds(parsedDocument.data);
   const cloneId = nanoid();
   const [newsletter] = await db
     .insert(newsletters)

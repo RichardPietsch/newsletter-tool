@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { badRequest, notFound } from '@/lib/api/api-error';
+import { parseJson } from '@/lib/api/parse-json';
 import { validateAndUpload } from '@/lib/assets/upload';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
@@ -23,9 +25,16 @@ export async function GET() {
 export async function POST(req: Request) {
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
-  const form = await req.formData();
+
+  let form: FormData;
+  try {
+    form = await req.formData();
+  } catch {
+    return badRequest('Ungültige Upload-Daten.');
+  }
+
   const file = form.get('file');
-  if (!(file instanceof File)) return NextResponse.json({ error: 'Datei fehlt' }, { status: 400 });
+  if (!(file instanceof File)) return badRequest('Datei fehlt');
   const data = await validateAndUpload(file);
   const title = data.originalFilename.replace(/\.[^.]+$/, '') || data.originalFilename;
   const row = { id: nanoid(), ownerId: auth.user.id, title, altText: '', ...data };
@@ -36,8 +45,8 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
-  const parsed = assetUpdateSchema.safeParse(await req.json());
-  if (!parsed.success) return NextResponse.json({ error: 'Ungültige Asset-Daten' }, { status: 400 });
+  const parsed = await parseJson(req, assetUpdateSchema);
+  if (parsed.response) return parsed.response;
 
   const [row] = await db
     .update(assets)
@@ -45,5 +54,5 @@ export async function PUT(req: Request) {
     .where(and(eq(assets.id, parsed.data.id), eq(assets.ownerId, auth.user.id)))
     .returning();
 
-  return row ? NextResponse.json(row) : NextResponse.json({ error: 'Nicht gefunden' }, { status: 404 });
+  return row ? NextResponse.json(row) : notFound();
 }

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { NextResponse } from 'next/server';
+import { unauthenticated } from '@/lib/api/api-error';
 import { AUTH_COOKIE_NAME } from './cookies';
 import { type AuthUser, validateSession } from './session';
 
@@ -18,6 +19,6 @@ export async function requirePageUser(): Promise<AuthUser> {
 
 export async function requireApiUser(): Promise<{ user: AuthUser; response: null } | { user: null; response: NextResponse }> {
   const user = await getCurrentUser();
-  if (!user) return { user: null, response: NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 }) };
+  if (!user) return { user: null, response: unauthenticated() };
   return { user, response: null };
 }

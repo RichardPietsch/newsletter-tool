@@ -3,6 +3,7 @@
 import { t } from '@/lib/i18n';
 
 import { useEffect, useState } from 'react';
+import { getApiErrorIssues, getApiErrorMessage } from '@/lib/api/error-message';
 import type { ExportValidationIssue } from '@/lib/newsletter/export-validation';
 import type { NewsletterDocument } from '@/lib/newsletter/schema';
 import { validateNewsletterForSave, type NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
@@ -77,9 +78,9 @@ export function EditorShell({
   async function downloadNewsletterExport(format: 'html' | 'yml') {
     const response = await fetch(`/api/newsletters/${id}/export${format === 'yml' ? '?format=yml' : ''}`);
     if (!response.ok) {
-      const payload = await response.json().catch(() => null) as { error?: string; issues?: ExportValidationIssue[] } | null;
-      setExportError(payload?.error ?? t('export.cannotExport'));
-      setExportIssues(payload?.issues ?? []);
+      const payload = await response.json().catch(() => null);
+      setExportError(getApiErrorMessage(payload, t('export.cannotExport')));
+      setExportIssues(getApiErrorIssues<ExportValidationIssue>(payload));
       return;
     }
 
