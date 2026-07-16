@@ -66,7 +66,17 @@ const positionPopoverNear = (rect: HighlightRect | null): PopoverPosition => {
   return { top: clamp(rect.top - popoverHeight - popoverGap, viewportMargin, maxTop), left: centeredLeft };
 };
 
-export function restartOnboardingTour() {
+export function restartOnboardingTour(accountEmail?: string) {
+  if (accountEmail) {
+    localStorage.removeItem(completedKey(accountEmail));
+    localStorage.setItem(stepKey(accountEmail), '0');
+  }
+
+  if (window.location.pathname !== '/newsletters') {
+    window.location.href = '/newsletters';
+    return;
+  }
+
   window.dispatchEvent(new Event(restartEventName));
 }
 
@@ -95,6 +105,10 @@ export function OnboardingTour({ variant, accountEmail, firstNewsletterHref }: {
     localStorage.setItem(completedKey(accountEmail), 'true');
     localStorage.removeItem(stepKey(accountEmail));
     setActive(false);
+
+    if (window.location.pathname !== '/newsletters') {
+      window.location.href = '/newsletters';
+    }
   }, [accountEmail]);
 
   const moveTo = useCallback((nextIndex: number) => {
@@ -183,9 +197,9 @@ export function OnboardingTour({ variant, accountEmail, firstNewsletterHref }: {
   };
 
   return (
-    <div className="fixed inset-0 z-[120] pointer-events-none" aria-live="polite">
-      <div className="absolute inset-0 bg-slate-950/40" />
-      {highlight ? <div className="absolute rounded-xl border-4 border-[#012aff] bg-[#012aff]/10 shadow-[0_0_0_9999px_rgba(15,23,42,0.45),0_0_0_8px_rgba(1,42,255,0.18)] transition-all" style={highlight} /> : null}
+    <div className="fixed inset-0 z-[120] pointer-events-auto" aria-live="polite">
+      <div className="absolute inset-0 bg-slate-950/25" />
+      {highlight ? <div className="pointer-events-none absolute rounded-xl border-4 border-[#012aff] bg-[#012aff]/10 shadow-[0_0_0_9999px_rgba(15,23,42,0.25),0_0_0_8px_rgba(1,42,255,0.18)] transition-all" style={highlight} /> : null}
       <section className="pointer-events-auto fixed w-[min(28rem,calc(100vw-3rem))] rounded-2xl border border-[#012aff]/20 bg-white p-6 shadow-2xl ring-4 ring-[#012aff]/10 transition-all" style={popoverPosition} role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">{t('onboarding.progress').replace('{current}', String(index + 1)).replace('{total}', String(steps.length))}</p>
         <h2 id="onboarding-title" className="mt-2 text-xl font-semibold text-slate-950">{step.title}</h2>
