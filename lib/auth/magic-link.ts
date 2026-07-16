@@ -1,4 +1,4 @@
-import { and, count, eq, gt, gte, isNull } from 'drizzle-orm';
+import { and, count, eq, gte } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
 import { authMagicLinks, users } from '@/lib/db/schema';
@@ -8,6 +8,7 @@ import { magicLinkEmail } from '@/lib/email/templates/magic-link';
 import { createSession } from './session';
 import { isEmailAllowed, MAGIC_LINK_TTL_MINUTES, normalizeEmail } from './config';
 import { serverEnv } from '@/lib/env';
+import { consumeMagicLinkToken } from './magic-link-consumption';
 import { createSecureToken, hashToken } from './tokens';
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
@@ -57,18 +58,14 @@ export async function requestMagicLink(emailInput: string, metadata: { ip?: stri
 }
 
 export async function verifyMagicLink(token: string, metadata: { ip?: string | null; userAgent?: string | null } = {}) {
-  const [row] = await db
-    .select()
-    .from(authMagicLinks)
-    .where(and(eq(authMagicLinks.tokenHash, hashToken(token)), isNull(authMagicLinks.consumedAt), gt(authMagicLinks.expiresAt, new Date())));
-  if (!row) return null;
+  const consumed = await consumeMagicLinkToken(hashToken(token), new Date(), db);
+  if (!consumed) return null;
 
-  await db.update(authMagicLinks).set({ consumedAt: new Date() }).where(eq(authMagicLinks.id, row.id));
   const [user] = await db
     .update(users)
     .set({ emailVerifiedAt: new Date(), lastLoginAt: new Date(), updatedAt: new Date() })
-    .where(eq(users.id, row.userId))
+    .where(eq(users.id, consumed.userId))
     .returning();
-  const sessionToken = await createSession(row.userId, { ipAddress: metadata.ip, userAgent: metadata.userAgent });
+  const sessionToken = await createSession(consumed.userId, { ipAddress: metadata.ip, userAgent: metadata.userAgent });
   return { user, sessionToken };
 }
