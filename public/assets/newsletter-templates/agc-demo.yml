@@ -1,0 +1,102 @@
+title: "AGC Demo-Newsletter"
+createdAt: "2026-07-10T00:00:00.000Z"
+updatedAt: "2026-07-10T00:00:00.000Z"
+documentJson: |
+  {
+    "schemaVersion": 1,
+    "title": "AGC Demo-Newsletter",
+    "blocks": [
+      {
+        "id": "template-header",
+        "type": "header",
+        "locked": true,
+        "branding": "AGC Newsletter",
+        "headerVariantId": "agc"
+      },
+      {
+        "id": "template-intro",
+        "type": "text",
+        "background": "white",
+        "content": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Willkommen zum AGC Newsletter"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Dieses vorbefüllte Beispiel zeigt Redakteuren, wie ein Newsletter aufgebaut werden kann. Texte, Veranstaltungen und Bilder können direkt ersetzt oder erweitert werden."
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "template-featured-event",
+        "type": "featuredEvent",
+        "overline": "Highlight",
+        "background": "blue",
+        "image": {
+          "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-whisky.jpg",
+          "alt": "Whiskytasting im Anglo-German Club",
+          "decorative": false
+        },
+        "title": "Sommerabend im Club",
+        "date": "Donnerstag, 23. Juli · 19:00 Uhr",
+        "description": "Ein geselliger Abend auf der Terrasse mit kulinarischer Begleitung und Gelegenheit zum Austausch.",
+        "buttonLabel": "Zur Anmeldung",
+        "buttonUrl": "https://anglogermanclub.de"
+      },
+      {
+        "id": "template-events",
+        "type": "eventGrid",
+        "heading": "Weitere Termine",
+        "layout": "list",
+        "items": [
+          {
+            "id": "template-event-1",
+            "category": "Vortrag",
+            "title": "Gesprächsabend mit Gästen",
+            "date": "Dienstag, 4. August · 18:30 Uhr",
+            "location": "Harvestehuder Weg 44",
+            "description": "Ein kurzer Beschreibungstext für den ersten Termin.",
+            "buttonLabel": "Details"
+          },
+          {
+            "id": "template-event-2",
+            "category": "Clubleben",
+            "image": {
+              "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-gaense.jpg",
+              "alt": "Traditionelles Gänseessen der Junioren",
+              "decorative": false
+            },
+            "title": "After Work im Club",
+            "date": "Freitag, 14. August · 18:00 Uhr",
+            "location": "Clubräume",
+            "description": "Ein lockerer Termin für Mitglieder und Gäste.",
+            "buttonLabel": "Mehr erfahren"
+          }
+        ]
+      },
+      {
+        "id": "template-footer",
+        "type": "footer",
+        "locked": true,
+        "contact": "AGC · Newsletter",
+        "legal": "Impressum und Datenschutz werden zentral gepflegt."
+      }
+    ]
+  }
