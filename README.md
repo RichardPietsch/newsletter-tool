@@ -113,6 +113,8 @@ pnpm test:e2e
 pnpm build
 ```
 
+Für Pull Requests läuft zusätzlich die GitHub-Actions-Workflow-Datei `.github/workflows/ci.yml`. Der Workflow verwendet Node.js 20 aus dem Docker-Projektkontext und `pnpm@9.4.0` aus `packageManager`, cached den pnpm-Store, installiert mit `pnpm install --frozen-lockfile=false` und blockiert PRs bei fehlgeschlagenem Linting, Typecheck, Unit-Tests oder Build. Playwright-E2E läuft als separater Job mit PostgreSQL-Service und denselben lokalen Test-Env-Variablen wie die Entwicklung.
+
 ## Export-Architektur
 
 Pipeline: Newsletter-JSON → Zod-Validierung → Export-Preflight → MJML-Renderer → vollständiges HTML → Download als `.html`. Der Export übernimmt keine Tailwind-Klassen, kein JavaScript und keine Web-App-Komponenten.
