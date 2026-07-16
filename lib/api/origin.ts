@@ -15,7 +15,9 @@ function originFromUrl(value: string) {
 function loopbackOriginsFor(origin: string) {
   const url = new URL(origin);
   if (!['localhost', '127.0.0.1', '0.0.0.0'].includes(url.hostname)) return [];
-  return ['localhost', '127.0.0.1', '0.0.0.0'].map((hostname) => `${url.protocol}//${hostname}${url.port ? `:${url.port}` : ''}`);
+  return ['localhost', '127.0.0.1', '0.0.0.0'].map(
+    (hostname) => `${url.protocol}//${hostname}${url.port ? `:${url.port}` : ''}`,
+  );
 }
 
 function allowedOrigins(request: Request, env: OriginEnv) {

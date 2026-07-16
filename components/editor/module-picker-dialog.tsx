@@ -7,7 +7,15 @@ import { useEffect } from 'react';
 
 type ModuleType = 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid';
 
-export function ModulePickerDialog({ open, onOpenChange, onPick }: { open: boolean; onOpenChange: (value: boolean) => void; onPick: (type: ModuleType) => void }) {
+export function ModulePickerDialog({
+  open,
+  onOpenChange,
+  onPick,
+}: {
+  open: boolean;
+  onOpenChange: (value: boolean) => void;
+  onPick: (type: ModuleType) => void;
+}) {
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
@@ -34,8 +42,24 @@ export function ModulePickerDialog({ open, onOpenChange, onPick }: { open: boole
           <Dialog.Title className="text-2xl font-bold">{t('misc.addModule')}</Dialog.Title>
           <div className="mt-6 grid grid-cols-3 gap-4">
             {cards.map((card) => (
-              <button key={card[0]} onClick={() => onPick(card[0])} className="rounded-lg border p-5 text-left hover:border-blue-600 focus:border-blue-600">
-                <div className="text-3xl">{card[0] === 'text' ? '¶' : card[0] === 'featuredEvent' ? '★' : card[0] === 'quote' ? '“' : card[0] === 'sectionHeading' ? '—' : card[0] === 'eventGrid' ? '▦' : '🖼️'}</div>
+              <button
+                key={card[0]}
+                onClick={() => onPick(card[0])}
+                className="rounded-lg border p-5 text-left hover:border-blue-600 focus:border-blue-600"
+              >
+                <div className="text-3xl">
+                  {card[0] === 'text'
+                    ? '¶'
+                    : card[0] === 'featuredEvent'
+                      ? '★'
+                      : card[0] === 'quote'
+                        ? '“'
+                        : card[0] === 'sectionHeading'
+                          ? '—'
+                          : card[0] === 'eventGrid'
+                            ? '▦'
+                            : '🖼️'}
+                </div>
                 <div className="mt-3 font-semibold">{card[1]}</div>
                 <p className="text-sm text-slate-600">{card[2]}</p>
               </button>

@@ -8,7 +8,13 @@ export async function consumeMagicLinkToken(tokenHash: string, consumedAt: Date,
   const [row] = await client
     .update(authMagicLinks)
     .set({ consumedAt })
-    .where(and(eq(authMagicLinks.tokenHash, tokenHash), isNull(authMagicLinks.consumedAt), gt(authMagicLinks.expiresAt, consumedAt)))
+    .where(
+      and(
+        eq(authMagicLinks.tokenHash, tokenHash),
+        isNull(authMagicLinks.consumedAt),
+        gt(authMagicLinks.expiresAt, consumedAt),
+      ),
+    )
     .returning({ id: authMagicLinks.id, userId: authMagicLinks.userId });
 
   return row ?? null;

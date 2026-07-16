@@ -16,7 +16,15 @@ import { QuoteBlock } from '../blocks/quote-block';
 import { SectionHeadingBlock } from '../blocks/section-heading-block';
 import { EventGridBlock } from '../blocks/event-grid-block';
 
-export function NewsletterCanvas({ settings, readOnly = false, validationIssues = [] }: { settings?: GlobalSettings; readOnly?: boolean; validationIssues?: NewsletterSaveIssue[] }) {
+export function NewsletterCanvas({
+  settings,
+  readOnly = false,
+  validationIssues = [],
+}: {
+  settings?: GlobalSettings;
+  readOnly?: boolean;
+  validationIssues?: NewsletterSaveIssue[];
+}) {
   const doc = useNewsletterStore((state) => state.doc);
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const select = useNewsletterStore((state) => state.select);
@@ -32,23 +40,56 @@ export function NewsletterCanvas({ settings, readOnly = false, validationIssues 
         const moduleSpacing = index === 0 || isHeaderTextConnection ? '' : 'mt-6';
         const hasValidationIssue = validationIssues.some((issue) => issue.blockId === block.id);
         return (
-        <div key={block.id} className={moduleSpacing}>
-          <div role="button" tabIndex={0} data-tour="newsletter-module" onClick={() => select(block.id)} onKeyDown={(event) => { if (event.key === 'Enter') select(block.id); }} className={`rounded ${hasValidationIssue ? 'ring-4 ring-red-500' : selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}>
-            {block.type === 'header' ? <HeaderBlock branding={block.branding} settings={settings} headerVariantId={block.headerVariantId} squareBottom={nextBlock?.type === 'text'} />
-              : block.type === 'footer' ? <FooterBlock contact={block.contact} legal={block.legal} settings={settings} />
-                : block.type === 'text' ? <TextBlock block={block} readOnly={readOnly} squareTop={previousBlock?.type === 'header'} />
-                  : block.type === 'event' ? <EventBlock block={block} />
-                    : block.type === 'featuredEvent' ? <FeaturedEventBlock block={block} />
-                      : block.type === 'quote' ? <QuoteBlock block={block} />
-                        : block.type === 'sectionHeading' ? <SectionHeadingBlock block={block} />
-                          : block.type === 'eventGrid' ? <EventGridBlock block={block} />
-                            : <ImageBlock block={block} />}
+          <div key={block.id} className={moduleSpacing}>
+            <div
+              role="button"
+              tabIndex={0}
+              data-tour="newsletter-module"
+              onClick={() => select(block.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') select(block.id);
+              }}
+              className={`rounded ${hasValidationIssue ? 'ring-4 ring-red-500' : selectedId === block.id ? 'ring-4 ring-blue-600' : 'ring-1 ring-slate-200'} hover:ring-blue-400`}
+            >
+              {block.type === 'header' ? (
+                <HeaderBlock
+                  branding={block.branding}
+                  settings={settings}
+                  headerVariantId={block.headerVariantId}
+                  squareBottom={nextBlock?.type === 'text'}
+                />
+              ) : block.type === 'footer' ? (
+                <FooterBlock contact={block.contact} legal={block.legal} settings={settings} />
+              ) : block.type === 'text' ? (
+                <TextBlock block={block} readOnly={readOnly} squareTop={previousBlock?.type === 'header'} />
+              ) : block.type === 'event' ? (
+                <EventBlock block={block} />
+              ) : block.type === 'featuredEvent' ? (
+                <FeaturedEventBlock block={block} />
+              ) : block.type === 'quote' ? (
+                <QuoteBlock block={block} />
+              ) : block.type === 'sectionHeading' ? (
+                <SectionHeadingBlock block={block} />
+              ) : block.type === 'eventGrid' ? (
+                <EventGridBlock block={block} />
+              ) : (
+                <ImageBlock block={block} />
+              )}
+            </div>
+            {!readOnly && index < doc.blocks.length - 1 ? (
+              <InsertionPoint index={index + 1} onOpen={setInsertionIndex} />
+            ) : null}
           </div>
-          {!readOnly && index < doc.blocks.length - 1 ? <InsertionPoint index={index + 1} onOpen={setInsertionIndex} /> : null}
-        </div>
         );
       })}
-      <ModulePickerDialog open={!readOnly && insertionIndex !== null} onOpenChange={(value) => !value && setInsertionIndex(null)} onPick={(type) => { if (insertionIndex !== null) insert(insertionIndex, type); setInsertionIndex(null); }} />
+      <ModulePickerDialog
+        open={!readOnly && insertionIndex !== null}
+        onOpenChange={(value) => !value && setInsertionIndex(null)}
+        onPick={(type) => {
+          if (insertionIndex !== null) insert(insertionIndex, type);
+          setInsertionIndex(null);
+        }}
+      />
     </div>
   );
 }

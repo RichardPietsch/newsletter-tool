@@ -63,7 +63,11 @@ export function EditorShell({
         return;
       }
       setStatus('saving');
-      const response = await fetch(`/api/newsletters/${id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: doc.title, document: doc }) });
+      const response = await fetch(`/api/newsletters/${id}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ title: doc.title, document: doc }),
+      });
       if (response.ok) {
         setSaveIssues([]);
         setStatus('saved');
@@ -86,7 +90,8 @@ export function EditorShell({
 
     const blob = await response.blob();
     const disposition = response.headers.get('content-disposition');
-    const filename = disposition?.match(/filename="?([^";]+)"?/i)?.[1] ?? (format === 'yml' ? 'newsletter.yml' : 'newsletter.html');
+    const filename =
+      disposition?.match(/filename="?([^";]+)"?/i)?.[1] ?? (format === 'yml' ? 'newsletter.yml' : 'newsletter.html');
     const url = URL.createObjectURL(blob);
     const link = window.document.createElement('a');
     link.href = url;
@@ -130,20 +135,26 @@ export function EditorShell({
 
   async function renameNewsletter(nextTitle: string) {
     if (isReadOnly) return;
-    const response = await fetch(`/api/newsletters/${id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: nextTitle }) });
+    const response = await fetch(`/api/newsletters/${id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ title: nextTitle }),
+    });
     if (!response.ok) throw new Error('Rename failed');
     setTitle(nextTitle);
   }
 
   async function toggleNewsletterSent() {
     const nextSent = !sentAtState;
-    const message = nextSent
-      ? t('newsletterSettings.confirmSent')
-      : t('newsletterSettings.confirmUnsent');
+    const message = nextSent ? t('newsletterSettings.confirmSent') : t('newsletterSettings.confirmUnsent');
     if (!window.confirm(message)) return;
-    const response = await fetch(`/api/newsletters/${id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sent: nextSent }) });
+    const response = await fetch(`/api/newsletters/${id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sent: nextSent }),
+    });
     if (!response.ok) return;
-    const payload = await response.json() as { sentAt?: string | null };
+    const payload = (await response.json()) as { sentAt?: string | null };
     setSentAtState(payload.sentAt ?? null);
     setStatus('saved');
   }
@@ -151,7 +162,7 @@ export function EditorShell({
   async function cloneNewsletter() {
     const response = await fetch(`/api/newsletters/${id}`, { method: 'POST' });
     if (!response.ok) return;
-    const payload = await response.json() as { location?: string };
+    const payload = (await response.json()) as { location?: string };
     window.location.href = payload.location ?? '/newsletters';
   }
 
@@ -184,31 +195,69 @@ export function EditorShell({
             />
             {isReadOnly ? <p className="mt-1 text-sm text-green-700">{t('editor.sentReadonly')}</p> : null}
           </div>
-          <div className="flex items-center gap-4"><UndoRedoControls disabled={isReadOnly} /><SaveStatus issues={saveIssues} /></div>
+          <div className="flex items-center gap-4">
+            <UndoRedoControls disabled={isReadOnly} />
+            <SaveStatus issues={saveIssues} />
+          </div>
         </div>
         <NewsletterCanvas settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       </main>
       <InspectorPanel settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
-      {settings ? <SettingsOverlay open={overlay === 'settings'} onClose={() => setOverlay(null)} settings={settings} usedHeaderVariantIds={usedHeaderVariantIds} /> : null}
+      {settings ? (
+        <SettingsOverlay
+          open={overlay === 'settings'}
+          onClose={() => setOverlay(null)}
+          settings={settings}
+          usedHeaderVariantIds={usedHeaderVariantIds}
+        />
+      ) : null}
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
-      <NewsletterSettingsOverlay open={overlay === 'newsletter'} title={doc.title} sentAt={sentAtState} onClose={() => setOverlay(null)} onRename={renameNewsletter} onToggleSent={toggleNewsletterSent} onClone={cloneNewsletter} onDelete={deleteNewsletter} />
+      <NewsletterSettingsOverlay
+        open={overlay === 'newsletter'}
+        title={doc.title}
+        sentAt={sentAtState}
+        onClose={() => setOverlay(null)}
+        onRename={renameNewsletter}
+        onToggleSent={toggleNewsletterSent}
+        onClone={cloneNewsletter}
+        onDelete={deleteNewsletter}
+      />
       {overlay === 'export' ? (
         <Overlay title={t('export.dialogTitle')} onClose={() => setOverlay(null)}>
           <div className="mx-auto max-w-xl space-y-4 p-6">
             <p className="text-sm text-slate-600">{t('export.dialogIntro')}</p>
-            <button type="button" className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50" onClick={() => { setOverlay(null); void handleHtmlExport(); }}>
+            <button
+              type="button"
+              className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50"
+              onClick={() => {
+                setOverlay(null);
+                void handleHtmlExport();
+              }}
+            >
               <span className="block font-semibold">{t('export.html')}</span>
               <span className="text-sm text-slate-600">{t('export.htmlDescription')}</span>
             </button>
-            <button type="button" className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50" onClick={() => { setOverlay(null); void handleTemplateExport(); }}>
+            <button
+              type="button"
+              className="block w-full rounded border bg-white p-4 text-left transition hover:border-blue-600 hover:bg-blue-50"
+              onClick={() => {
+                setOverlay(null);
+                void handleTemplateExport();
+              }}
+            >
               <span className="block font-semibold">{t('export.yml')}</span>
               <span className="text-sm text-slate-600">{t('export.ymlDescription')}</span>
             </button>
           </div>
         </Overlay>
       ) : null}
-      <ExportIssuesOverlay open={exportError !== null} error={exportError ?? ''} issues={exportIssues} onClose={() => setExportError(null)} />
+      <ExportIssuesOverlay
+        open={exportError !== null}
+        error={exportError ?? ''}
+        issues={exportIssues}
+        onClose={() => setExportError(null)}
+      />
       <OnboardingTour variant="editor" accountEmail={account.email} />
     </div>
   );

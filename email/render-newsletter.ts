@@ -12,7 +12,8 @@ import { renderSectionHeading } from './modules/section-heading';
 import { renderText } from './modules/text';
 import { emailTheme } from './theme';
 
-const MODULE_GAP = '<mj-section background-color="#f4f1ec" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>';
+const MODULE_GAP =
+  '<mj-section background-color="#f4f1ec" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>';
 
 type MjmlRenderResult = {
   html: string;
@@ -29,23 +30,26 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
     .map((b, index) => {
       const previousBlock = doc.blocks[index - 1];
       const needsGap = index > 0 && !(previousBlock?.type === 'header' && b.type === 'text');
-      const rendered = b.type === 'header'
-        ? renderHeader(b.branding, b.headerVariantId, settings, { squareBottom: doc.blocks[index + 1]?.type === 'text' })
-        : b.type === 'footer'
-          ? renderFooter(b.contact, b.legal, settings)
-          : b.type === 'text'
-            ? renderText(b, { squareTop: previousBlock?.type === 'header' })
-            : b.type === 'event'
-              ? renderEvent(b)
-              : b.type === 'featuredEvent'
-                ? renderFeaturedEvent(b)
-                : b.type === 'quote'
-                  ? renderQuote(b)
-                  : b.type === 'sectionHeading'
-                    ? renderSectionHeading(b)
-                    : b.type === 'eventGrid'
-                      ? renderEventGrid(b)
-                      : renderImage(b);
+      const rendered =
+        b.type === 'header'
+          ? renderHeader(b.branding, b.headerVariantId, settings, {
+              squareBottom: doc.blocks[index + 1]?.type === 'text',
+            })
+          : b.type === 'footer'
+            ? renderFooter(b.contact, b.legal, settings)
+            : b.type === 'text'
+              ? renderText(b, { squareTop: previousBlock?.type === 'header' })
+              : b.type === 'event'
+                ? renderEvent(b)
+                : b.type === 'featuredEvent'
+                  ? renderFeaturedEvent(b)
+                  : b.type === 'quote'
+                    ? renderQuote(b)
+                    : b.type === 'sectionHeading'
+                      ? renderSectionHeading(b)
+                      : b.type === 'eventGrid'
+                        ? renderEventGrid(b)
+                        : renderImage(b);
       return `${needsGap ? `${MODULE_GAP}\n` : ''}${rendered}`;
     })
     .join('\n');
@@ -55,4 +59,10 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
   return '<!doctype html>\n' + html.replace('<html ', '<html lang="de" ');
 }
 
-export const safeFilename = (title: string) => `${title.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, '-').replace(/^-|-$/g, '') || 'newsletter'}.html`;
+export const safeFilename = (title: string) =>
+  `${
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9äöüß]+/gi, '-')
+      .replace(/^-|-$/g, '') || 'newsletter'
+  }.html`;

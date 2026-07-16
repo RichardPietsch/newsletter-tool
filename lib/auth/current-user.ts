@@ -17,7 +17,9 @@ export async function requirePageUser(): Promise<AuthUser> {
   return user;
 }
 
-export async function requireApiUser(): Promise<{ user: AuthUser; response: null } | { user: null; response: NextResponse }> {
+export async function requireApiUser(): Promise<
+  { user: AuthUser; response: null } | { user: null; response: NextResponse }
+> {
   const user = await getCurrentUser();
   if (!user) return { user: null, response: unauthenticated() };
   return { user, response: null };

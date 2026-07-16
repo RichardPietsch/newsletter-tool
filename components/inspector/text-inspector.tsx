@@ -9,7 +9,9 @@ function removeAutomaticTextColors(node: any): any {
   if (!node || typeof node !== 'object') return node;
   const next = { ...node };
   if (Array.isArray(next.marks)) {
-    const marks = next.marks.filter((mark: any) => !(mark.type === 'textStyle' && ['#111827', '#ffffff'].includes(mark.attrs?.color)));
+    const marks = next.marks.filter(
+      (mark: any) => !(mark.type === 'textStyle' && ['#111827', '#ffffff'].includes(mark.attrs?.color)),
+    );
     if (marks.length > 0) next.marks = marks;
     else delete next.marks;
   }
@@ -28,11 +30,17 @@ export function TextInspector() {
       <h2 className="font-bold">{t('misc.textModule')}</h2>
       <p className="text-sm text-slate-600">{t('misc.textInspectorIntro')}</p>
       {block ? (
-        <label className="block text-sm font-medium">Hintergrund
+        <label className="block text-sm font-medium">
+          Hintergrund
           <select
             className="mt-1 w-full rounded border p-2"
             value={block.background ?? 'white'}
-            onChange={(event) => update(block.id, { background: event.target.value as TextBlockType['background'], content: removeAutomaticTextColors(block.content) } as any)}
+            onChange={(event) =>
+              update(block.id, {
+                background: event.target.value as TextBlockType['background'],
+                content: removeAutomaticTextColors(block.content),
+              } as any)
+            }
           >
             <option value="white">{t('misc.defaultWhite')}</option>
             <option value="blue">{t('misc.featureBlue')}</option>

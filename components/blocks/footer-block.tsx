@@ -12,7 +12,12 @@ type RichTextNode = {
 function renderMarkedText(text: string, marks: RichTextNode['marks'], key: string): ReactNode {
   return (marks ?? []).reduce<ReactNode>((current, mark, index) => {
     if (mark.type === 'bold') return <strong key={`${key}-bold-${index}`}>{current}</strong>;
-    if (mark.type === 'link') return <a key={`${key}-link-${index}`} href={mark.attrs?.href ?? '#'} className="underline">{current}</a>;
+    if (mark.type === 'link')
+      return (
+        <a key={`${key}-link-${index}`} href={mark.attrs?.href ?? '#'} className="underline">
+          {current}
+        </a>
+      );
     return current;
   }, text);
 }
@@ -34,15 +39,29 @@ function footerParagraphs(doc: GlobalSettings['footerRichText']) {
   return (doc.content ?? []) as RichTextNode[];
 }
 
-export function FooterBlock({ contact, legal, settings }: { contact: string; legal: string; settings?: GlobalSettings }) {
-  const paragraphs = settings ? footerParagraphs(settings.footerRichText) : [
-    { type: 'paragraph', content: [{ type: 'text', text: contact }] },
-    { type: 'paragraph', content: [{ type: 'text', text: legal }] },
-  ];
+export function FooterBlock({
+  contact,
+  legal,
+  settings,
+}: {
+  contact: string;
+  legal: string;
+  settings?: GlobalSettings;
+}) {
+  const paragraphs = settings
+    ? footerParagraphs(settings.footerRichText)
+    : [
+        { type: 'paragraph', content: [{ type: 'text', text: contact }] },
+        { type: 'paragraph', content: [{ type: 'text', text: legal }] },
+      ];
 
   return (
     <div className="p-8 text-center text-sm text-slate-500">
-      {paragraphs.map((paragraph, index) => <p key={index} className={paragraphHasContent(paragraph) ? undefined : 'h-4'}>{renderInlineNodes(paragraph.content, `footer-${index}`)}</p>)}
+      {paragraphs.map((paragraph, index) => (
+        <p key={index} className={paragraphHasContent(paragraph) ? undefined : 'h-4'}>
+          {renderInlineNodes(paragraph.content, `footer-${index}`)}
+        </p>
+      ))}
       <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-1 text-xs">{t('shared.lockedGlobal')}</span>
     </div>
   );

@@ -27,15 +27,24 @@ export function ExportIssuesOverlay({
         </div>
         <ul className="space-y-3">
           {issues.map((issue) => (
-            <li key={`${issue.blockId}-${issue.path}-${issue.code}`} className="rounded-xl border bg-white p-4 shadow-sm">
+            <li
+              key={`${issue.blockId}-${issue.path}-${issue.code}`}
+              className="rounded-xl border bg-white p-4 shadow-sm"
+            >
               <p className="font-medium text-slate-950">{issue.message}</p>
               <p className="mt-1 text-sm text-slate-600">
-                {t('export.module')}: <span className="font-mono">{issue.blockType}</span>{t('misc.fieldSeparator')}<span className="font-mono">{issue.path}</span>
+                {t('export.module')}: <span className="font-mono">{issue.blockType}</span>
+                {t('misc.fieldSeparator')}
+                <span className="font-mono">{issue.path}</span>
               </p>
             </li>
           ))}
         </ul>
-        <p className="text-sm text-slate-600">{t('export.tip')}<span className="font-mono">PUBLIC_ASSET_BASE_URL</span>{t('export.productionAssetUrl')}</p>
+        <p className="text-sm text-slate-600">
+          {t('export.tip')}
+          <span className="font-mono">PUBLIC_ASSET_BASE_URL</span>
+          {t('export.productionAssetUrl')}
+        </p>
       </div>
     </Overlay>
   );

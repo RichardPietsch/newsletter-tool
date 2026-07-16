@@ -1,20 +1,140 @@
 import { z } from 'zod';
-export const allowedUrl=(v:string)=>{try{const u=new URL(v);return ['https:','http:','mailto:'].includes(u.protocol)}catch{return false}};
-const url=z.string().trim().refine(allowedUrl,'Nur http, https oder mailto erlaubt');
-const base=z.object({id:z.string().min(1),locked:z.boolean().optional()});
-export const tiptapDocSchema=z.object({type:z.literal('doc'),content:z.array(z.any()).optional()});
-export const headerBlockSchema=base.extend({type:z.literal('header'),locked:z.literal(true),branding:z.string(),headerVariantId:z.string().optional()});
-export const footerBlockSchema=base.extend({type:z.literal('footer'),locked:z.literal(true),contact:z.string(),legal:z.string()});
-export const textBlockSchema=base.extend({type:z.literal('text'),content:tiptapDocSchema,background:z.enum(['white','blue']).default('white')});
-const imageFields={assetId:z.string().optional(),src:url.optional().or(z.literal('')),alt:z.string().optional(),decorative:z.boolean().default(false),href:url.optional().or(z.literal(''))};
-export const imageBlockSchema=base.extend({type:z.literal('image'),...imageFields}).superRefine((v,c)=>{if((v.src||v.assetId)&&!v.decorative&&!v.alt?.trim())c.addIssue({code:'custom',path:['alt'],message:'Alternativtext ist erforderlich.'})});
-export const eventItemSchema=z.object({id:z.string().min(1),image:z.object(imageFields).optional(),category:z.string().optional(),title:z.string().min(1,'Titel ist erforderlich'),date:z.string().optional(),location:z.string().optional(),description:z.string().optional(),buttonLabel:z.string().optional(),buttonUrl:url.optional().or(z.literal(''))}).superRefine((v,c)=>{if(v.buttonUrl&&!v.buttonLabel?.trim())c.addIssue({code:'custom',path:['buttonLabel'],message:'Button-Label ist bei URL erforderlich.'}); if(v.image?.src&&!v.image.decorative&&!v.image.alt?.trim())c.addIssue({code:'custom',path:['image','alt'],message:'Alternativtext ist erforderlich.'})});
-export const eventBlockSchema=base.extend({type:z.literal('event'),image:z.object(imageFields).optional(),title:z.string().min(1,'Titel ist erforderlich'),date:z.string().optional(),location:z.string().optional(),description:z.string().optional(),buttonLabel:z.string().optional(),buttonUrl:url.optional().or(z.literal(''))}).superRefine((v,c)=>{if(v.buttonUrl&&!v.buttonLabel?.trim())c.addIssue({code:'custom',path:['buttonLabel'],message:'Button-Label ist bei URL erforderlich.'}); if(v.image?.src&&!v.image.decorative&&!v.image.alt?.trim())c.addIssue({code:'custom',path:['image','alt'],message:'Alternativtext ist erforderlich.'})});
-export const featuredEventBlockSchema=base.extend({type:z.literal('featuredEvent'),overline:z.string().default('Featured Event'),background:z.enum(['blue','white']).default('blue'),image:z.object(imageFields).optional(),title:z.string().min(1,'Titel ist erforderlich'),date:z.string().optional(),description:z.string().optional(),buttonLabel:z.string().optional(),buttonUrl:url.optional().or(z.literal(''))}).superRefine((v,c)=>{if(v.buttonUrl&&!v.buttonLabel?.trim())c.addIssue({code:'custom',path:['buttonLabel'],message:'Button-Label ist bei URL erforderlich.'}); if(v.image?.src&&!v.image.decorative&&!v.image.alt?.trim())c.addIssue({code:'custom',path:['image','alt'],message:'Alternativtext ist erforderlich.'})});
-export const quoteBlockSchema=base.extend({type:z.literal('quote'),quote:z.string().min(1,'Zitat ist erforderlich'),author:z.string().optional(),role:z.string().optional()});
-export const sectionHeadingBlockSchema=base.extend({type:z.literal('sectionHeading'),label:z.string().min(1,'Abschnittsüberschrift ist erforderlich')});
-export const eventGridBlockSchema=base.extend({type:z.literal('eventGrid'),heading:z.string().optional(),layout:z.enum(['grid','list']).default('grid'),items:z.array(eventItemSchema).min(1,'Mindestens ein Event ist erforderlich')});
-export const newsletterBlockSchema=z.union([headerBlockSchema,textBlockSchema,eventBlockSchema,featuredEventBlockSchema,quoteBlockSchema,sectionHeadingBlockSchema,eventGridBlockSchema,imageBlockSchema,footerBlockSchema]);
-export const newsletterDocumentSchema=z.object({schemaVersion:z.literal(1),title:z.string().min(1),blocks:z.array(newsletterBlockSchema).min(2)}).superRefine((d,c)=>{if(d.blocks[0]?.type!=='header')c.addIssue({code:'custom',path:['blocks',0],message:'Dokument muss mit Header beginnen'}); if(d.blocks.at(-1)?.type!=='footer')c.addIssue({code:'custom',path:['blocks'],message:'Dokument muss mit Footer enden'});});
-export type NewsletterDocument=z.infer<typeof newsletterDocumentSchema>; export type NewsletterBlock=z.infer<typeof newsletterBlockSchema>; export type HeaderBlock=z.infer<typeof headerBlockSchema>; export type TextBlock=z.infer<typeof textBlockSchema>; export type EventBlock=z.infer<typeof eventBlockSchema>; export type FeaturedEventBlock=z.infer<typeof featuredEventBlockSchema>; export type QuoteBlock=z.infer<typeof quoteBlockSchema>; export type SectionHeadingBlock=z.infer<typeof sectionHeadingBlockSchema>; export type EventGridBlock=z.infer<typeof eventGridBlockSchema>; export type EventItem=z.infer<typeof eventItemSchema>; export type ImageBlock=z.infer<typeof imageBlockSchema>;
-export const isLocked=(b:NewsletterBlock)=>b.type==='header'||b.type==='footer'||b.locked===true;
+export const allowedUrl = (v: string) => {
+  try {
+    const u = new URL(v);
+    return ['https:', 'http:', 'mailto:'].includes(u.protocol);
+  } catch {
+    return false;
+  }
+};
+const url = z.string().trim().refine(allowedUrl, 'Nur http, https oder mailto erlaubt');
+const base = z.object({ id: z.string().min(1), locked: z.boolean().optional() });
+export const tiptapDocSchema = z.object({ type: z.literal('doc'), content: z.array(z.any()).optional() });
+export const headerBlockSchema = base.extend({
+  type: z.literal('header'),
+  locked: z.literal(true),
+  branding: z.string(),
+  headerVariantId: z.string().optional(),
+});
+export const footerBlockSchema = base.extend({
+  type: z.literal('footer'),
+  locked: z.literal(true),
+  contact: z.string(),
+  legal: z.string(),
+});
+export const textBlockSchema = base.extend({
+  type: z.literal('text'),
+  content: tiptapDocSchema,
+  background: z.enum(['white', 'blue']).default('white'),
+});
+const imageFields = {
+  assetId: z.string().optional(),
+  src: url.optional().or(z.literal('')),
+  alt: z.string().optional(),
+  decorative: z.boolean().default(false),
+  href: url.optional().or(z.literal('')),
+};
+export const imageBlockSchema = base.extend({ type: z.literal('image'), ...imageFields }).superRefine((v, c) => {
+  if ((v.src || v.assetId) && !v.decorative && !v.alt?.trim())
+    c.addIssue({ code: 'custom', path: ['alt'], message: 'Alternativtext ist erforderlich.' });
+});
+export const eventItemSchema = z
+  .object({
+    id: z.string().min(1),
+    image: z.object(imageFields).optional(),
+    category: z.string().optional(),
+    title: z.string().min(1, 'Titel ist erforderlich'),
+    date: z.string().optional(),
+    location: z.string().optional(),
+    description: z.string().optional(),
+    buttonLabel: z.string().optional(),
+    buttonUrl: url.optional().or(z.literal('')),
+  })
+  .superRefine((v, c) => {
+    if (v.buttonUrl && !v.buttonLabel?.trim())
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+  });
+export const eventBlockSchema = base
+  .extend({
+    type: z.literal('event'),
+    image: z.object(imageFields).optional(),
+    title: z.string().min(1, 'Titel ist erforderlich'),
+    date: z.string().optional(),
+    location: z.string().optional(),
+    description: z.string().optional(),
+    buttonLabel: z.string().optional(),
+    buttonUrl: url.optional().or(z.literal('')),
+  })
+  .superRefine((v, c) => {
+    if (v.buttonUrl && !v.buttonLabel?.trim())
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+  });
+export const featuredEventBlockSchema = base
+  .extend({
+    type: z.literal('featuredEvent'),
+    overline: z.string().default('Featured Event'),
+    background: z.enum(['blue', 'white']).default('blue'),
+    image: z.object(imageFields).optional(),
+    title: z.string().min(1, 'Titel ist erforderlich'),
+    date: z.string().optional(),
+    description: z.string().optional(),
+    buttonLabel: z.string().optional(),
+    buttonUrl: url.optional().or(z.literal('')),
+  })
+  .superRefine((v, c) => {
+    if (v.buttonUrl && !v.buttonLabel?.trim())
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+  });
+export const quoteBlockSchema = base.extend({
+  type: z.literal('quote'),
+  quote: z.string().min(1, 'Zitat ist erforderlich'),
+  author: z.string().optional(),
+  role: z.string().optional(),
+});
+export const sectionHeadingBlockSchema = base.extend({
+  type: z.literal('sectionHeading'),
+  label: z.string().min(1, 'Abschnittsüberschrift ist erforderlich'),
+});
+export const eventGridBlockSchema = base.extend({
+  type: z.literal('eventGrid'),
+  heading: z.string().optional(),
+  layout: z.enum(['grid', 'list']).default('grid'),
+  items: z.array(eventItemSchema).min(1, 'Mindestens ein Event ist erforderlich'),
+});
+export const newsletterBlockSchema = z.union([
+  headerBlockSchema,
+  textBlockSchema,
+  eventBlockSchema,
+  featuredEventBlockSchema,
+  quoteBlockSchema,
+  sectionHeadingBlockSchema,
+  eventGridBlockSchema,
+  imageBlockSchema,
+  footerBlockSchema,
+]);
+export const newsletterDocumentSchema = z
+  .object({ schemaVersion: z.literal(1), title: z.string().min(1), blocks: z.array(newsletterBlockSchema).min(2) })
+  .superRefine((d, c) => {
+    if (d.blocks[0]?.type !== 'header')
+      c.addIssue({ code: 'custom', path: ['blocks', 0], message: 'Dokument muss mit Header beginnen' });
+    if (d.blocks.at(-1)?.type !== 'footer')
+      c.addIssue({ code: 'custom', path: ['blocks'], message: 'Dokument muss mit Footer enden' });
+  });
+export type NewsletterDocument = z.infer<typeof newsletterDocumentSchema>;
+export type NewsletterBlock = z.infer<typeof newsletterBlockSchema>;
+export type HeaderBlock = z.infer<typeof headerBlockSchema>;
+export type TextBlock = z.infer<typeof textBlockSchema>;
+export type EventBlock = z.infer<typeof eventBlockSchema>;
+export type FeaturedEventBlock = z.infer<typeof featuredEventBlockSchema>;
+export type QuoteBlock = z.infer<typeof quoteBlockSchema>;
+export type SectionHeadingBlock = z.infer<typeof sectionHeadingBlockSchema>;
+export type EventGridBlock = z.infer<typeof eventGridBlockSchema>;
+export type EventItem = z.infer<typeof eventItemSchema>;
+export type ImageBlock = z.infer<typeof imageBlockSchema>;
+export const isLocked = (b: NewsletterBlock) => b.type === 'header' || b.type === 'footer' || b.locked === true;

@@ -12,7 +12,12 @@ export const UPLOAD_LIMITS = {
   maxEmailWidth: 600,
 } as const;
 
-export type UploadErrorCode = 'FILE_TOO_LARGE' | 'IMAGE_DIMENSIONS_TOO_LARGE' | 'IMAGE_PIXELS_TOO_LARGE' | 'INVALID_IMAGE' | 'UNSUPPORTED_FORMAT';
+export type UploadErrorCode =
+  | 'FILE_TOO_LARGE'
+  | 'IMAGE_DIMENSIONS_TOO_LARGE'
+  | 'IMAGE_PIXELS_TOO_LARGE'
+  | 'INVALID_IMAGE'
+  | 'UNSUPPORTED_FORMAT';
 
 export class UploadValidationError extends Error {
   constructor(
@@ -42,14 +47,20 @@ function assertImageDimensions(width: number, height: number, frameCount: number
   }
 
   if (width * height * frameCount > UPLOAD_LIMITS.maxPixels) {
-    throw new UploadValidationError('IMAGE_PIXELS_TOO_LARGE', `Bild darf maximal ${UPLOAD_LIMITS.maxPixels.toLocaleString('de-DE')} Pixel enthalten.`);
+    throw new UploadValidationError(
+      'IMAGE_PIXELS_TOO_LARGE',
+      `Bild darf maximal ${UPLOAD_LIMITS.maxPixels.toLocaleString('de-DE')} Pixel enthalten.`,
+    );
   }
 }
 
 async function normalizeImage(buffer: Buffer, format: string, width?: number) {
   if (!width || width <= UPLOAD_LIMITS.maxEmailWidth) return buffer;
 
-  const pipeline = sharp(buffer, { animated: format === 'gif' }).resize({ width: UPLOAD_LIMITS.maxEmailWidth, withoutEnlargement: true });
+  const pipeline = sharp(buffer, { animated: format === 'gif' }).resize({
+    width: UPLOAD_LIMITS.maxEmailWidth,
+    withoutEnlargement: true,
+  });
   if (format === 'jpeg') return pipeline.jpeg({ quality: 85, mozjpeg: true }).toBuffer();
   if (format === 'png') return pipeline.png({ compressionLevel: 9 }).toBuffer();
   if (format === 'gif') return pipeline.gif().toBuffer();
@@ -58,7 +69,8 @@ async function normalizeImage(buffer: Buffer, format: string, width?: number) {
 
 export async function validateAndUpload(file: File, upload: AssetUploader = putAsset) {
   const input = Buffer.from(await file.arrayBuffer());
-  if (input.length > UPLOAD_LIMITS.maxBytes) throw new UploadValidationError('FILE_TOO_LARGE', 'Datei ist größer als 10 MB.');
+  if (input.length > UPLOAD_LIMITS.maxBytes)
+    throw new UploadValidationError('FILE_TOO_LARGE', 'Datei ist größer als 10 MB.');
 
   let inputMetadata: sharp.Metadata;
   try {
@@ -68,8 +80,10 @@ export async function validateAndUpload(file: File, upload: AssetUploader = putA
   }
 
   const mimeType = mimeFromSharpFormat(inputMetadata.format);
-  if (!allowed.has(mimeType)) throw new UploadValidationError('UNSUPPORTED_FORMAT', 'Nur JPEG, PNG und GIF sind erlaubt.');
-  if (!inputMetadata.width || !inputMetadata.height) throw new UploadValidationError('INVALID_IMAGE', 'Bilddimensionen konnten nicht gelesen werden.');
+  if (!allowed.has(mimeType))
+    throw new UploadValidationError('UNSUPPORTED_FORMAT', 'Nur JPEG, PNG und GIF sind erlaubt.');
+  if (!inputMetadata.width || !inputMetadata.height)
+    throw new UploadValidationError('INVALID_IMAGE', 'Bilddimensionen konnten nicht gelesen werden.');
   assertImageDimensions(inputMetadata.width, inputMetadata.height, inputMetadata.pages ?? 1);
 
   const output = await normalizeImage(input, inputMetadata.format!, inputMetadata.width);

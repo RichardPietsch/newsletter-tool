@@ -4,7 +4,10 @@ import { badRequest, validationError, zodIssues } from './api-error';
 
 export type ParsedJson<T> = { data: T; response: null } | { data: null; response: NextResponse };
 
-export async function parseJson<TSchema extends ZodTypeAny>(request: Request, schema: TSchema): Promise<ParsedJson<z.infer<TSchema>>> {
+export async function parseJson<TSchema extends ZodTypeAny>(
+  request: Request,
+  schema: TSchema,
+): Promise<ParsedJson<z.infer<TSchema>>> {
   let body: unknown;
 
   try {

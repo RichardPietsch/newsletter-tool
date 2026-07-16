@@ -12,6 +12,9 @@ export async function POST(request: Request) {
   if (originError) return originError;
   const parsed = await parseJson(request, schema);
   if (parsed.response) return parsed.response;
-  await requestMagicLink(parsed.data.email, { userAgent: request.headers.get('user-agent'), ip: request.headers.get('x-forwarded-for') });
+  await requestMagicLink(parsed.data.email, {
+    userAgent: request.headers.get('user-agent'),
+    ip: request.headers.get('x-forwarded-for'),
+  });
   return NextResponse.json({ ok: true });
 }

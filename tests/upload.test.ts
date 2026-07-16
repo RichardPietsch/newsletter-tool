@@ -20,7 +20,9 @@ describe('asset upload validation', () => {
   });
 
   it('rejects unsupported image formats', async () => {
-    const file = new File(['<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" />'], 'icon.svg', { type: 'image/svg+xml' });
+    const file = new File(['<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" />'], 'icon.svg', {
+      type: 'image/svg+xml',
+    });
 
     await expect(validateAndUpload(file, fakeUploader())).rejects.toMatchObject({ code: 'UNSUPPORTED_FORMAT' });
   });

@@ -49,10 +49,14 @@ function publicDemoAssetUrl(filename: string) {
 
 function demoFilenameFromUrl(src?: string) {
   if (!src) return undefined;
-  return DEMO_ASSETS.find((asset) => src.endsWith(`/demo-assets/${asset.filename}`) || src.endsWith(asset.filename))?.filename;
+  return DEMO_ASSETS.find((asset) => src.endsWith(`/demo-assets/${asset.filename}`) || src.endsWith(asset.filename))
+    ?.filename;
 }
 
-function applyDemoImage(image: { src?: string; alt?: string; decorative?: boolean; assetId?: string; href?: string } | undefined, demoAssets: DemoAssetSeedMap) {
+function applyDemoImage(
+  image: { src?: string; alt?: string; decorative?: boolean; assetId?: string; href?: string } | undefined,
+  demoAssets: DemoAssetSeedMap,
+) {
   const filename = demoFilenameFromUrl(image?.src);
   if (!filename || !demoAssets[filename]) return image;
   const asset = demoAssets[filename];
@@ -65,7 +69,10 @@ function applyDemoImage(image: { src?: string; alt?: string; decorative?: boolea
   };
 }
 
-export function applyDemoAssetsToDocument(document: NewsletterDocument, demoAssets: DemoAssetSeedMap): NewsletterDocument {
+export function applyDemoAssetsToDocument(
+  document: NewsletterDocument,
+  demoAssets: DemoAssetSeedMap,
+): NewsletterDocument {
   if (Object.keys(demoAssets).length === 0) return document;
   const nextDocument = {
     ...document,
@@ -76,7 +83,11 @@ export function applyDemoAssetsToDocument(document: NewsletterDocument, demoAsse
       }
       if (block.type === 'event') return { ...block, image: applyDemoImage(block.image, demoAssets) };
       if (block.type === 'featuredEvent') return { ...block, image: applyDemoImage(block.image, demoAssets) };
-      if (block.type === 'eventGrid') return { ...block, items: block.items.map((item) => ({ ...item, image: applyDemoImage(item.image, demoAssets) })) };
+      if (block.type === 'eventGrid')
+        return {
+          ...block,
+          items: block.items.map((item) => ({ ...item, image: applyDemoImage(item.image, demoAssets) })),
+        };
       return block;
     }),
   };
@@ -136,7 +147,9 @@ async function readTemplateFiles() {
     filenames
       .filter((filename) => filename.endsWith('.yml') || filename.endsWith('.yaml'))
       .sort((a, b) => a.localeCompare(b))
-      .map(async (filename) => parseNewsletterTemplateYaml(await readFile(path.join(TEMPLATE_DIRECTORY, filename), 'utf8'))),
+      .map(async (filename) =>
+        parseNewsletterTemplateYaml(await readFile(path.join(TEMPLATE_DIRECTORY, filename), 'utf8')),
+      ),
   );
   return templates;
 }
@@ -154,42 +167,49 @@ function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument 
 }
 
 async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap> {
-  const rows = await Promise.all(DEMO_ASSETS.map(async (asset) => {
-    const filePath = path.join(DEMO_ASSET_DIRECTORY, asset.filename);
-    let fileStats;
-    try {
-      fileStats = await stat(filePath);
-    } catch {
-      return undefined;
-    }
-    const metadata = await sharp(filePath).metadata();
-    const id = nanoid();
-    const publicUrl = publicDemoAssetUrl(asset.filename);
-    return {
-      id,
-      ownerId,
-      storageKey: `newsletter-templates/demo-assets/${asset.filename}`,
-      publicUrl,
-      originalFilename: asset.filename,
-      title: asset.title,
-      altText: asset.altText,
-      mimeType: 'image/jpeg',
-      width: metadata.width ?? 0,
-      height: metadata.height ?? 0,
-      sizeBytes: fileStats.size,
-    };
-  }));
+  const rows = await Promise.all(
+    DEMO_ASSETS.map(async (asset) => {
+      const filePath = path.join(DEMO_ASSET_DIRECTORY, asset.filename);
+      let fileStats;
+      try {
+        fileStats = await stat(filePath);
+      } catch {
+        return undefined;
+      }
+      const metadata = await sharp(filePath).metadata();
+      const id = nanoid();
+      const publicUrl = publicDemoAssetUrl(asset.filename);
+      return {
+        id,
+        ownerId,
+        storageKey: `newsletter-templates/demo-assets/${asset.filename}`,
+        publicUrl,
+        originalFilename: asset.filename,
+        title: asset.title,
+        altText: asset.altText,
+        mimeType: 'image/jpeg',
+        width: metadata.width ?? 0,
+        height: metadata.height ?? 0,
+        sizeBytes: fileStats.size,
+      };
+    }),
+  );
 
   const assetRows = rows.filter((row): row is NonNullable<typeof row> => row !== undefined);
   if (assetRows.length > 0) await db.insert(assetTable).values(assetRows);
 
-  return Object.fromEntries(assetRows.map((row) => [row.originalFilename, {
-    id: row.id,
-    filename: row.originalFilename,
-    title: row.title ?? row.originalFilename,
-    altText: row.altText ?? '',
-    publicUrl: row.publicUrl,
-  } satisfies DemoAssetSeed]));
+  return Object.fromEntries(
+    assetRows.map((row) => [
+      row.originalFilename,
+      {
+        id: row.id,
+        filename: row.originalFilename,
+        title: row.title ?? row.originalFilename,
+        altText: row.altText ?? '',
+        publicUrl: row.publicUrl,
+      } satisfies DemoAssetSeed,
+    ]),
+  );
 }
 
 export async function seedNewsletterTemplatesForUser(ownerId: string) {

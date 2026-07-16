@@ -1,8 +1,11 @@
 import { globSync, readFileSync } from 'node:fs';
 
 const roots = ['app', 'components'];
-const files = roots.flatMap((root) => globSync(`${root}/**/*.{ts,tsx}`, { exclude: ['**/*.test.ts', '**/*.test.tsx'] }));
-const textPattern = />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder|alt)=(?:"([^"]+)"|'([^']+)')/g;
+const files = roots.flatMap((root) =>
+  globSync(`${root}/**/*.{ts,tsx}`, { exclude: ['**/*.test.ts', '**/*.test.tsx'] }),
+);
+const textPattern =
+  />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder|alt)=(?:"([^"]+)"|'([^']+)')/g;
 const technical = [
   /^use client$/,
   /^#[0-9a-fA-F]{3,8}$/,
@@ -15,6 +18,7 @@ const technical = [
   /^[/a-z0-9_.?=&:…-]+$/i,
   /^(GET|POST|PUT|PATCH|DELETE)$/,
   /^[A-Z0-9¶↗]+$/,
+  /^\)\s*:\s*\($/,
 ];
 const raw = [];
 
@@ -30,7 +34,9 @@ for (const file of files) {
 }
 
 if (raw.length > 0) {
-  console.error('Dezentral gepflegte UI-Texte gefunden. Bitte in lib/i18n/locales/de.ts hinterlegen und per t(...) referenzieren:');
+  console.error(
+    'Dezentral gepflegte UI-Texte gefunden. Bitte in lib/i18n/locales/de.ts hinterlegen und per t(...) referenzieren:',
+  );
   for (const item of raw.slice(0, 120)) console.error(`- ${item}`);
   if (raw.length > 120) console.error(`… ${raw.length - 120} weitere`);
   process.exit(1);

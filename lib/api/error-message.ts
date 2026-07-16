@@ -11,6 +11,7 @@ export function getApiErrorMessage(payload: ApiErrorPayload | null | undefined, 
 
 export function getApiErrorIssues<TIssue>(payload: ApiErrorPayload | null | undefined) {
   if (Array.isArray(payload?.error) || !payload) return [];
-  const nestedIssues = typeof payload.error === 'object' && Array.isArray(payload.error.issues) ? payload.error.issues : undefined;
+  const nestedIssues =
+    typeof payload.error === 'object' && Array.isArray(payload.error.issues) ? payload.error.issues : undefined;
   return (nestedIssues ?? payload.issues ?? []) as TIssue[];
 }

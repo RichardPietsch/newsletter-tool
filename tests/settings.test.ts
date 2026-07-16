@@ -27,16 +27,24 @@ describe('settings defaults', () => {
         alt: 'AGC Gastro Newsletter Header',
       },
     ]);
-    expect(settings.footerRichText.content?.map((node) => node.content?.map((child: any) => child.text ?? '').join('') ?? '')).toEqual([
+    expect(
+      settings.footerRichText.content?.map(
+        (node) => node.content?.map((child: any) => child.text ?? '').join('') ?? '',
+      ),
+    ).toEqual([
       'Clubbüro:  +49 40-450 155-12/13  office@anglogermanclub.de',
       'Gastronomie:  +49 40-450 155-0  gastronomie@anglogermanclub.de',
       '',
       'Harvestehuder Weg 44  •  20149 Hamburg  •  Germany',
     ]);
     expect(settings.footerRichText.content?.[0]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
-    expect(settings.footerRichText.content?.[0]?.content?.[2]?.marks).toEqual([{ type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } }]);
+    expect(settings.footerRichText.content?.[0]?.content?.[2]?.marks).toEqual([
+      { type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } },
+    ]);
     expect(settings.footerRichText.content?.[1]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
-    expect(settings.footerRichText.content?.[1]?.content?.[2]?.marks).toEqual([{ type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } }]);
+    expect(settings.footerRichText.content?.[1]?.content?.[2]?.marks).toEqual([
+      { type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } },
+    ]);
   });
 
   it('upgrades old placeholder defaults without overwriting custom settings', () => {
@@ -47,7 +55,10 @@ describe('settings defaults', () => {
         type: 'doc',
         content: [
           { type: 'paragraph', content: [{ type: 'text', text: 'AGC · Newsletter' }] },
-          { type: 'paragraph', content: [{ type: 'text', text: 'Impressum und Datenschutz werden zentral gepflegt.' }] },
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Impressum und Datenschutz werden zentral gepflegt.' }],
+          },
         ],
       },
     });

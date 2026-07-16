@@ -14,7 +14,15 @@ import { useNewsletterStore } from '@/lib/newsletter/store';
 import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 
-export function TextBlock({ block, readOnly = false, squareTop = false }: { block: T; readOnly?: boolean; squareTop?: boolean }) {
+export function TextBlock({
+  block,
+  readOnly = false,
+  squareTop = false,
+}: {
+  block: T;
+  readOnly?: boolean;
+  squareTop?: boolean;
+}) {
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
   const isSelected = selectedId === block.id;
@@ -36,7 +44,9 @@ export function TextBlock({ block, readOnly = false, squareTop = false }: { bloc
         'aria-label': t('editor.textEditAria'),
       },
     },
-    onUpdate: ({ editor }) => { if (!readOnly) update(block.id, { content: editor.getJSON() as T['content'] } as any); },
+    onUpdate: ({ editor }) => {
+      if (!readOnly) update(block.id, { content: editor.getJSON() as T['content'] } as any);
+    },
   });
 
   useEffect(() => {
@@ -51,9 +61,18 @@ export function TextBlock({ block, readOnly = false, squareTop = false }: { bloc
   }, [block.content, editor]);
 
   return (
-    <div className={`overflow-hidden p-6 ${squareTop ? 'rounded-b-[4px]' : 'rounded-[4px]'}`} style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground, color: isBlue ? '#ffffff' : styles.navy }}>
-      {isSelected && editor && !readOnly ? <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : styles.navy} /> : null}
-      {editor ? <EditorContent editor={editor} /> : <div className="min-h-32 text-slate-500">{t('editor.textLoading')}</div>}
+    <div
+      className={`overflow-hidden p-6 ${squareTop ? 'rounded-b-[4px]' : 'rounded-[4px]'}`}
+      style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground, color: isBlue ? '#ffffff' : styles.navy }}
+    >
+      {isSelected && editor && !readOnly ? (
+        <RichTextToolbar editor={editor} automaticColor={isBlue ? '#ffffff' : styles.navy} />
+      ) : null}
+      {editor ? (
+        <EditorContent editor={editor} />
+      ) : (
+        <div className="min-h-32 text-slate-500">{t('editor.textLoading')}</div>
+      )}
     </div>
   );
 }

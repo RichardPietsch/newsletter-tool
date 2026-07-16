@@ -36,7 +36,11 @@ export const defaultFooterRichText = {
       content: [
         { type: 'text', text: 'Clubbüro:', marks: [{ type: 'bold' }] },
         { type: 'text', text: '  +49 40-450 155-12/13  ' },
-        { type: 'text', text: 'office@anglogermanclub.de', marks: [{ type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } }] },
+        {
+          type: 'text',
+          text: 'office@anglogermanclub.de',
+          marks: [{ type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } }],
+        },
       ],
     },
     {
@@ -44,7 +48,11 @@ export const defaultFooterRichText = {
       content: [
         { type: 'text', text: 'Gastronomie:', marks: [{ type: 'bold' }] },
         { type: 'text', text: '  +49 40-450 155-0  ' },
-        { type: 'text', text: 'gastronomie@anglogermanclub.de', marks: [{ type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } }] },
+        {
+          type: 'text',
+          text: 'gastronomie@anglogermanclub.de',
+          marks: [{ type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } }],
+        },
       ],
     },
     {
@@ -66,7 +74,9 @@ export function createDefaultSettings(): GlobalSettings {
 }
 
 function footerLines(settings: GlobalSettings) {
-  return (settings.footerRichText.content ?? []).map((node: any) => (node.content ?? []).map((child: any) => child.text ?? '').join(''));
+  return (settings.footerRichText.content ?? []).map((node: any) =>
+    (node.content ?? []).map((child: any) => child.text ?? '').join(''),
+  );
 }
 
 export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalSettings {
@@ -74,7 +84,8 @@ export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalS
   const currentFooterLines = footerLines(settings);
   const usesPreviousDefaultFooter =
     currentFooterLines.join('\n') === 'AGC · Newsletter\nImpressum und Datenschutz werden zentral gepflegt.' ||
-    currentFooterLines.join('\n') === 'ACME GmbH · Musterstraße 1 · 12345 Berlin\nImpressum und Datenschutz werden zentral gepflegt.';
+    currentFooterLines.join('\n') ===
+      'ACME GmbH · Musterstraße 1 · 12345 Berlin\nImpressum und Datenschutz werden zentral gepflegt.';
 
   const missingDefaultHeaderVariants = defaults.headerVariants.filter(
     (defaultVariant) => !settings.headerVariants.some((variant) => variant.id === defaultVariant.id),

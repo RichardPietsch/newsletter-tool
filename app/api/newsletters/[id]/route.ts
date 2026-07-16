@@ -42,7 +42,10 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
-  const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+  const [current] = await db
+    .select()
+    .from(newsletters)
+    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
   if (!current) return notFound();
   if (current.sentAt) return conflict('Versendete Newsletter können nicht mehr bearbeitet werden.');
 
@@ -51,7 +54,11 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
 
   const [newsletter] = await db
     .update(newsletters)
-    .set({ title: parsed.data.title || parsed.data.document.title, document: parsed.data.document, updatedAt: new Date() })
+    .set({
+      title: parsed.data.title || parsed.data.document.title,
+      document: parsed.data.document,
+      updatedAt: new Date(),
+    })
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning();
 
@@ -67,7 +74,10 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
   const parsed = await parseJson(request, patchSchema);
   if (parsed.response) return parsed.response;
   const patch = parsed.data;
-  const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+  const [current] = await db
+    .select()
+    .from(newsletters)
+    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
   if (!current) return notFound();
   if (current.sentAt && patch.title) return conflict('Versendete Newsletter können nicht umbenannt werden.');
 
@@ -113,11 +123,15 @@ export async function POST(request: Request, { params }: NewsletterRouteContext)
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
-  const [current] = await db.select().from(newsletters).where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+  const [current] = await db
+    .select()
+    .from(newsletters)
+    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
   if (!current) return notFound();
 
   const parsedDocument = newsletterDocumentSchema.safeParse(current.document);
-  if (!parsedDocument.success) return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
+  if (!parsedDocument.success)
+    return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
 
   const clonedDocument = cloneDocumentWithFreshIds(parsedDocument.data);
   const cloneId = nanoid();

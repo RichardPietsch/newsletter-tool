@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { insertBlock } from '@/lib/newsletter/operations';
-import type { EventBlock, EventGridBlock, FeaturedEventBlock, ImageBlock, NewsletterBlock, NewsletterDocument } from '@/lib/newsletter/schema';
+import type {
+  EventBlock,
+  EventGridBlock,
+  FeaturedEventBlock,
+  ImageBlock,
+  NewsletterBlock,
+  NewsletterDocument,
+} from '@/lib/newsletter/schema';
 
 function documentWithBlock(block: NewsletterBlock): NewsletterDocument {
   return insertBlock(createDefaultDocument('Export Validation'), 1, block);
@@ -26,21 +33,39 @@ describe('export validation', () => {
 
   it('requires https for production image URLs', () => {
     expect(issueCodes(imageDocument('http://example.com/test.jpg'))).toContain('NON_HTTPS_IMAGE_URL');
-    expect(validateNewsletterForExport(imageDocument('https://assets.example.com/newsletter-assets/test.jpg'), { mode: 'production' })).toEqual([]);
+    expect(
+      validateNewsletterForExport(imageDocument('https://assets.example.com/newsletter-assets/test.jpg'), {
+        mode: 'production',
+      }),
+    ).toEqual([]);
   });
 
   it('keeps local MinIO URLs usable in development', () => {
-    expect(validateNewsletterForExport(imageDocument('http://localhost:9000/newsletter-assets/test.jpg'), { mode: 'development' })).toEqual([]);
+    expect(
+      validateNewsletterForExport(imageDocument('http://localhost:9000/newsletter-assets/test.jpg'), {
+        mode: 'development',
+      }),
+    ).toEqual([]);
   });
 
   it('requires alt text for non-decorative images and accepts decorative empty-alt images', () => {
     expect(issueCodes(imageDocument('https://assets.example.com/test.jpg', ''))).toContain('MISSING_IMAGE_ALT');
-    expect(validateNewsletterForExport(imageDocument('https://assets.example.com/test.jpg', '', true), { mode: 'production' })).toEqual([]);
+    expect(
+      validateNewsletterForExport(imageDocument('https://assets.example.com/test.jpg', '', true), {
+        mode: 'production',
+      }),
+    ).toEqual([]);
   });
 
   it('checks event, featured event and event grid images', () => {
-    const eventDocument = documentWithBlock({ ...(createBlock('event') as EventBlock), image: { src: 'http://localhost:9000/event.jpg', alt: 'Event' } });
-    const featuredDocument = documentWithBlock({ ...(createBlock('featuredEvent') as FeaturedEventBlock), image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event' } });
+    const eventDocument = documentWithBlock({
+      ...(createBlock('event') as EventBlock),
+      image: { src: 'http://localhost:9000/event.jpg', alt: 'Event' },
+    });
+    const featuredDocument = documentWithBlock({
+      ...(createBlock('featuredEvent') as FeaturedEventBlock),
+      image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event' },
+    });
     const eventGrid = createBlock('eventGrid') as EventGridBlock;
     const gridDocument = documentWithBlock({
       ...eventGrid,

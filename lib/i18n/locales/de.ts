@@ -25,7 +25,8 @@ export const de = {
   },
   export: {
     impossible: 'Export nicht möglich',
-    fixIssues: 'Bitte behebe die folgenden Punkte und starte den Export erneut. Bilder müssen in der öffentlichen Testumgebung über öffentliche HTTPS-URLs erreichbar sein.',
+    fixIssues:
+      'Bitte behebe die folgenden Punkte und starte den Export erneut. Bilder müssen in der öffentlichen Testumgebung über öffentliche HTTPS-URLs erreichbar sein.',
     module: 'Modul',
     field: 'Feld',
     tip: 'Tipp: Lade Bilder über die Medienverwaltung hoch und konfiguriere',
@@ -38,7 +39,8 @@ export const de = {
     ymlDescription: 'Speichert den Newsletter als wiederverwendbares Template für Testnutzer.',
     cannotExport: 'Newsletter kann nicht exportiert werden.',
     htmlStartError: 'Der Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.',
-    templateStartError: 'Der Template-Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.',
+    templateStartError:
+      'Der Template-Export konnte nicht gestartet werden. Bitte prüfe deine Verbindung und versuche es erneut.',
   },
   editor: {
     titleLabel: 'Newsletter-Titel',
@@ -59,7 +61,8 @@ export const de = {
     delete: 'Newsletter löschen',
     markSent: 'Als versendet markieren',
     unmarkSent: 'Versendet-Markierung aufheben',
-    confirmSent: 'Newsletter wirklich als versendet markieren? Danach ist er schreibgeschützt, kann aber bei Bedarf wieder freigegeben werden.',
+    confirmSent:
+      'Newsletter wirklich als versendet markieren? Danach ist er schreibgeschützt, kann aber bei Bedarf wieder freigegeben werden.',
     confirmUnsent: 'Versendet-Markierung wirklich aufheben? Danach kann der Newsletter wieder bearbeitet werden.',
     confirmDelete: 'Newsletter wirklich dauerhaft löschen? Diese Aktion kann nicht rückgängig gemacht werden.',
   },
@@ -70,26 +73,32 @@ export const de = {
     loginIntro: 'Gib deine E-Mail-Adresse ein. Wir senden dir einen einmaligen Zugangslink.',
     invalidLink: 'Der Link ist ungültig oder abgelaufen.',
     checkInbox: 'Prüfe dein Postfach',
-    checkInboxIntro: 'Wenn für diese E-Mail-Adresse ein Zugang besteht, haben wir einen Login-Link gesendet. Der Link ist nur kurz gültig und einmal nutzbar.',
+    checkInboxIntro:
+      'Wenn für diese E-Mail-Adresse ein Zugang besteht, haben wir einen Login-Link gesendet. Der Link ist nur kurz gültig und einmal nutzbar.',
     useOtherEmail: 'Andere E-Mail verwenden',
     backToNewsletterList: '← Zur Newsletter-Liste',
     settingsIntro: 'Bearbeite globale Header-Varianten und den systemweiten Footer.',
-    headerVariantsDescription: 'Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.',
+    headerVariantsDescription:
+      'Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.',
     noHeaderVariant: 'Noch keine Header-Variante vorhanden. Lade ein JPEG, PNG oder GIF hoch.',
     globalFooter: 'Globaler Footer',
-    globalFooterDescription: 'Der Footer nutzt dieselben eingeschränkten RichText-Funktionen wie ein normales Textmodul und bleibt damit E-Mail-kompatibel.',
+    globalFooterDescription:
+      'Der Footer nutzt dieselben eingeschränkten RichText-Funktionen wie ein normales Textmodul und bleibt damit E-Mail-kompatibel.',
     saveFooter: 'Footer speichern',
     assetPickerIntro: 'Wähle ein vorhandenes Medium aus oder lade ein neues Bild hoch.',
     mediaLoading: 'Medien werden geladen …',
     noMedia: 'Noch keine Medien vorhanden.',
     white: 'Weiß',
-    headerInspectorIntro: 'Der Header ist global gestaltet. In diesem Newsletter kannst du auswählen, welche konfigurierte Header-Variante verwendet wird.',
+    headerInspectorIntro:
+      'Der Header ist global gestaltet. In diesem Newsletter kannst du auswählen, welche konfigurierte Header-Variante verwendet wird.',
     noHeaderVariantsConfigured: 'Lege in den globalen Einstellungen zuerst Header-Varianten per Bild-Upload an.',
     lockedMvp: 'Header und Footer sind global vorgegeben und im MVP nicht bearbeitbar.',
-    textInspectorIntro: 'Bearbeite den Text direkt im Newsletter-Canvas. So siehst du Überschriften, Hervorhebungen und Listen unmittelbar im Layout.',
+    textInspectorIntro:
+      'Bearbeite den Text direkt im Newsletter-Canvas. So siehst du Überschriften, Hervorhebungen und Listen unmittelbar im Layout.',
     defaultWhite: 'Standard · Weiß',
     featureBlue: 'Blau · Feature-Teaser',
-    textToolbarHint: 'Wähle Text im Canvas aus und nutze die Symbol-Toolbar oberhalb des Textmoduls für Absatz, H2, H3, Fett, Kursiv, Unterstreichen, Link, Textfarbe sowie Listen.',
+    textToolbarHint:
+      'Wähle Text im Canvas aus und nutze die Symbol-Toolbar oberhalb des Textmoduls für Absatz, H2, H3, Fett, Kursiv, Unterstreichen, Link, Textfarbe sowie Listen.',
     fieldSeparator: '· Feld:',
     listLayout: 'Liste über volle Breite',
     addEvent: 'Event hinzufügen',
@@ -98,9 +107,11 @@ export const de = {
     addModule: 'Modul hinzufügen',
     newsletterNameIntro: 'Der Name erscheint in der Übersicht und in der Kopfzeile der Editieransicht.',
     newsletterNameSaveFailed: 'Der Name konnte nicht gespeichert werden.',
-    sentReadonlyHint: 'Als versendet markierte Newsletter sind schreibgeschützt. Die Markierung kann bei Bedarf wieder aufgehoben werden.',
+    sentReadonlyHint:
+      'Als versendet markierte Newsletter sind schreibgeschützt. Die Markierung kann bei Bedarf wieder aufgehoben werden.',
     cloneNewsletter: 'Newsletter klonen',
-    cloneNewsletterDescription: 'Erstellt eine bearbeitbare Kopie dieses Newsletters, z. B. als neue Ausgabe auf Basis einer versendeten Vorlage.',
+    cloneNewsletterDescription:
+      'Erstellt eine bearbeitbare Kopie dieses Newsletters, z. B. als neue Ausgabe auf Basis einer versendeten Vorlage.',
     deleteNewsletterDescription: 'Löschen entfernt den Newsletter dauerhaft aus der Übersicht.',
     chooseTextColor: 'Textfarbe auswählen',
     automaticTextColor: 'Automatische Textfarbe',
@@ -133,7 +144,8 @@ export const de = {
     sectionHeading: 'Abschnittsüberschrift',
     layout: 'Darstellung',
     teaserGrid: 'Teaser-Grid',
-    gridLayoutHint: 'Im Grid werden gerade Event-Anzahlen zweispaltig dargestellt; in der Liste laufen alle Teaser über die volle Breite.',
+    gridLayoutHint:
+      'Im Grid werden gerade Event-Anzahlen zweispaltig dargestellt; in der Liste laufen alle Teaser über die volle Breite.',
     event: 'Event',
     remove: 'Entfernen',
     category: 'Kategorie',
@@ -151,7 +163,8 @@ export const de = {
     darkBlue: 'Dunkelblau',
     image: 'Bild',
     textModule: 'Textmodul',
-    textColorAutoHint: 'Die Standard-Textfarbe passt sich automatisch an den Hintergrund an; Rot und Grau sind nur für einzelne Hervorhebungen vorgesehen.',
+    textColorAutoHint:
+      'Die Standard-Textfarbe passt sich automatisch an den Hintergrund an; Rot und Grau sind nur für einzelne Hervorhebungen vorgesehen.',
     systemArea: 'Systembereich',
     header: 'Header',
     configuration: 'Konfiguration',
@@ -167,27 +180,38 @@ export const de = {
 
   onboarding: {
     welcomeTitle: 'Willkommen im Newsletter Tool',
-    welcomeBody: 'Diese kurze Tour zeigt dir die wichtigsten Bereiche und führt dich vom Einstieg über den Beispiel-Newsletter bis zum HTML-Export.',
+    welcomeBody:
+      'Diese kurze Tour zeigt dir die wichtigsten Bereiche und führt dich vom Einstieg über den Beispiel-Newsletter bis zum HTML-Export.',
     overviewTitle: 'Newsletter-Übersicht',
-    overviewBody: 'Hier findest du alle Newsletter deines Accounts. Neue Newsletter erstellst du zentral auf dieser Startseite.',
+    overviewBody:
+      'Hier findest du alle Newsletter deines Accounts. Neue Newsletter erstellst du zentral auf dieser Startseite.',
     mediaTitle: 'Medien verwalten',
-    mediaBody: 'In der Medienverwaltung pflegst du hochgeladene Bilder, Titel und Alternativtexte zentral für spätere Exporte.',
+    mediaBody:
+      'In der Medienverwaltung pflegst du hochgeladene Bilder, Titel und Alternativtexte zentral für spätere Exporte.',
     settingsTitle: 'Globale Einstellungen',
-    settingsBody: 'In den Einstellungen verwaltest du Header-Varianten und den globalen Footer, der in Vorschau und Export verwendet wird.',
+    settingsBody:
+      'In den Einstellungen verwaltest du Header-Varianten und den globalen Footer, der in Vorschau und Export verwendet wird.',
     accountTitle: 'Account und Tour',
-    accountBody: 'Im Account-Bereich findest du deine Sitzungsdaten und kannst diese Einführung jederzeit erneut starten.',
+    accountBody:
+      'Im Account-Bereich findest du deine Sitzungsdaten und kannst diese Einführung jederzeit erneut starten.',
     demoTitle: 'Beispiel-Newsletter öffnen',
-    demoBody: 'Der vorbefüllte Beispiel-Newsletter zeigt dir typische Module und ist ein guter Startpunkt für eigene Tests.',
+    demoBody:
+      'Der vorbefüllte Beispiel-Newsletter zeigt dir typische Module und ist ein guter Startpunkt für eigene Tests.',
     canvasTitle: 'Newsletter-Vorschau',
-    canvasBody: 'In der Canvas siehst du den Newsletter so, wie er später im Export aufgebaut wird. Klicke Module an, um sie rechts zu bearbeiten.',
+    canvasBody:
+      'In der Canvas siehst du den Newsletter so, wie er später im Export aufgebaut wird. Klicke Module an, um sie rechts zu bearbeiten.',
     moduleTitle: 'Module bearbeiten',
-    moduleBody: 'Jedes Modul enthält kontrollierte Inhalte und Einstellungen. Header und Footer bleiben dabei geschützt und global gesteuert.',
+    moduleBody:
+      'Jedes Modul enthält kontrollierte Inhalte und Einstellungen. Header und Footer bleiben dabei geschützt und global gesteuert.',
     addModuleTitle: 'Neue Module hinzufügen',
-    addModuleBody: 'Über die Plus-Flächen zwischen den Modulen fügst du neue Text-, Bild- oder Teaser-Module an genau dieser Position ein.',
+    addModuleBody:
+      'Über die Plus-Flächen zwischen den Modulen fügst du neue Text-, Bild- oder Teaser-Module an genau dieser Position ein.',
     inspectorTitle: 'Inspector-Seitenleiste',
-    inspectorBody: 'In der rechten Seitenleiste bearbeitest du die Eigenschaften des ausgewählten Moduls und siehst Pflichtfelder sowie Hinweise.',
+    inspectorBody:
+      'In der rechten Seitenleiste bearbeitest du die Eigenschaften des ausgewählten Moduls und siehst Pflichtfelder sowie Hinweise.',
     exportTitle: 'HTML exportieren',
-    exportBody: 'Über den Export-Button erzeugst du die finale HTML-Datei. Vor dem Download prüft das Tool Bilder, Alt-Texte und öffentliche URLs.',
+    exportBody:
+      'Über den Export-Button erzeugst du die finale HTML-Datei. Vor dem Download prüft das Tool Bilder, Alt-Texte und öffentliche URLs.',
     progress: 'Schritt {current} von {total}',
     back: 'Zurück',
     next: 'Weiter',

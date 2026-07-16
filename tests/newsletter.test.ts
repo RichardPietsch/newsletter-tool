@@ -9,9 +9,16 @@ describe('newsletter core', () => {
   it('validates block schemas and defaults', () => {
     const d = createDefaultDocument();
     expect(newsletterDocumentSchema.parse(d).blocks.map((b) => b.type)).toEqual(['header', 'footer']);
-    expect(newsletterDocumentSchema.parse({ ...d, blocks: [{ ...d.blocks[0], headerVariantId: 'variant-1' }, d.blocks[1]] }).blocks[0].type).toBe('header');
-    expect(imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: false }).success).toBe(false);
-    expect(imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: true }).success).toBe(true);
+    expect(
+      newsletterDocumentSchema.parse({ ...d, blocks: [{ ...d.blocks[0], headerVariantId: 'variant-1' }, d.blocks[1]] })
+        .blocks[0].type,
+    ).toBe('header');
+    expect(
+      imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: false }).success,
+    ).toBe(false);
+    expect(
+      imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: true }).success,
+    ).toBe(true);
   });
 
   it('inserts deletes and moves only content blocks', () => {
@@ -66,8 +73,10 @@ describe('newsletter core', () => {
     const document = insertBlock(createDefaultDocument('Valid title'), 1, { ...createBlock('event'), title: '' });
     const issues = validateNewsletterForSave(document);
 
-    expect(issues).toEqual(expect.arrayContaining([
-      expect.objectContaining({ blockLabel: expect.stringContaining('Event'), fieldKey: 'title' }),
-    ]));
+    expect(issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ blockLabel: expect.stringContaining('Event'), fieldKey: 'title' }),
+      ]),
+    );
   });
 });

@@ -43,6 +43,8 @@ describe('api errors', () => {
 
     expect(parsed.data).toBeNull();
     expect(parsed.response?.status).toBe(400);
-    await expect(parsed.response?.json()).resolves.toEqual({ error: { code: 'BAD_REQUEST', message: 'Anfrage enthält kein gültiges JSON.' } });
+    await expect(parsed.response?.json()).resolves.toEqual({
+      error: { code: 'BAD_REQUEST', message: 'Anfrage enthält kein gültiges JSON.' },
+    });
   });
 });

@@ -30,7 +30,9 @@ export function LoginForm() {
 
   return (
     <form className="mt-6 space-y-4" onSubmit={submit}>
-      <label className="block text-sm font-medium">{t('account.email')}<input
+      <label className="block text-sm font-medium">
+        {t('account.email')}
+        <input
           name="email"
           type="email"
           required

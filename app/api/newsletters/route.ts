@@ -11,7 +11,11 @@ import { createDefaultDocument } from '@/lib/newsletter/defaults';
 export async function GET() {
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
-  const rows = await db.select().from(newsletters).where(eq(newsletters.ownerId, auth.user.id)).orderBy(desc(newsletters.updatedAt));
+  const rows = await db
+    .select()
+    .from(newsletters)
+    .where(eq(newsletters.ownerId, auth.user.id))
+    .orderBy(desc(newsletters.updatedAt));
   return NextResponse.json(rows);
 }
 

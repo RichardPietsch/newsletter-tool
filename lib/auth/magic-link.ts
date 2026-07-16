@@ -15,7 +15,10 @@ const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_EMAIL_REQUESTS_PER_WINDOW = 5;
 const MAX_IP_REQUESTS_PER_WINDOW = 20;
 
-export async function requestMagicLink(emailInput: string, metadata: { ip?: string | null; userAgent?: string | null } = {}) {
+export async function requestMagicLink(
+  emailInput: string,
+  metadata: { ip?: string | null; userAgent?: string | null } = {},
+) {
   const email = normalizeEmail(emailInput);
   const since = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
   const [{ value: emailCount }] = await db

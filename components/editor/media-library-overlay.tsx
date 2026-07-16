@@ -53,27 +53,49 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
         <div className="mb-4 flex items-center justify-between gap-4">
           <p className="text-sm text-slate-600">{t('misc.mediaLibraryIntro')}</p>
           <p aria-live="polite" className="text-sm text-slate-500">
-            {status === 'loading' ? 'Lade Medien …' : status === 'saving' ? 'Speichere …' : status === 'error' ? 'Fehler beim Speichern oder Laden' : `${assets.length} Medien`}
+            {status === 'loading'
+              ? 'Lade Medien …'
+              : status === 'saving'
+                ? 'Speichere …'
+                : status === 'error'
+                  ? 'Fehler beim Speichern oder Laden'
+                  : `${assets.length} Medien`}
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {assets.map((asset) => (
             <article key={asset.id} className="rounded-xl border bg-white p-4 shadow-sm">
-              <img src={asset.publicUrl} alt={asset.altText || asset.title || asset.originalFilename} className="h-44 w-full rounded bg-slate-100 object-contain" />
-              <p className="mt-2 text-xs text-slate-500">{asset.width}×{asset.height}px · {Math.round(asset.sizeBytes / 1024)} KB</p>
+              <img
+                src={asset.publicUrl}
+                alt={asset.altText || asset.title || asset.originalFilename}
+                className="h-44 w-full rounded bg-slate-100 object-contain"
+              />
+              <p className="mt-2 text-xs text-slate-500">
+                {asset.width}×{asset.height}px · {Math.round(asset.sizeBytes / 1024)} KB
+              </p>
               <label className="mt-3 block text-sm font-medium">
                 Titel
                 <input
                   className="mt-1 w-full rounded border p-2"
                   value={asset.title ?? ''}
-                  onChange={(event) => setAssets((items) => items.map((item) => item.id === asset.id ? { ...item, title: event.target.value } : item))}
+                  onChange={(event) =>
+                    setAssets((items) =>
+                      items.map((item) => (item.id === asset.id ? { ...item, title: event.target.value } : item)),
+                    )
+                  }
                   onBlur={(event) => void updateAsset(asset.id, { title: event.target.value })}
                 />
               </label>
-              <label className="mt-3 block text-sm font-medium">{t('image.alt')}<textarea
+              <label className="mt-3 block text-sm font-medium">
+                {t('image.alt')}
+                <textarea
                   className="mt-1 min-h-20 w-full rounded border p-2"
                   value={asset.altText ?? ''}
-                  onChange={(event) => setAssets((items) => items.map((item) => item.id === asset.id ? { ...item, altText: event.target.value } : item))}
+                  onChange={(event) =>
+                    setAssets((items) =>
+                      items.map((item) => (item.id === asset.id ? { ...item, altText: event.target.value } : item)),
+                    )
+                  }
                   onBlur={(event) => void updateAsset(asset.id, { altText: event.target.value })}
                 />
               </label>

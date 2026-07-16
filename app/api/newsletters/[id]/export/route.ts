@@ -30,7 +30,8 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
   }
 
   const parsedDocument = newsletterDocumentSchema.safeParse(newsletter.document);
-  if (!parsedDocument.success) return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
+  if (!parsedDocument.success)
+    return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
   const document = parsedDocument.data;
   const format = request.nextUrl.searchParams.get('format');
 

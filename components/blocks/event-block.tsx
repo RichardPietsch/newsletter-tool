@@ -1,1 +1,13 @@
-import type { EventBlock as E } from '@/lib/newsletter/schema'; export function EventBlock({block}:{block:E}){return <div className="overflow-hidden rounded-[4px] bg-white p-6"><h2 className="text-xl font-bold">{block.title}</h2><p className="text-sm text-slate-500">{[block.date,block.location].filter(Boolean).join(' · ')}</p><p>{block.description}</p>{block.buttonUrl&&<span className="inline-block rounded bg-blue-700 px-4 py-2 text-white">{block.buttonLabel}</span>}</div>}
+import type { EventBlock as E } from '@/lib/newsletter/schema';
+export function EventBlock({ block }: { block: E }) {
+  return (
+    <div className="overflow-hidden rounded-[4px] bg-white p-6">
+      <h2 className="text-xl font-bold">{block.title}</h2>
+      <p className="text-sm text-slate-500">{[block.date, block.location].filter(Boolean).join(' · ')}</p>
+      <p>{block.description}</p>
+      {block.buttonUrl && (
+        <span className="inline-block rounded bg-blue-700 px-4 py-2 text-white">{block.buttonLabel}</span>
+      )}
+    </div>
+  );
+}

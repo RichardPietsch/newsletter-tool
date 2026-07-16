@@ -1,7 +1,17 @@
 import nodemailer from 'nodemailer';
 import { serverEnv } from '@/lib/env';
 
-export async function sendEmail({ to, subject, html, text }: { to: string; subject: string; html: string; text: string }) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  text,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+}) {
   const transporter = nodemailer.createTransport({
     host: serverEnv.smtp.host,
     port: serverEnv.smtp.port,

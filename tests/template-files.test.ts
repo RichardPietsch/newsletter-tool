@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { insertBlock } from '@/lib/newsletter/operations';
-import { applyDemoAssetsToDocument, parseNewsletterTemplateYaml, serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
+import {
+  applyDemoAssetsToDocument,
+  parseNewsletterTemplateYaml,
+  serializeNewsletterTemplate,
+} from '@/lib/newsletter/template-files';
 
 describe('newsletter template files', () => {
   it('serializes and parses newsletter templates with metadata', () => {
@@ -49,5 +53,4 @@ describe('newsletter template files', () => {
       decorative: false,
     });
   });
-
 });

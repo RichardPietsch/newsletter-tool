@@ -1,7 +1,12 @@
 import type { GlobalSettings } from '@/lib/settings/schema';
 import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
-export function renderHeader(branding: string, headerVariantId?: string, settings?: GlobalSettings, options: { squareBottom?: boolean } = {}) {
+export function renderHeader(
+  branding: string,
+  headerVariantId?: string,
+  settings?: GlobalSettings,
+  options: { squareBottom?: boolean } = {},
+) {
   const variant = settings?.headerVariants.find((item) => item.id === headerVariantId) ?? settings?.headerVariants[0];
 
   const radius = options.squareBottom ? '4px 4px 0 0' : '4px';

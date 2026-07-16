@@ -38,7 +38,12 @@ export function NewsletterOverviewShell({
       />
       <div className="flex-1">{children}</div>
       <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
-      <SettingsOverlay open={overlay === 'settings'} onClose={() => setOverlay(null)} settings={settings} usedHeaderVariantIds={usedHeaderVariantIds} />
+      <SettingsOverlay
+        open={overlay === 'settings'}
+        onClose={() => setOverlay(null)}
+        settings={settings}
+        usedHeaderVariantIds={usedHeaderVariantIds}
+      />
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
       <OnboardingTour variant="overview" accountEmail={account.email} firstNewsletterHref={firstNewsletterHref} />
     </div>

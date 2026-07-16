@@ -26,7 +26,10 @@ const rawEnvSchema = z.object({
 const productionBuildPhase = 'phase-production-build';
 
 function splitCsv(value: string) {
-  return value.split(',').map((entry) => entry.trim().toLowerCase()).filter(Boolean);
+  return value
+    .split(',')
+    .map((entry) => entry.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 function assertUrl(value: string, key: string, errors: string[]) {
@@ -49,7 +52,9 @@ function readPositiveInteger(value: string, key: string, errors: string[]) {
 export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
   const parsed = rawEnvSchema.safeParse(input);
   if (!parsed.success) {
-    throw new Error(`Invalid server environment:\n${parsed.error.issues.map((issue) => `- ${issue.path.join('.')}: ${issue.message}`).join('\n')}`);
+    throw new Error(
+      `Invalid server environment:\n${parsed.error.issues.map((issue) => `- ${issue.path.join('.')}: ${issue.message}`).join('\n')}`,
+    );
   }
 
   const raw = parsed.data;
@@ -67,7 +72,11 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
   const databaseUrl = read('DATABASE_URL', 'postgres://newsletter:newsletter@localhost:5432/newsletter');
   const appUrl = read('APP_URL', 'http://localhost:3000');
   const authCookieName = read('AUTH_COOKIE_NAME', 'newsletter_session', false);
-  const magicLinkTtlMinutes = readPositiveInteger(read('AUTH_MAGIC_LINK_TTL_MINUTES', '15', false), 'AUTH_MAGIC_LINK_TTL_MINUTES', errors);
+  const magicLinkTtlMinutes = readPositiveInteger(
+    read('AUTH_MAGIC_LINK_TTL_MINUTES', '15', false),
+    'AUTH_MAGIC_LINK_TTL_MINUTES',
+    errors,
+  );
   const sessionDays = readPositiveInteger(read('AUTH_SESSION_DAYS', '14', false), 'AUTH_SESSION_DAYS', errors);
   const authAllowedEmails = splitCsv(read('AUTH_ALLOWED_EMAILS', '', false));
   const authAllowedEmailDomains = splitCsv(read('AUTH_ALLOWED_EMAIL_DOMAINS', '', false));

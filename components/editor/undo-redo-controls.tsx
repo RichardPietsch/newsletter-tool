@@ -9,8 +9,20 @@ export function UndoRedoControls({ disabled = false }: { disabled?: boolean }) {
   const redo = useNewsletterStore((state) => state.redo);
   return (
     <div className="flex gap-2">
-      <button className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:text-slate-400" disabled={disabled} onClick={undo}>{t('misc.undo')}</button>
-      <button className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:text-slate-400" disabled={disabled} onClick={redo}>{t('misc.redo')}</button>
+      <button
+        className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:text-slate-400"
+        disabled={disabled}
+        onClick={undo}
+      >
+        {t('misc.undo')}
+      </button>
+      <button
+        className="rounded border px-3 py-1 disabled:cursor-not-allowed disabled:text-slate-400"
+        disabled={disabled}
+        onClick={redo}
+      >
+        {t('misc.redo')}
+      </button>
     </div>
   );
 }

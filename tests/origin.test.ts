@@ -10,13 +10,19 @@ function requestWithHeaders(headers: HeadersInit, url = 'https://newsletter.exam
 
 describe('validateMutationOrigin', () => {
   it('allows requests from the configured app origin', () => {
-    const response = validateMutationOrigin(requestWithHeaders({ origin: 'https://newsletter.example.com' }), productionEnv);
+    const response = validateMutationOrigin(
+      requestWithHeaders({ origin: 'https://newsletter.example.com' }),
+      productionEnv,
+    );
 
     expect(response).toBeNull();
   });
 
   it('allows requests with a same-origin referer when origin is absent', () => {
-    const response = validateMutationOrigin(requestWithHeaders({ referer: 'https://newsletter.example.com/newsletters' }), productionEnv);
+    const response = validateMutationOrigin(
+      requestWithHeaders({ referer: 'https://newsletter.example.com/newsletters' }),
+      productionEnv,
+    );
 
     expect(response).toBeNull();
   });
@@ -45,7 +51,10 @@ describe('validateMutationOrigin', () => {
   });
 
   it('allows missing origins in development for local scripts and tests', () => {
-    const response = validateMutationOrigin(requestWithHeaders({}, 'http://localhost:3000/api/newsletters'), developmentEnv);
+    const response = validateMutationOrigin(
+      requestWithHeaders({}, 'http://localhost:3000/api/newsletters'),
+      developmentEnv,
+    );
 
     expect(response).toBeNull();
   });

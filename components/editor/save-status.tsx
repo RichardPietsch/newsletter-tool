@@ -15,8 +15,15 @@ export function SaveStatus({ issues = [] }: { issues?: NewsletterSaveIssue[] }) 
     <div aria-live="polite" className="flex items-center gap-2 text-sm text-slate-600">
       <span>{status === 'saved' ? t('save.saved') : status === 'saving' ? t('save.saving') : t('save.failed')}</span>
       {status === 'error' && hasIssues ? (
-        <button type="button" className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-700" aria-label={t('save.errorButton')} onClick={() => setOpen(true)}>
-          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true"><path fill="currentColor" d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" /></svg>
+        <button
+          type="button"
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-red-300 bg-red-50 text-red-700"
+          aria-label={t('save.errorButton')}
+          onClick={() => setOpen(true)}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden="true">
+            <path fill="currentColor" d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" />
+          </svg>
         </button>
       ) : null}
       {open ? (
@@ -25,7 +32,10 @@ export function SaveStatus({ issues = [] }: { issues?: NewsletterSaveIssue[] }) 
             <p className="text-sm text-slate-600">{t('save.errorIntro')}</p>
             <ul className="space-y-3">
               {issues.map((issue, index) => (
-                <li key={`${issue.path}-${index}`} className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                <li
+                  key={`${issue.path}-${index}`}
+                  className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-900"
+                >
                   <strong className="block">{issue.blockLabel}</strong>
                   <span>{issue.message}</span>
                 </li>

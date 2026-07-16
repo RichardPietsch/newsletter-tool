@@ -1,2 +1,29 @@
-@tailwind base;@tailwind components;@tailwind utilities;
-:root{color-scheme:light} body{margin:0;background:#f4f1ec;color:#172033} *:focus-visible{outline:3px solid #2563eb;outline-offset:2px}.ProseMirror{min-height:120px}.ProseMirror p{margin:0 0 0.75rem}.ProseMirror h2{font-size:1.35rem;font-weight:700}.ProseMirror h3{font-size:1.1rem;font-weight:700}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  color-scheme: light;
+}
+body {
+  margin: 0;
+  background: #f4f1ec;
+  color: #172033;
+}
+*:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}
+.ProseMirror {
+  min-height: 120px;
+}
+.ProseMirror p {
+  margin: 0 0 0.75rem;
+}
+.ProseMirror h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+.ProseMirror h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
