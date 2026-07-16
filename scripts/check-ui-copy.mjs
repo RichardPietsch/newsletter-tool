@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-const roots = ['app', 'components'];
+const roots = process.argv.length > 2 ? process.argv.slice(2) : ['app', 'components'];
 const sourceExtensions = new Set(['.ts', '.tsx']);
 
 function collectSourceFiles(directory) {
