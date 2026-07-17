@@ -10,6 +10,7 @@ import { isEmailAllowed, MAGIC_LINK_TTL_MINUTES, normalizeEmail } from './config
 import { serverEnv } from '@/lib/env';
 import { consumeMagicLinkToken } from './magic-link-consumption';
 import { createSecureToken, hashToken } from './tokens';
+import { recordAuditEvent } from '@/lib/db/audit-events';
 
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_EMAIL_REQUESTS_PER_WINDOW = 5;
@@ -58,6 +59,7 @@ export async function requestMagicLink(
   url.searchParams.set('token', token);
   const message = magicLinkEmail({ url: url.toString(), ttlMinutes: MAGIC_LINK_TTL_MINUTES });
   await sendEmail({ to: email, subject: 'Dein Zugangslink zum Newsletter Tool', ...message });
+  await recordAuditEvent({ userId: user.id, eventType: 'auth.magic_link.requested' });
 }
 
 export async function verifyMagicLink(token: string, metadata: { ip?: string | null; userAgent?: string | null } = {}) {
@@ -70,5 +72,6 @@ export async function verifyMagicLink(token: string, metadata: { ip?: string | n
     .where(eq(users.id, consumed.userId))
     .returning();
   const sessionToken = await createSession(consumed.userId, { ipAddress: metadata.ip, userAgent: metadata.userAgent });
+  await recordAuditEvent({ userId: consumed.userId, eventType: 'auth.login.succeeded' });
   return { user, sessionToken };
 }

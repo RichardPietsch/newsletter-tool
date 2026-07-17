@@ -11,6 +11,7 @@ import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
 import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { newsletterDocumentSchema, type NewsletterDocument } from '@/lib/newsletter/schema';
+import { recordAuditEvent } from '@/lib/db/audit-events';
 
 type NewsletterRouteContext = {
   params: Promise<{ id: string }>;
@@ -95,6 +96,10 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning();
 
+  if (newsletter && patch.sent === true && !current.sentAt) {
+    await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.marked_sent', entityId: id });
+  }
+
   const responseSentAt = newsletter.sentAt instanceof Date ? newsletter.sentAt.toISOString() : newsletter.sentAt;
   return NextResponse.json({ ...newsletter, sentAt: responseSentAt });
 }
@@ -109,6 +114,7 @@ export async function DELETE(request: Request, { params }: NewsletterRouteContex
     .delete(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning({ id: newsletters.id });
+  if (newsletter) await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.deleted', entityId: id });
   return newsletter ? NextResponse.json({ ok: true }) : notFound();
 }
 

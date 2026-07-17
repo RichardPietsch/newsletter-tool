@@ -93,3 +93,20 @@ export const sessions = pgTable(
     expiresIdx: index('sessions_expires_idx').on(table.expiresAt),
   }),
 );
+
+export const auditEvents = pgTable(
+  'audit_events',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .references(() => users.id)
+      .notNull(),
+    eventType: text('event_type').notNull(),
+    entityId: text('entity_id'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index('audit_events_user_idx').on(table.userId),
+    createdIdx: index('audit_events_created_idx').on(table.createdAt),
+  }),
+);

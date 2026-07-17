@@ -12,6 +12,7 @@ import { serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
 import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { getUserSettings } from '@/lib/settings/store';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
+import { recordAuditEvent } from '@/lib/db/audit-events';
 
 type NewsletterExportRouteContext = {
   params: Promise<{ id: string }>;
@@ -58,6 +59,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
       document,
     });
     logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'yml' });
+    await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.exported', entityId: id });
 
     return new NextResponse(yml, {
       headers: {
@@ -77,6 +79,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
   const html = renderNewsletter(document, settings);
   const exportHtml = `<!--email_off-->${html}<!--/email_off-->`;
   logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'html' });
+  await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.exported', entityId: id });
 
   return new NextResponse(exportHtml, {
     headers: {

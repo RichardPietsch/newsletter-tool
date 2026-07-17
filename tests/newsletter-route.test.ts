@@ -18,7 +18,10 @@ type Condition = { op: 'eq'; column: string; value: string } | { op: 'and'; cond
 const mocks = vi.hoisted(() => ({
   rows: [] as NewsletterRow[],
   authUserId: 'owner-1',
+  recordAuditEvent: vi.fn(async () => true),
 }));
+
+vi.mock('@/lib/db/audit-events', () => ({ recordAuditEvent: mocks.recordAuditEvent }));
 
 function conditionFilters(condition: Condition | undefined) {
   const filters: Record<string, string> = {};
@@ -141,6 +144,7 @@ describe('newsletter detail API route', () => {
   beforeEach(() => {
     mocks.rows = [];
     mocks.authUserId = 'owner-1';
+    mocks.recordAuditEvent.mockClear();
   });
 
   it('returns the authenticated owner newsletter', async () => {
@@ -220,6 +224,11 @@ describe('newsletter detail API route', () => {
     expect(unsentResponse.status).toBe(200);
     expect(unsentPayload.sentAt).toBeNull();
     expect(mocks.rows[0].sentAt).toBeNull();
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
+      userId: 'owner-1',
+      eventType: 'newsletter.marked_sent',
+      entityId: 'own',
+    });
   });
 
   it('deletes an owned newsletter', async () => {
@@ -231,6 +240,11 @@ describe('newsletter detail API route', () => {
     expect(response.status).toBe(200);
     expect(payload).toEqual({ ok: true });
     expect(mocks.rows).toHaveLength(0);
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
+      userId: 'owner-1',
+      eventType: 'newsletter.deleted',
+      entityId: 'own',
+    });
   });
 
   it('clones newsletters with fresh block IDs', async () => {

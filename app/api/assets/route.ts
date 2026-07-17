@@ -11,6 +11,7 @@ import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { assets } from '@/lib/db/schema';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
+import { recordAuditEvent } from '@/lib/db/audit-events';
 
 const assetUpdateSchema = z.object({
   id: z.string().min(1),
@@ -57,6 +58,7 @@ export async function POST(req: Request) {
   const title = data.originalFilename.replace(/\.[^.]+$/, '') || data.originalFilename;
   const row = { id: nanoid(), ownerId: auth.user.id, title, altText: '', ...data };
   await db.insert(assets).values(row);
+  await recordAuditEvent({ userId: auth.user.id, eventType: 'asset.uploaded', entityId: row.id });
   logger.info(
     { event: 'asset.upload.completed', requestId, userId: auth.user.id },
     { assetId: row.id, bytes: data.sizeBytes, mimeType: data.mimeType },

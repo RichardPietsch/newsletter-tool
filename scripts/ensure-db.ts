@@ -96,6 +96,18 @@ async function main() {
   await db.execute(sql`create index if not exists sessions_user_idx on sessions(user_id);`);
   await db.execute(sql`create index if not exists sessions_expires_idx on sessions(expires_at);`);
 
+  await db.execute(sql`
+    create table if not exists audit_events (
+      id text primary key,
+      user_id text not null references users(id),
+      event_type text not null,
+      entity_id text,
+      created_at timestamp not null default now()
+    );
+  `);
+  await db.execute(sql`create index if not exists audit_events_user_idx on audit_events(user_id);`);
+  await db.execute(sql`create index if not exists audit_events_created_idx on audit_events(created_at);`);
+
   await db.insert(users).values({ id: DEFAULT_USER_ID, email: 'local@example.test' }).onConflictDoNothing();
   console.log('Database schema and default user are ready.');
 }

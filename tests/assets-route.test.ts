@@ -25,7 +25,10 @@ const mocks = vi.hoisted(() => ({
   authUserId: 'owner-1',
   uploadResult: null as UploadedAsset | null,
   uploadError: null as Error | null,
+  recordAuditEvent: vi.fn(async () => true),
 }));
+
+vi.mock('@/lib/db/audit-events', () => ({ recordAuditEvent: mocks.recordAuditEvent }));
 
 function conditionFilters(condition: Condition | undefined) {
   const filters: Record<string, string> = {};
@@ -162,6 +165,7 @@ describe('assets API route', () => {
     mocks.authUserId = 'owner-1';
     mocks.uploadResult = null;
     mocks.uploadError = null;
+    mocks.recordAuditEvent.mockClear();
   });
 
   it('returns assets only for the authenticated owner', async () => {
@@ -200,6 +204,30 @@ describe('assets API route', () => {
     const response = await PUT(jsonRequest({ id: 'asset-1', title: 'Neu' }));
 
     expect(response.status).toBe(404);
+  });
+
+  it('records a successful asset upload', async () => {
+    const form = new FormData();
+    form.set('file', new File(['image'], 'hero.jpg', { type: 'image/jpeg' }));
+    mocks.uploadResult = {
+      storageKey: 'hero.jpg',
+      publicUrl: 'https://assets.example.com/hero.jpg',
+      originalFilename: 'hero.jpg',
+      mimeType: 'image/jpeg',
+      width: 600,
+      height: 400,
+      sizeBytes: 5,
+    };
+
+    const response = await POST(formRequest(form));
+    const payload = await responseJson(response);
+
+    expect(response.status).toBe(200);
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
+      userId: 'owner-1',
+      eventType: 'asset.uploaded',
+      entityId: payload.id,
+    });
   });
 
   it('updates title and alt text for owned assets', async () => {

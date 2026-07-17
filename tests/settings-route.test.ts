@@ -13,7 +13,10 @@ type Condition = { op: 'eq'; column: string; value: string };
 const mocks = vi.hoisted(() => ({
   rows: [] as SettingsRow[],
   authUserId: 'owner-1',
+  recordAuditEvent: vi.fn(async () => true),
 }));
+
+vi.mock('@/lib/db/audit-events', () => ({ recordAuditEvent: mocks.recordAuditEvent }));
 
 vi.mock('drizzle-orm', () => ({
   eq: (column: string, value: string) => ({ op: 'eq', column, value }),
@@ -71,6 +74,7 @@ describe('settings API route', () => {
   beforeEach(() => {
     mocks.rows = [];
     mocks.authUserId = 'owner-1';
+    mocks.recordAuditEvent.mockClear();
   });
 
   it('returns default settings when a user has no stored settings', async () => {
@@ -122,6 +126,7 @@ describe('settings API route', () => {
     expect(response.status).toBe(200);
     expect(payload.headerVariants).toHaveLength(settings.headerVariants.length);
     expect(mocks.rows[0].settings).toEqual(settings);
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({ userId: 'owner-1', eventType: 'settings.updated' });
   });
 
   it('returns 400 for invalid settings payloads', async () => {
