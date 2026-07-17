@@ -172,6 +172,8 @@ export const en = {
     sendLoginLink: 'Send access link',
     newsletterOverview: 'Newsletter overview',
     serverSaveRejected: 'The server rejected the save. Check your input and try again.',
+    serverSaveFailed: 'The server could not save the newsletter. Please try again.',
+    networkSaveFailed: 'Saving failed because of a network error. Check your connection.',
   },
   onboarding: {
     welcomeTitle: 'Welcome to the Newsletter Tool',

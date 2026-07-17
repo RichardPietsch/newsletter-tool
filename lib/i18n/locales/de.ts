@@ -176,6 +176,8 @@ export const de = {
     sendLoginLink: 'Zugangslink senden',
     newsletterOverview: 'Newsletter-Übersicht',
     serverSaveRejected: 'Der Server hat das Speichern abgelehnt. Bitte prüfe deine Eingaben und versuche es erneut.',
+    serverSaveFailed: 'Der Server konnte den Newsletter nicht speichern. Bitte versuche es erneut.',
+    networkSaveFailed: 'Speichern wegen eines Netzwerkfehlers fehlgeschlagen. Bitte prüfe deine Verbindung.',
   },
 
   onboarding: {
