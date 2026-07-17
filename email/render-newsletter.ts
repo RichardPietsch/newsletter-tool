@@ -11,6 +11,7 @@ import { renderRegisteredEmailModule } from '@/email/module-render-registry';
 import { isRegisteredNewsletterBlock } from '@/lib/newsletter/module-registry';
 import { renderText } from './modules/text';
 import { emailTheme } from './theme';
+import { logger } from '@/lib/logging/logger';
 
 const MODULE_GAP =
   '<mj-section background-color="#f4f1ec" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>';
@@ -53,7 +54,7 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
     .join('\n');
   const mjml = `<mjml><mj-head><mj-title>${doc.title}</mj-title><mj-preview>${doc.title}</mj-preview><mj-attributes><mj-all font-family="${emailTheme.font}" /><mj-body background-color="${emailTheme.colors.bg}" width="${emailTheme.container}px" /></mj-attributes></mj-head><mj-body>${body}</mj-body></mjml>`;
   const { html, errors } = renderMjml(mjml, { validationLevel: 'soft' });
-  if (errors.length) console.warn(errors);
+  if (errors.length) logger.warn({ event: 'newsletter.mjml.warnings' }, { warningCount: errors.length });
   return '<!doctype html>\n' + html.replace('<html ', '<html lang="de" ');
 }
 

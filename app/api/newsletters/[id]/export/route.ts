@@ -11,6 +11,7 @@ import { validateNewsletterForExport } from '@/lib/newsletter/export-validation'
 import { serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
 import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { getUserSettings } from '@/lib/settings/store';
+import { logger, requestIdFrom } from '@/lib/logging/logger';
 
 type NewsletterExportRouteContext = {
   params: Promise<{ id: string }>;
@@ -20,12 +21,20 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
   const auth = await requireApiUser();
   if (auth.response) return auth.response;
   const { id } = await params;
+  const logContext = {
+    event: 'newsletter.export.requested',
+    requestId: requestIdFrom(request),
+    userId: auth.user.id,
+    newsletterId: id,
+  };
+  logger.info(logContext);
   const [newsletter] = await db
     .select()
     .from(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
 
   if (!newsletter) {
+    logger.warn({ ...logContext, event: 'newsletter.export.not_found' });
     return notFound();
   }
 
@@ -48,6 +57,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
       updatedAt: newsletter.updatedAt.toISOString(),
       document,
     });
+    logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'yml' });
 
     return new NextResponse(yml, {
       headers: {
@@ -59,12 +69,14 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
 
   const issues = validateNewsletterForExport(document);
   if (issues.length > 0) {
+    logger.warn({ ...logContext, event: 'newsletter.export.validation_failed' }, { issueCount: issues.length });
     return validationError('Newsletter kann nicht exportiert werden.', issues);
   }
 
   const settings = await getUserSettings(auth.user.id);
   const html = renderNewsletter(document, settings);
   const exportHtml = `<!--email_off-->${html}<!--/email_off-->`;
+  logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'html' });
 
   return new NextResponse(exportHtml, {
     headers: {
