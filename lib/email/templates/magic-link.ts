@@ -1,0 +1,5 @@
+export function magicLinkEmail({ url, ttlMinutes }: { url: string; ttlMinutes: number }) {
+  const text = `Mit diesem Link meldest du dich beim Newsletter Tool an: ${url}\n\nDer Link ist ${ttlMinutes} Minuten gültig und nur einmal nutzbar.`;
+  const html = `<p>Mit diesem Link meldest du dich beim Newsletter Tool an:</p><p><a href="${url}">Beim Newsletter Tool anmelden</a></p><p>Der Link ist ${ttlMinutes} Minuten gültig und nur einmal nutzbar.</p><p>Falls du diese E-Mail nicht angefordert hast, kannst du sie ignorieren.</p>`;
+  return { text, html };
+}
