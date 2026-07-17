@@ -1,3 +1,5 @@
+// @vitest-environment node
+
 import sharp from 'sharp';
 import { describe, expect, it, vi } from 'vitest';
 import { UPLOAD_LIMITS, validateAndUpload } from '@/lib/assets/upload';

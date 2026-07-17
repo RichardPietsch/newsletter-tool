@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { renderFooter } from '@/email/modules/footer';
+import { serverEnv } from '@/lib/env';
 import type { TiptapNode } from '@/lib/newsletter/schema';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import { globalSettingsSchema } from '@/lib/settings/schema';
@@ -21,24 +22,25 @@ function marksFromNode(node: TiptapNode | undefined) {
 describe('settings defaults', () => {
   it('prefills AGC header variants with public app asset URLs', () => {
     const settings = createDefaultSettings();
+    const headerUrl = (filename: string) => new URL(`/assets/headers/${filename}`, serverEnv.appUrl).toString();
 
     expect(globalSettingsSchema.parse(settings).headerVariants).toEqual([
       {
         id: 'agc',
         name: 'AGC',
-        imageUrl: 'http://localhost:3000/assets/headers/header-agc.jpg',
+        imageUrl: headerUrl('header-agc.jpg'),
         alt: 'AGC Newsletter Header',
       },
       {
         id: 'agc-junioren',
         name: 'AGC Junioren',
-        imageUrl: 'http://localhost:3000/assets/headers/header-agc-junioren.jpg',
+        imageUrl: headerUrl('header-agc-junioren.jpg'),
         alt: 'AGC Junioren Newsletter Header',
       },
       {
         id: 'agc-gastro',
         name: 'AGC Gastro',
-        imageUrl: 'http://localhost:3000/assets/headers/header-agc-gastronomie.jpg',
+        imageUrl: headerUrl('header-agc-gastronomie.jpg'),
         alt: 'AGC Gastro Newsletter Header',
       },
     ]);

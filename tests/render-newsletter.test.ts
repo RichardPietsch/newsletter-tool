@@ -113,7 +113,7 @@ describe('MJML newsletter rendering', () => {
   it('keeps module gaps while preserving the seamless header-to-text transition', () => {
     const html = renderNewsletter(documentWithBlocks([richTextBlock(), imageBlock()]));
 
-    expect(html.match(/height:32px/g)).toHaveLength(2);
+    expect(html.match(/height:32px;line-height:32px/g)).toHaveLength(2);
     expect(html).toContain('border-radius:0 0 4px 4px');
     expect(html).not.toContain('border-radius="4px"><mj-column border-radius="4px"><mj-text');
   });

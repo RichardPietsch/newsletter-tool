@@ -132,7 +132,7 @@ describe('newsletter core', () => {
     const html = renderNewsletter(d);
 
     expect(html).toContain('height:32px');
-    expect(html.match(/height:32px/g)).toHaveLength(2);
+    expect(html.match(/height:32px;line-height:32px/g)).toHaveLength(2);
   });
 
   it('reports missing required fields for autosave feedback', () => {
