@@ -101,8 +101,12 @@ async function installTestSession(page: Page) {
     },
   ]);
   await page.addInitScript((email) => {
-    localStorage.setItem(`newsletter:onboarding:completed:${email}`, 'true');
-    localStorage.removeItem(`newsletter:onboarding:step:${email}`);
+    const initializedKey = 'newsletter:e2e:onboarding-initialized';
+    if (!sessionStorage.getItem(initializedKey)) {
+      localStorage.setItem(`newsletter:onboarding:completed:${email}`, 'true');
+      localStorage.removeItem(`newsletter:onboarding:step:${email}`);
+      sessionStorage.setItem(initializedKey, 'true');
+    }
   }, e2eUser.email);
 }
 
@@ -148,7 +152,9 @@ test('covers the main authenticated editor flow', async ({ page }) => {
 
   await page.getByLabel('Komponente an dieser Stelle hinzufügen').first().click();
   await page.getByRole('button', { name: /Zitat/ }).click();
-  await expect(page.getByText('Ein prägnantes Zitat für den Newsletter.')).toBeVisible();
+  await expect(inspector.getByRole('textbox', { name: 'Zitat *', exact: true })).toHaveValue(
+    'Ein prägnantes Zitat für den Newsletter.',
+  );
 
   await page.getByLabel('Medien').click();
   await expect(page.getByRole('dialog', { name: 'Medien' })).toContainText('E2E Hero');
