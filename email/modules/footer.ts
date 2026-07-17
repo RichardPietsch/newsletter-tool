@@ -1,4 +1,5 @@
 import type { GlobalSettings } from '@/lib/settings/schema';
+import type { TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
 
 function escapeHtml(value: string) {
   return value.replace(
@@ -7,14 +8,7 @@ function escapeHtml(value: string) {
   );
 }
 
-type RichTextNode = {
-  type?: string;
-  text?: string;
-  marks?: Array<{ type: string; attrs?: Record<string, string> }>;
-  content?: RichTextNode[];
-};
-
-function renderMarkedText(text: string, marks: RichTextNode['marks'] = []) {
+function renderMarkedText(text: string, marks: TiptapMark[] = []) {
   return marks.reduce((current, mark) => {
     if (mark.type === 'bold') return `<strong>${current}</strong>`;
     if (mark.type === 'link') return `<a href="${escapeHtml(mark.attrs?.href ?? '#')}">${current}</a>`;
@@ -22,13 +16,14 @@ function renderMarkedText(text: string, marks: RichTextNode['marks'] = []) {
   }, escapeHtml(text));
 }
 
-function renderNodes(nodes: RichTextNode[] = []): string {
+function renderNodes(nodes: TiptapNode[] = []): string {
   return nodes
     .map((node) => {
-      if (node.type === 'text') return renderMarkedText(node.text ?? '', node.marks);
+      if (node.type === 'text') return renderMarkedText(node.text, node.marks);
       if (node.type === 'hardBreak') return '<br />';
       if (node.type === 'paragraph') return `<p style="margin:0 0 4px">${renderNodes(node.content)}</p>`;
-      return renderNodes(node.content);
+      if ('content' in node) return renderNodes(node.content);
+      return '';
     })
     .join('');
 }

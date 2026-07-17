@@ -5,7 +5,7 @@ import { UPLOAD_LIMITS, validateAndUpload } from '@/lib/assets/upload';
 async function imageFile(format: 'gif' | 'jpeg' | 'png', width: number, height: number, name = `image.${format}`) {
   const image = sharp({ create: { width, height, channels: 3, background: '#ffffff' } });
   const buffer = await image[format]().toBuffer();
-  return new File([buffer], name, { type: `image/${format === 'jpeg' ? 'jpeg' : format}` });
+  return new File([Uint8Array.from(buffer)], name, { type: `image/${format === 'jpeg' ? 'jpeg' : format}` });
 }
 
 function fakeUploader() {
@@ -14,7 +14,7 @@ function fakeUploader() {
 
 describe('asset upload validation', () => {
   it('rejects files above the configured byte limit', async () => {
-    const file = new File([Buffer.alloc(UPLOAD_LIMITS.maxBytes + 1)], 'large.png', { type: 'image/png' });
+    const file = new File([new Uint8Array(UPLOAD_LIMITS.maxBytes + 1)], 'large.png', { type: 'image/png' });
 
     await expect(validateAndUpload(file, fakeUploader())).rejects.toMatchObject({ code: 'FILE_TOO_LARGE' });
   });

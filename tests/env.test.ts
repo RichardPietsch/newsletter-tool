@@ -15,7 +15,7 @@ const productionEnv = {
   S3_SECRET_ACCESS_KEY: 'secret-key',
   S3_BUCKET: 'newsletter-assets',
   PUBLIC_ASSET_BASE_URL: 'https://assets.example.com/newsletter-assets',
-};
+} as const satisfies NodeJS.ProcessEnv;
 
 describe('server environment validation', () => {
   it('keeps development defaults usable for local setups', () => {

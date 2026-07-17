@@ -10,6 +10,14 @@ function textFromNode(node: TiptapNode): string {
   return (node.content ?? []).map(textFromNode).join('');
 }
 
+function contentFromNode(node: TiptapNode | undefined) {
+  return node && 'content' in node ? node.content : undefined;
+}
+
+function marksFromNode(node: TiptapNode | undefined) {
+  return node?.type === 'text' ? node.marks : undefined;
+}
+
 describe('settings defaults', () => {
   it('prefills AGC header variants with public app asset URLs', () => {
     const settings = createDefaultSettings();
@@ -40,12 +48,12 @@ describe('settings defaults', () => {
       '',
       'Harvestehuder Weg 44  •  20149 Hamburg  •  Germany',
     ]);
-    expect(settings.footerRichText.content?.[0]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
-    expect(settings.footerRichText.content?.[0]?.content?.[2]?.marks).toEqual([
+    expect(marksFromNode(contentFromNode(settings.footerRichText.content?.[0])?.[0])).toEqual([{ type: 'bold' }]);
+    expect(marksFromNode(contentFromNode(settings.footerRichText.content?.[0])?.[2])).toEqual([
       { type: 'link', attrs: { href: 'mailto:office@anglogermanclub.de' } },
     ]);
-    expect(settings.footerRichText.content?.[1]?.content?.[0]?.marks).toEqual([{ type: 'bold' }]);
-    expect(settings.footerRichText.content?.[1]?.content?.[2]?.marks).toEqual([
+    expect(marksFromNode(contentFromNode(settings.footerRichText.content?.[1])?.[0])).toEqual([{ type: 'bold' }]);
+    expect(marksFromNode(contentFromNode(settings.footerRichText.content?.[1])?.[2])).toEqual([
       { type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } },
     ]);
   });

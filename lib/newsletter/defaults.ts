@@ -1,8 +1,20 @@
 import { nanoid } from 'nanoid';
 import { createRegisteredModule, isRegisteredModuleType } from './module-registry';
-import type { NewsletterBlock, NewsletterDocument, EventItem } from './schema';
-export const emptyTiptapDoc = {
-  type: 'doc' as const,
+import type {
+  EventBlock,
+  EventGridBlock,
+  EventItem,
+  FeaturedEventBlock,
+  ImageBlock,
+  NewsletterBlock,
+  NewsletterDocument,
+  QuoteBlock,
+  SectionHeadingBlock,
+  TextBlock,
+  TiptapDoc,
+} from './schema';
+export const emptyTiptapDoc: TiptapDoc = {
+  type: 'doc',
   content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Neuer Textbaustein' }] }],
 };
 export function createDefaultDocument(title = 'Neuer Newsletter'): NewsletterDocument {
@@ -30,6 +42,16 @@ export function createEventItem(): EventItem {
     buttonLabel: 'Anmeldung',
   };
 }
+export function createBlock(type: 'text'): TextBlock;
+export function createBlock(type: 'event'): EventBlock;
+export function createBlock(type: 'image'): ImageBlock;
+export function createBlock(type: 'featuredEvent'): FeaturedEventBlock;
+export function createBlock(type: 'quote'): QuoteBlock;
+export function createBlock(type: 'sectionHeading'): SectionHeadingBlock;
+export function createBlock(type: 'eventGrid'): EventGridBlock;
+export function createBlock(
+  type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid',
+): NewsletterBlock;
 export function createBlock(
   type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid',
 ): NewsletterBlock {

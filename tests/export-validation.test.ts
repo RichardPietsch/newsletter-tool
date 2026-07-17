@@ -60,17 +60,20 @@ describe('export validation', () => {
   it('checks event, featured event and event grid images', () => {
     const eventDocument = documentWithBlock({
       ...(createBlock('event') as EventBlock),
-      image: { src: 'http://localhost:9000/event.jpg', alt: 'Event' },
+      image: { src: 'http://localhost:9000/event.jpg', alt: 'Event', decorative: false },
     });
     const featuredDocument = documentWithBlock({
       ...(createBlock('featuredEvent') as FeaturedEventBlock),
-      image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event' },
+      image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event', decorative: false },
     });
     const eventGrid = createBlock('eventGrid') as EventGridBlock;
     const gridDocument = documentWithBlock({
       ...eventGrid,
       items: [
-        { ...eventGrid.items[0], image: { src: 'http://192.168.1.10/grid.jpg', alt: 'Grid Event' } },
+        {
+          ...eventGrid.items[0],
+          image: { src: 'http://192.168.1.10/grid.jpg', alt: 'Grid Event', decorative: false },
+        },
         eventGrid.items[1],
       ],
     });

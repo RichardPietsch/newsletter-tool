@@ -1,5 +1,5 @@
 import { serverEnv } from '@/lib/env';
-import type { TiptapNode } from '@/lib/newsletter/schema';
+import type { TiptapDoc, TiptapNode } from '@/lib/newsletter/schema';
 import type { GlobalSettings } from './schema';
 
 function appAssetUrl(path: string) {
@@ -29,8 +29,8 @@ export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] 
   ];
 }
 
-export const defaultFooterRichText = {
-  type: 'doc' as const,
+export const defaultFooterRichText: TiptapDoc = {
+  type: 'doc',
   content: [
     {
       type: 'paragraph',

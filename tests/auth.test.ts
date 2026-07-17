@@ -25,7 +25,7 @@ function fakeConsumerDb(row: FakeMagicLinkRow | null) {
         }),
       }),
     }),
-  } as Parameters<typeof consumeMagicLinkToken>[2];
+  } as unknown as Parameters<typeof consumeMagicLinkToken>[2];
 }
 
 describe('passwordless auth helpers', () => {

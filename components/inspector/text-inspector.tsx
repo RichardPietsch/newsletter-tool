@@ -2,7 +2,7 @@
 
 import { t } from '@/lib/i18n';
 
-import type { TextBlock as TextBlockType, TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
+import type { TextBlock as TextBlockType, TiptapDoc, TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 
 function isAutomaticTextColor(mark: TiptapMark) {
@@ -19,6 +19,10 @@ function removeAutomaticTextColors(node: TiptapNode): TiptapNode {
   }
   if ('content' in next && Array.isArray(next.content)) next.content = next.content.map(removeAutomaticTextColors);
   return next;
+}
+
+function removeAutomaticDocumentTextColors(doc: TiptapDoc): TiptapDoc {
+  return { ...doc, content: doc.content?.map(removeAutomaticTextColors) };
 }
 
 export function TextInspector() {
@@ -43,7 +47,7 @@ export function TextInspector() {
             onChange={(event) =>
               update(block.id, {
                 background: event.target.value as TextBlockType['background'],
-                content: removeAutomaticTextColors(block.content),
+                content: removeAutomaticDocumentTextColors(block.content),
               })
             }
           >
