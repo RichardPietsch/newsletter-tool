@@ -1,8 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-const roots = process.argv.length > 2 ? process.argv.slice(2) : ['app', 'components'];
-const sourceExtensions = new Set(['.ts', '.tsx']);
+const customRoots = process.argv.slice(2);
+const uiRoots = customRoots.length > 0 ? customRoots : ['app', 'components'];
+const apiRoots = customRoots.length > 0 ? customRoots : ['app/api', 'lib/api'];
+const sourceExtensions = new Set(['.ts', '.tsx', '.mts']);
 
 function collectSourceFiles(directory) {
   const entries = readdirSync(directory, { withFileTypes: true });
@@ -24,7 +26,8 @@ function collectSourceFiles(directory) {
   return files;
 }
 
-const files = roots.flatMap((root) => collectSourceFiles(root));
+const uiFiles = uiRoots.flatMap((root) => collectSourceFiles(root));
+const apiFiles = apiRoots.flatMap((root) => collectSourceFiles(root));
 const textPattern =
   />([^<>{}][^<>{}]*(?:[A-Za-zÄÖÜäöüß][^<>{}]*)?)<|(?:aria-label|title|placeholder|alt)=(?:"([^"]+)"|'([^']+)')/g;
 const technical = [
@@ -42,8 +45,9 @@ const technical = [
   /^\)\s*:\s*\($/,
 ];
 const raw = [];
+const uncodedApiCopy = [];
 
-for (const file of files) {
+for (const file of uiFiles) {
   const source = readFileSync(file, 'utf8');
   for (const match of source.matchAll(textPattern)) {
     const value = (match[1] ?? match[2] ?? match[3] ?? '').trim().replace(/\s+/g, ' ');
@@ -54,10 +58,28 @@ for (const file of files) {
   }
 }
 
+const uncodedApiCopyPattern = /NextResponse\.json\(\s*\{\s*(?:error|message)\s*:\s*(?:"([^"]+)"|'([^']+)'|`([^`]+)`)/g;
+
+for (const file of apiFiles) {
+  const source = readFileSync(file, 'utf8');
+  for (const match of source.matchAll(uncodedApiCopyPattern)) {
+    const value = match[1] ?? match[2] ?? match[3] ?? '';
+    uncodedApiCopy.push(`${file}: ${value}`);
+  }
+}
+
 if (raw.length > 0) {
   console.error(
     'Dezentral gepflegte UI-Texte gefunden. Bitte in lib/i18n/locales/de.ts hinterlegen und per t(...) referenzieren:',
   );
   for (const item of raw) console.error(`- ${item}`);
+  process.exit(1);
+}
+
+if (uncodedApiCopy.length > 0) {
+  console.error(
+    'Uncodierte API-Texte gefunden. Bitte strukturierte Fehlercodes verwenden und Texte UI-seitig per t(...) übersetzen:',
+  );
+  for (const item of uncodedApiCopy) console.error(`- ${item}`);
   process.exit(1);
 }

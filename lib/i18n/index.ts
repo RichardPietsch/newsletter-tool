@@ -1,6 +1,7 @@
 import { de } from './locales/de';
+import { en } from './locales/en';
 
-export const dictionaries = { de } as const;
+export const dictionaries = { de, en } as const;
 export type Locale = keyof typeof dictionaries;
 export const defaultLocale: Locale = 'de';
 
@@ -34,3 +35,6 @@ export function flattenUiText(value: unknown = de): string[] {
   if (!value || typeof value !== 'object') return [];
   return Object.values(value).flatMap((entry) => flattenUiText(entry));
 }
+
+export { compareLocaleKeys } from './locale-keys';
+export type { UiDictionary } from './types';

@@ -43,4 +43,17 @@ describe('UI copy checker', () => {
 
     expect(() => execFileSync(process.execPath, [checker, fixture])).not.toThrow();
   });
+
+  it('rejects API error responses without a structured error code', () => {
+    const fixture = createFixture({
+      'route.ts':
+        "export const GET = () => NextResponse.json({ error: 'Newsletter nicht gefunden' }, { status: 404 });",
+    });
+
+    const result = spawnSync(process.execPath, [checker, fixture], { encoding: 'utf8' });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('Uncodierte API-Texte gefunden');
+    expect(result.stderr).toContain('route.ts: Newsletter nicht gefunden');
+  });
 });
