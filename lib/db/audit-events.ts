@@ -18,8 +18,10 @@ export type AuditEventInput = {
   entityId?: string;
 };
 
-export type AuditEventRecord = AuditEventInput & {
+export type AuditEventRecord = {
   id: string;
+  userId: string;
+  eventType: AuditEventType;
   entityId: string | null;
   createdAt: Date;
 };
