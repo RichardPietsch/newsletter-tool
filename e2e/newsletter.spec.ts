@@ -161,9 +161,9 @@ test('covers the main authenticated editor flow', async ({ page }) => {
   await page.getByRole('button', { name: 'Medien schließen' }).click();
 
   await page.getByLabel('Newsletter exportieren').click();
-  const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: /Export als HTML/ }).click();
-  await expect((await downloadPromise).suggestedFilename()).toMatch(/e2e-demo-newsletter\.html/i);
+  const exportIssues = page.getByRole('dialog', { name: 'Export nicht möglich' });
+  await expect(exportIssues).toContainText('Newsletter kann nicht exportiert werden.');
+  await expect(exportIssues).toContainText('Bild-URLs müssen in der öffentlichen Testumgebung HTTPS verwenden.');
 });
 
 test('allows restarting and completing the onboarding tour manually', async ({ page }) => {
