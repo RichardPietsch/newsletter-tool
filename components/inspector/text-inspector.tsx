@@ -1,0 +1,63 @@
+'use client';
+
+import { t } from '@/lib/i18n';
+
+import type { TextBlock as TextBlockType, TiptapDoc, TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
+import { useNewsletterStore } from '@/lib/newsletter/store';
+
+function isAutomaticTextColor(mark: TiptapMark) {
+  return mark.type === 'textStyle' && ['#111827', '#ffffff'].includes(mark.attrs?.color ?? '');
+}
+
+function removeAutomaticTextColors(node: TiptapNode): TiptapNode {
+  if (!node || typeof node !== 'object') return node;
+  const next = { ...node };
+  if (next.type === 'text' && Array.isArray(next.marks)) {
+    const marks = next.marks.filter((mark) => !isAutomaticTextColor(mark));
+    if (marks.length > 0) next.marks = marks;
+    else delete next.marks;
+  }
+  if ('content' in next && Array.isArray(next.content)) next.content = next.content.map(removeAutomaticTextColors);
+  return next;
+}
+
+function removeAutomaticDocumentTextColors(doc: TiptapDoc): TiptapDoc {
+  return { ...doc, content: doc.content?.map(removeAutomaticTextColors) };
+}
+
+export function TextInspector() {
+  const doc = useNewsletterStore((state) => state.doc);
+  const selectedId = useNewsletterStore((state) => state.selectedId);
+  const update = useNewsletterStore((state) => state.update);
+
+  if (!doc) return null;
+
+  const block = doc.blocks.find((item) => item.id === selectedId && item.type === 'text') as TextBlockType | undefined;
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-bold">{t('misc.textModule')}</h2>
+      <p className="text-sm text-slate-600">{t('misc.textInspectorIntro')}</p>
+      {block ? (
+        <label className="block text-sm font-medium">
+          Hintergrund
+          <select
+            className="mt-1 w-full rounded border p-2"
+            value={block.background ?? 'white'}
+            onChange={(event) =>
+              update(block.id, {
+                background: event.target.value as TextBlockType['background'],
+                content: removeAutomaticDocumentTextColors(block.content),
+              })
+            }
+          >
+            <option value="white">{t('misc.defaultWhite')}</option>
+            <option value="blue">{t('misc.featureBlue')}</option>
+          </select>
+        </label>
+      ) : null}
+      <p className="rounded border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900">{t('misc.textToolbarHint')}</p>
+      <p className="text-xs text-slate-500">{t('misc.textColorAutoHint')}</p>
+    </div>
+  );
+}
