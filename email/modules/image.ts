@@ -1,0 +1,6 @@
+import type { ImageBlock } from '@/lib/newsletter/schema';
+export function renderImage(b: ImageBlock) {
+  if (!b.src) return '';
+  const img = `<mj-image src="${b.src}" alt="${b.decorative ? '' : b.alt || ''}" padding="0 24px 20px" />`;
+  return `<mj-section background-color="#ffffff"><mj-column>${b.href ? `<mj-wrapper padding="0"><mj-column><mj-text><a href="${b.href}">${img}</a></mj-text></mj-column></mj-wrapper>` : img}</mj-column></mj-section>`;
+}
