@@ -12,9 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
   PNPM_VERSION: '9.4.0'
-  NODE_ENV: development
   DATABASE_URL: postgres://newsletter:newsletter@127.0.0.1:5432/newsletter
   APP_URL: http://127.0.0.1:3000
   AUTH_ALLOWED_EMAIL_DOMAINS: example.test
@@ -71,8 +70,19 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-next-${{ hashFiles('package.json') }}-${{ hashFiles('app/**/*.ts', 'app/**/*.tsx', 'components/**/*.ts', 'components/**/*.tsx', 'email/**/*.ts', 'lib/**/*.ts') }}
+          restore-keys: |
+            ${{ runner.os }}-next-${{ hashFiles('package.json') }}-
+
       - name: Build
         run: pnpm build
+        env:
+          NODE_ENV: production
+          NEXT_PHASE: phase-production-build
 
   e2e:
     name: Playwright E2E
