@@ -23,6 +23,7 @@ export function TextRichEditor({ block, readOnly, isBlue }: TextRichEditorProps)
   const selectedId = useNewsletterStore((state) => state.selectedId);
   const update = useNewsletterStore((state) => state.update);
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       TextStyle,
