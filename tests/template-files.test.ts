@@ -23,6 +23,15 @@ describe('newsletter template files', () => {
     expect(parsed.createdAt).toBe('2026-07-10T00:00:00.000Z');
     expect(parsed.document.blocks.map((block) => block.type)).toEqual(['header', 'text', 'footer']);
   });
+  it('migrates legacy template documents during import', () => {
+    const document = createDefaultDocument('Legacy Template');
+    const yml = serializeNewsletterTemplate({ title: document.title, document }).replace(
+      /    "schemaVersion": \d+,\n/,
+      '',
+    );
+
+    expect(parseNewsletterTemplateYaml(yml).document).toEqual(document);
+  });
   it('links static demo asset metadata into template documents', () => {
     const document = insertBlock(createDefaultDocument('Template Test'), 1, {
       ...createBlock('featuredEvent'),

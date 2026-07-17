@@ -2,14 +2,14 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
-import { forbidden, notFound, validationError, zodIssues } from '@/lib/api/api-error';
+import { forbidden, notFound, validationError } from '@/lib/api/api-error';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { serverEnv } from '@/lib/env';
 import { newsletters } from '@/lib/db/schema';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
-import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { getUserSettings } from '@/lib/settings/store';
 
 type NewsletterExportRouteContext = {
@@ -29,10 +29,12 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
     return notFound();
   }
 
-  const parsedDocument = newsletterDocumentSchema.safeParse(newsletter.document);
-  if (!parsedDocument.success)
-    return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
-  const document = parsedDocument.data;
+  const migratedDocument = safeMigrateNewsletterDocument(newsletter.document);
+  if (!migratedDocument.success)
+    return validationError('Gespeicherter Newsletter ist ungültig.', [
+      { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
+    ]);
+  const document = migratedDocument.data;
   const format = request.nextUrl.searchParams.get('format');
 
   if (format === 'yml') {

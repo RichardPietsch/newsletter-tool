@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import { createRegisteredModule, isRegisteredModuleType } from './module-registry';
+import { CURRENT_NEWSLETTER_SCHEMA_VERSION } from './migrations/version';
 import type {
   EventBlock,
   EventGridBlock,
@@ -19,7 +20,7 @@ export const emptyTiptapDoc: TiptapDoc = {
 };
 export function createDefaultDocument(title = 'Neuer Newsletter'): NewsletterDocument {
   return {
-    schemaVersion: 1,
+    schemaVersion: CURRENT_NEWSLETTER_SCHEMA_VERSION,
     title,
     blocks: [
       { id: nanoid(), type: 'header', locked: true, branding: 'AGC Newsletter', headerVariantId: 'agc' },

@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { serverEnv } from '@/lib/env';
 import { assets as assetTable, newsletters } from '@/lib/db/schema';
 import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
+import { migrateNewsletterDocument } from './migrations';
 
 type NewsletterTemplateFile = {
   title: string;
@@ -125,7 +126,7 @@ export function parseNewsletterTemplateYaml(source: string): NewsletterTemplateF
     .map((line) => (line.startsWith('  ') ? line.slice(2) : line))
     .join('\n')
     .trim();
-  const document = newsletterDocumentSchema.parse(JSON.parse(documentJson));
+  const document = migrateNewsletterDocument(JSON.parse(documentJson));
 
   return {
     title,

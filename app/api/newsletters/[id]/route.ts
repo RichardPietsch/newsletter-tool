@@ -3,12 +3,13 @@ import { NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { nanoid } from 'nanoid';
-import { conflict, notFound, validationError, zodIssues } from '@/lib/api/api-error';
+import { conflict, notFound, validationError } from '@/lib/api/api-error';
 import { parseJson } from '@/lib/api/parse-json';
 import { validateMutationOrigin } from '@/lib/api/origin';
 import { requireApiUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
+import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { newsletterDocumentSchema, type NewsletterDocument } from '@/lib/newsletter/schema';
 
 type NewsletterRouteContext = {
@@ -33,7 +34,13 @@ export async function GET(_: Request, { params }: NewsletterRouteContext) {
     .select()
     .from(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
-  return newsletter ? NextResponse.json(newsletter) : notFound();
+  if (!newsletter) return notFound();
+  const migratedDocument = safeMigrateNewsletterDocument(newsletter.document);
+  if (!migratedDocument.success)
+    return validationError('Gespeicherter Newsletter ist ungültig.', [
+      { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
+    ]);
+  return NextResponse.json({ ...newsletter, document: migratedDocument.data });
 }
 
 export async function PUT(request: Request, { params }: NewsletterRouteContext) {
@@ -129,11 +136,13 @@ export async function POST(request: Request, { params }: NewsletterRouteContext)
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
   if (!current) return notFound();
 
-  const parsedDocument = newsletterDocumentSchema.safeParse(current.document);
-  if (!parsedDocument.success)
-    return validationError('Gespeicherter Newsletter ist ungültig.', zodIssues(parsedDocument.error.issues));
+  const migratedDocument = safeMigrateNewsletterDocument(current.document);
+  if (!migratedDocument.success)
+    return validationError('Gespeicherter Newsletter ist ungültig.', [
+      { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
+    ]);
 
-  const clonedDocument = cloneDocumentWithFreshIds(parsedDocument.data);
+  const clonedDocument = cloneDocumentWithFreshIds(migratedDocument.data);
   const cloneId = nanoid();
   const [newsletter] = await db
     .insert(newsletters)

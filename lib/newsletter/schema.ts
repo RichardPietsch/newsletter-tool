@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CURRENT_NEWSLETTER_SCHEMA_VERSION } from './migrations/version';
 export const allowedUrl = (v: string) => {
   try {
     const u = new URL(v);
@@ -173,7 +174,11 @@ export const newsletterBlockSchema = z.union([
   footerBlockSchema,
 ]);
 export const newsletterDocumentSchema = z
-  .object({ schemaVersion: z.literal(1), title: z.string().min(1), blocks: z.array(newsletterBlockSchema).min(2) })
+  .object({
+    schemaVersion: z.literal(CURRENT_NEWSLETTER_SCHEMA_VERSION),
+    title: z.string().min(1),
+    blocks: z.array(newsletterBlockSchema).min(2),
+  })
   .superRefine((d, c) => {
     if (d.blocks[0]?.type !== 'header')
       c.addIssue({ code: 'custom', path: ['blocks', 0], message: 'Dokument muss mit Header beginnen' });

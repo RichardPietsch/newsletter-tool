@@ -5,7 +5,7 @@ import { EditorShell } from '@/components/editor/editor-shell';
 import { requirePageUser } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
-import { newsletterDocumentSchema } from '@/lib/newsletter/schema';
+import { migrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { getUserSettings } from '@/lib/settings/store';
 
 type NewsletterPageProps = {
@@ -41,7 +41,7 @@ export default async function Page({ params }: NewsletterPageProps) {
   return (
     <EditorShell
       id={newsletter.id}
-      document={newsletterDocumentSchema.parse(newsletter.document)}
+      document={migrateNewsletterDocument(newsletter.document)}
       settings={settings}
       usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))}
       sentAt={newsletter.sentAt?.toISOString() ?? null}
