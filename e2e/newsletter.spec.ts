@@ -106,6 +106,12 @@ async function installTestSession(page: Page) {
   }, e2eUser.email);
 }
 
+async function advanceTourStep(page: Page, stepId: string) {
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toHaveAttribute('data-onboarding-step', stepId);
+  await dialog.getByRole('button', { name: 'Weiter' }).click();
+}
+
 test.beforeAll(async () => {
   await prepareE2eData();
 });
@@ -129,7 +135,7 @@ test('covers the main authenticated editor flow', async ({ page }) => {
 
   await page.getByText('E2E Veranstaltungsabend').click();
   const inspector = page.locator('[data-tour="inspector"]');
-  await expect(inspector).toContainText('E2E Veranstaltungsabend');
+  await expect(inspector.getByLabel('Newsletter-Titel')).toHaveValue('E2E Veranstaltungsabend');
 
   await inspector.getByLabel('Newsletter-Titel').fill('');
   await expect(page.getByText('Speichern fehlgeschlagen')).toBeVisible({ timeout: 5000 });
@@ -161,14 +167,24 @@ test('allows restarting and completing the onboarding tour manually', async ({ p
   await page.getByRole('button', { name: 'Einführung erneut starten' }).click();
 
   await expect(page.getByRole('dialog', { name: 'Willkommen im Newsletter Tool' })).toBeVisible();
-  for (let step = 0; step < 12; step += 1) {
-    const finish = page.getByRole('button', { name: 'Fertig' });
-    if (await finish.isVisible().catch(() => false)) {
-      await finish.click();
-      break;
-    }
-    await page.getByRole('button', { name: 'Weiter' }).click();
+  for (const stepId of ['welcome', 'overview-nav', 'media-nav', 'settings-nav', 'account-nav']) {
+    await advanceTourStep(page, stepId);
   }
+
+  const demoDialog = page.getByRole('dialog');
+  await expect(demoDialog).toHaveAttribute('data-onboarding-step', 'demo-newsletter');
+  await Promise.all([
+    page.waitForURL(/\/newsletters\/e2e-demo-newsletter$/),
+    demoDialog.getByRole('button', { name: 'Weiter' }).click(),
+  ]);
+
+  for (const stepId of ['canvas', 'module', 'add-module', 'inspector']) {
+    await advanceTourStep(page, stepId);
+  }
+
+  const exportDialog = page.getByRole('dialog');
+  await expect(exportDialog).toHaveAttribute('data-onboarding-step', 'export');
+  await Promise.all([page.waitForURL(/\/newsletters$/), exportDialog.getByRole('button', { name: 'Fertig' }).click()]);
 
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });

@@ -286,6 +286,7 @@ export function OnboardingTour({
         />
       ) : null}
       <section
+        data-onboarding-step={step.id}
         className="pointer-events-auto fixed w-[min(28rem,calc(100vw-3rem))] rounded-2xl border border-[#012aff]/20 bg-white p-6 shadow-2xl ring-4 ring-[#012aff]/10 transition-all"
         style={popoverPosition}
         role="dialog"
