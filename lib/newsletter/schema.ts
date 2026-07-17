@@ -179,6 +179,7 @@ export const newsletterDocumentSchema = z
     title: z.string().min(1),
     blocks: z.array(newsletterBlockSchema).min(2),
   })
+  .strict()
   .superRefine((d, c) => {
     if (d.blocks[0]?.type !== 'header')
       c.addIssue({ code: 'custom', path: ['blocks', 0], message: 'Dokument muss mit Header beginnen' });
