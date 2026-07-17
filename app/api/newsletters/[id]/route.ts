@@ -89,6 +89,7 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
   if (!current) return notFound();
   if (current.sentAt && patch.title) return conflict('Versendete Newsletter können nicht umbenannt werden.');
 
+  const wasSent = current.sentAt !== null;
   const sentAt = patch.sent === true ? (current.sentAt ?? new Date()) : patch.sent === false ? null : current.sentAt;
   const [newsletter] = await db
     .update(newsletters)
@@ -96,7 +97,7 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
     .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
     .returning();
 
-  if (newsletter && patch.sent === true && !current.sentAt) {
+  if (newsletter && patch.sent === true && !wasSent) {
     await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.marked_sent', entityId: id });
   }
 
