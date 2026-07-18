@@ -54,12 +54,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
         run: pnpm lint
@@ -74,9 +74,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .next/cache
-          key: ${{ runner.os }}-next-${{ hashFiles('package.json') }}-${{ hashFiles('app/**/*.ts', 'app/**/*.tsx', 'components/**/*.ts', 'components/**/*.tsx', 'email/**/*.ts', 'lib/**/*.ts') }}
+          key: ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('app/**/*.ts', 'app/**/*.tsx', 'components/**/*.ts', 'components/**/*.tsx', 'email/**/*.ts', 'lib/**/*.ts') }}
           restore-keys: |
-            ${{ runner.os }}-next-${{ hashFiles('package.json') }}-
+            ${{ runner.os }}-next-${{ hashFiles('pnpm-lock.yaml') }}-
 
       - name: Build
         run: pnpm build
@@ -124,12 +124,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('package.json') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium

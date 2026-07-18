@@ -5,8 +5,8 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 
 FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile=false
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 FROM base AS development
 ENV NODE_ENV=development
