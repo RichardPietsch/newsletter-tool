@@ -1,34 +1,30 @@
-title: "AGC Demo-Newsletter"
+title: "(Beispiel) Juniorenveranstaltungen 2026 - Ausblick auf die 2. Jahreshaelfte"
 createdAt: "2026-07-10T00:00:00.000Z"
 updatedAt: "2026-07-10T00:00:00.000Z"
 documentJson: |
   {
     "schemaVersion": 1,
-    "title": "AGC Demo-Newsletter",
+    "title": "(Beispiel) Juniorenveranstaltungen 2026 - Ausblick auf die 2. Jahreshaelfte",
     "blocks": [
       {
-        "id": "template-header",
-        "type": "header",
+        "id": "GzXzhrPi8v-kc0LJ-1pfa",
         "locked": true,
+        "type": "header",
         "branding": "AGC Newsletter",
-        "headerVariantId": "agc"
+        "headerVariantId": "agc-junioren"
       },
       {
-        "id": "template-intro",
+        "id": "SIedsRiAdtmxxwwSzjUwh",
         "type": "text",
-        "background": "white",
         "content": {
           "type": "doc",
           "content": [
             {
-              "type": "heading",
-              "attrs": {
-                "level": 2
-              },
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "text",
-                  "text": "Willkommen zum AGC Newsletter"
+                  "text": "Sehr geehrter Herr Pietsch,",
+                  "type": "text"
                 }
               ]
             },
@@ -36,65 +32,215 @@ documentJson: |
               "type": "paragraph",
               "content": [
                 {
+                  "text": "der Juli steht im Club traditionell ganz im Zeichen des Sommers. Deshalb verzichten wir in diesen Monaten auf unsere klassischen Juniorenabende, laden die langen Tage doch eher zu Muße und Geselligkeit als zu geistiger Anstrengung ein.",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Nach der ",
+                  "type": "text"
+                },
+                {
+                  "text": "Sommerpause",
                   "type": "text",
-                  "text": "Dieses vorbefüllte Beispiel zeigt Redakteuren, wie ein Newsletter aufgebaut werden kann. Texte, Veranstaltungen und Bilder können direkt ersetzt oder erweitert werden."
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ]
+                },
+                {
+                  "text": " vom ",
+                  "type": "text"
+                },
+                {
+                  "text": "20. Juli ",
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ]
+                },
+                {
+                  "text": "bis zum ",
+                  "type": "text"
+                },
+                {
+                  "text": "17. August ",
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ]
+                },
+                {
+                  "text": "setzen wir das Juniorenprogramm wie folgt fort:",
+                  "type": "text"
                 }
               ]
             }
           ]
-        }
-      },
-      {
-        "id": "template-featured-event",
-        "type": "featuredEvent",
-        "overline": "Highlight",
-        "background": "blue",
-        "image": {
-          "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-whisky.jpg",
-          "alt": "Whiskytasting im Anglo-German Club",
-          "decorative": false
         },
-        "title": "Sommerabend im Club",
-        "date": "Donnerstag, 23. Juli · 19:00 Uhr",
-        "description": "Ein geselliger Abend auf der Terrasse mit kulinarischer Begleitung und Gelegenheit zum Austausch.",
-        "buttonLabel": "Zur Anmeldung",
-        "buttonUrl": "https://anglogermanclub.de"
+        "background": "white"
       },
       {
-        "id": "template-events",
+        "id": "aW4SBoq30RfDVjfS9LEyw",
         "type": "eventGrid",
-        "heading": "Weitere Termine",
+        "heading": "",
         "layout": "list",
         "items": [
           {
-            "id": "template-event-1",
-            "category": "Vortrag",
-            "title": "Gesprächsabend mit Gästen",
-            "date": "Dienstag, 4. August · 18:30 Uhr",
-            "location": "Harvestehuder Weg 44",
-            "description": "Ein kurzer Beschreibungstext für den ersten Termin.",
-            "buttonLabel": "Details"
+            "id": "esIh6HE8ifOX3iWjwJnn3",
+            "category": "VORTRAG",
+            "title": "Jochen Spehmann",
+            "date": "Dienstag, 1. September",
+            "location": "",
+            "description": "Vorsitzender der Versammlung Ehrbarer Kaufleute zu Hamburg (VEEK) ",
+            "buttonLabel": ""
           },
           {
-            "id": "template-event-2",
-            "category": "Clubleben",
-            "image": {
-              "src": "http://localhost:3000/assets/newsletter-templates/demo-assets/demo-gaense.jpg",
-              "alt": "Traditionelles Gänseessen der Junioren",
-              "decorative": false
-            },
-            "title": "After Work im Club",
-            "date": "Freitag, 14. August · 18:00 Uhr",
-            "location": "Clubräume",
-            "description": "Ein lockerer Termin für Mitglieder und Gäste.",
-            "buttonLabel": "Mehr erfahren"
+            "id": "rU6Z49TeIFW_LhjvcYURl",
+            "category": "JUNIOREN-ABEND",
+            "title": "to be announced...",
+            "date": "Dienstag, 6. Oktober",
+            "buttonLabel": "Anmeldung"
+          },
+          {
+            "id": "zMRTsxK9Y31_0VahvbS--",
+            "category": "Vortrag",
+            "title": "Bernhard Roetzel",
+            "date": "Dienstag, 3. November",
+            "description": "Stilautor und Verfasser des Standardwerks \"Der Gentleman\"",
+            "buttonLabel": "Anmeldung"
           }
         ]
       },
       {
-        "id": "template-footer",
-        "type": "footer",
+        "id": "YO62oU7avj90R7r4NGJmT",
+        "type": "featuredEvent",
+        "overline": "SAVE THE DATE",
+        "background": "white",
+        "image": {
+          "assetId": "zaDgEwlyRnymZZ3xnDGN7",
+          "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-gaense.jpg",
+          "alt": "demo-gaense",
+          "decorative": false
+        },
+        "title": "Gänseessen der Junioren",
+        "date": "Freitag, 20. November",
+        "description": "",
+        "buttonLabel": "Mehr erfahren"
+      },
+      {
+        "id": "wjdJ_zfUEhyafrq-SLzQ4",
+        "type": "featuredEvent",
+        "overline": "BETTER TOGETHER",
+        "background": "blue",
+        "image": {
+          "assetId": "eGsPHlmPoYVFBI13_qN6n",
+          "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-whisky.jpg",
+          "alt": "demo-whisky",
+          "decorative": false
+        },
+        "title": "Whisky Tasting",
+        "date": "27. November",
+        "description": "Der inzwischen weit verbreitete Dry January hat sich in den vergangenen Jahren auch bei uns bemerkbar gemacht. Aus diesem Grund werden wir Anfang 2027 kein eigenes Junioren- Whiskytasting anbieten. Stattdessen gilt für Juniorenmitglieder beim Whiskytasting ein ermäßigter Preis.",
+        "buttonLabel": ""
+      },
+      {
+        "id": "70p9llQkSi5li3Td1Hmvs",
+        "type": "text",
+        "content": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 3
+              },
+              "content": [
+                {
+                  "text": "Neues Format",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Da viele Mitglieder dem Juniorenkreis auch nach ihrer Juniorenzeit verbunden bleiben, haben wir gemeinsam mit den Juniorenvertretern ein ergänzendes Format entwickelt: ",
+                  "type": "text"
+                },
+                {
+                  "text": "Young Professionals",
+                  "type": "text",
+                  "marks": [
+                    {
+                      "type": "bold"
+                    }
+                  ]
+                },
+                {
+                  "text": " richtet sich künftig an Mitglieder zwischen 32 und 40 Jahren und lädt in unregelmäßigen Abständen zu ausgewählten Veranstaltungen ein. Die Mitglieder dieser Altersgruppe werden hierzu künftig gesondert informiert.",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": "Wir wünschen einen zauberhaften Sommer und freuen uns auf ein Wiedersehen nach der Sommerpause!",
+                  "type": "text"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "text": " ",
+                  "type": "text"
+                },
+                {
+                  "type": "hardBreak"
+                },
+                {
+                  "text": "Ihre Britta Döring & Harriet Wege",
+                  "type": "text"
+                }
+              ]
+            }
+          ]
+        },
+        "background": "white"
+      },
+      {
+        "id": "qHIjiQlAev-rNArH6AxC1",
+        "type": "eventGrid",
+        "heading": "Ausblick 2027:",
+        "layout": "list",
+        "items": [
+          {
+            "id": "JTVLgt5LdkAASzP6MF_j_",
+            "category": "SAVE THE DATE",
+            "title": "5. Ball der Junioren",
+            "date": "Samstag, 20. Februar 2027",
+            "buttonLabel": ""
+          }
+        ]
+      },
+      {
+        "id": "LHrJmU3Zz4cNRuiITk2mz",
         "locked": true,
+        "type": "footer",
         "contact": "AGC · Newsletter",
         "legal": "Impressum und Datenschutz werden zentral gepflegt."
       }
