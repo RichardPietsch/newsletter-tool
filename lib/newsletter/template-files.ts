@@ -2,6 +2,7 @@ import { readdir, readFile, stat } from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
 import { nanoid } from 'nanoid';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { serverEnv } from '@/lib/env';
 import { assets as assetTable, newsletters } from '@/lib/db/schema';
@@ -9,6 +10,7 @@ import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
 import { migrateNewsletterDocument } from './migrations';
 
 type NewsletterTemplateFile = {
+  seedKey?: string;
   title: string;
   createdAt?: string;
   updatedAt?: string;
@@ -29,7 +31,7 @@ export type DemoAssetSeed = DemoAssetDefinition & {
 export type DemoAssetSeedMap = Record<string, DemoAssetSeed>;
 
 const TEMPLATE_DIRECTORY = path.join(process.cwd(), 'public', 'assets', 'newsletter-templates');
-const DEMO_ASSET_DIRECTORY = path.join(TEMPLATE_DIRECTORY, 'demo-assets');
+const DEMO_ASSET_DIRECTORY = path.join(TEMPLATE_DIRECTORY, 'agc-demo-assets');
 const DEMO_ASSETS: DemoAssetDefinition[] = [
   { filename: 'demo-whisky.jpg', title: 'Whiskytasting', altText: 'Whiskytasting im Anglo-German Club' },
   { filename: 'demo-gaense.jpg', title: 'Gänseessen', altText: 'Traditionelles Gänseessen der Junioren' },
@@ -45,7 +47,7 @@ function readYamlString(lines: string[], key: string) {
 }
 
 function publicDemoAssetUrl(filename: string) {
-  return new URL(`/assets/newsletter-templates/demo-assets/${filename}`, serverEnv.appUrl).toString();
+  return new URL(`/assets/newsletter-templates/agc-demo-assets/${filename}`, serverEnv.appUrl).toString();
 }
 
 function demoFilenameFromUrl(src?: string) {
@@ -148,9 +150,10 @@ async function readTemplateFiles() {
     filenames
       .filter((filename) => filename.endsWith('.yml') || filename.endsWith('.yaml'))
       .sort((a, b) => a.localeCompare(b))
-      .map(async (filename) =>
-        parseNewsletterTemplateYaml(await readFile(path.join(TEMPLATE_DIRECTORY, filename), 'utf8')),
-      ),
+      .map(async (filename) => ({
+        ...parseNewsletterTemplateYaml(await readFile(path.join(TEMPLATE_DIRECTORY, filename), 'utf8')),
+        seedKey: `template:${filename}`,
+      })),
   );
   return templates;
 }
@@ -167,7 +170,7 @@ function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument 
   return newsletterDocumentSchema.parse(nextDocument);
 }
 
-async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap> {
+async function seedDemoAssetsForTenant(tenantId: string): Promise<DemoAssetSeedMap> {
   const rows = await Promise.all(
     DEMO_ASSETS.map(async (asset) => {
       const filePath = path.join(DEMO_ASSET_DIRECTORY, asset.filename);
@@ -182,8 +185,8 @@ async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap>
       const publicUrl = publicDemoAssetUrl(asset.filename);
       return {
         id,
-        ownerId,
-        storageKey: `newsletter-templates/demo-assets/${asset.filename}`,
+        tenantId,
+        storageKey: `${tenantId}/newsletter-templates/demo-assets/${asset.filename}`,
         publicUrl,
         originalFilename: asset.filename,
         title: asset.title,
@@ -192,15 +195,39 @@ async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap>
         width: metadata.width ?? 0,
         height: metadata.height ?? 0,
         sizeBytes: fileStats.size,
+        seedKey: `demo-asset:${asset.filename}`,
       };
     }),
   );
 
   const assetRows = rows.filter((row): row is NonNullable<typeof row> => row !== undefined);
-  if (assetRows.length > 0) await db.insert(assetTable).values(assetRows);
+  if (assetRows.length > 0) {
+    await db
+      .insert(assetTable)
+      .values(assetRows)
+      .onConflictDoNothing({
+        target: [assetTable.tenantId, assetTable.seedKey],
+      });
+  }
+
+  const persistedRows =
+    DEMO_ASSETS.length === 0
+      ? []
+      : await db
+          .select()
+          .from(assetTable)
+          .where(
+            and(
+              eq(assetTable.tenantId, tenantId),
+              inArray(
+                assetTable.seedKey,
+                DEMO_ASSETS.map((asset) => `demo-asset:${asset.filename}`),
+              ),
+            ),
+          );
 
   return Object.fromEntries(
-    assetRows.map((row) => [
+    persistedRows.map((row) => [
       row.originalFilename,
       {
         id: row.id,
@@ -213,21 +240,28 @@ async function seedDemoAssetsForUser(ownerId: string): Promise<DemoAssetSeedMap>
   );
 }
 
-export async function seedNewsletterTemplatesForUser(ownerId: string) {
+export async function seedNewsletterTemplatesForTenant(tenantId: string) {
   const templates = await readTemplateFiles();
   if (templates.length === 0) return;
 
-  const demoAssets = await seedDemoAssetsForUser(ownerId);
+  const demoAssets = await seedDemoAssetsForTenant(tenantId);
 
-  await db.insert(newsletters).values(
-    templates.map((template) => {
-      const document = applyDemoAssetsToDocument(documentWithFreshIds(template.document), demoAssets);
-      return {
-        id: nanoid(),
-        ownerId,
-        title: template.title,
-        document: { ...document, title: template.title },
-      };
-    }),
-  );
+  await db
+    .insert(newsletters)
+    .values(
+      templates.map((template) => {
+        const document = applyDemoAssetsToDocument(documentWithFreshIds(template.document), demoAssets);
+        return {
+          id: nanoid(),
+          tenantId,
+          title: template.title,
+          document: { ...document, title: template.title },
+          seedKey: template.seedKey ?? `template:${template.title}`,
+        };
+      }),
+    )
+    .onConflictDoNothing({ target: [newsletters.tenantId, newsletters.seedKey] });
 }
+
+/** Compatibility alias; the argument is now a tenant ID. */
+export const seedNewsletterTemplatesForUser = seedNewsletterTemplatesForTenant;

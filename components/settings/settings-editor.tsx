@@ -18,13 +18,16 @@ function FooterRichTextEditor({
   value,
   onChange,
   onBlur,
+  readOnly = false,
 }: {
   value: GlobalSettings['footerRichText'];
   onChange: (value: GlobalSettings['footerRichText']) => void;
   onBlur: (value: GlobalSettings['footerRichText']) => void;
+  readOnly?: boolean;
 }) {
   const editor = useEditor({
     immediatelyRender: false,
+    editable: !readOnly,
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       TextStyle,
@@ -49,6 +52,10 @@ function FooterRichTextEditor({
     if (JSON.stringify(editor.getJSON()) !== JSON.stringify(value)) editor.commands.setContent(value, false);
   }, [editor, value]);
 
+  useEffect(() => {
+    editor?.setEditable(!readOnly);
+  }, [editor, readOnly]);
+
   if (!editor) return <div className="mt-4 min-h-48 rounded border p-3 text-slate-500">{t('shared.loadRichText')}</div>;
 
   return (
@@ -63,16 +70,19 @@ export function SettingsEditor({
   initialSettings,
   usedHeaderVariantIds,
   embedded = false,
+  readOnly = false,
 }: {
   initialSettings: GlobalSettings;
   usedHeaderVariantIds: string[];
   embedded?: boolean;
+  readOnly?: boolean;
 }) {
   const [settings, setSettings] = useState(initialSettings);
   const [status, setStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [uploading, setUploading] = useState(false);
 
   async function save(next = settings) {
+    if (readOnly) return;
     setStatus('saving');
     const response = await fetch('/api/settings', {
       method: 'PUT',
@@ -83,6 +93,7 @@ export function SettingsEditor({
   }
 
   async function uploadHeaderImage(file: File) {
+    if (readOnly) return;
     setUploading(true);
     const formData = new FormData();
     formData.append('file', file);
@@ -136,6 +147,12 @@ export function SettingsEditor({
         </div>
       </div>
 
+      {readOnly ? (
+        <p className="mb-6 rounded border border-amber-300 bg-amber-50 p-3 text-amber-900">
+          {t('admin.settingsReadOnly')}
+        </p>
+      ) : null}
+      <fieldset disabled={readOnly}>
       <section className="rounded-xl bg-white p-6 shadow-sm">
         <h2 className="text-xl font-semibold">{t('misc.headerVariants')}</h2>
         <p className="mt-1 text-sm text-slate-600">{t('misc.headerVariantsDescription')}</p>
@@ -225,11 +242,13 @@ export function SettingsEditor({
           value={settings.footerRichText}
           onChange={updateFooterRichText}
           onBlur={(footerRichText) => void saveFooterRichText(footerRichText)}
+          readOnly={readOnly}
         />
         <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>
           {t('misc.saveFooter')}
         </button>
       </section>
+      </fieldset>
     </div>
   );
 }

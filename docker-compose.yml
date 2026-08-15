@@ -64,7 +64,7 @@ services:
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
       SMTP_FROM: Newsletter Tool <no-reply@newsletter.local>
-    command: sh -c "pnpm db:ensure && pnpm dev"
+    command: sh -c "pnpm db:migrate && pnpm db:seed && pnpm dev"
     ports:
       - '3000:3000'
     depends_on:

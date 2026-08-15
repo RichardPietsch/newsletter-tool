@@ -16,7 +16,15 @@ type Asset = {
   sizeBytes: number;
 };
 
-export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function MediaLibraryOverlay({
+  open,
+  onClose,
+  readOnly = false,
+}: {
+  open: boolean;
+  onClose: () => void;
+  readOnly?: boolean;
+}) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [status, setStatus] = useState<'idle' | 'loading' | 'saving' | 'error'>('idle');
 
@@ -33,6 +41,7 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
   }, [open]);
 
   async function updateAsset(id: string, patch: { title?: string | null; altText?: string | null }) {
+    if (readOnly) return;
     const current = assets.find((asset) => asset.id === id);
     if (!current) return;
     const payload = { id, title: patch.title ?? current.title ?? '', altText: patch.altText ?? current.altText ?? '' };
@@ -78,6 +87,7 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
                 <input
                   className="mt-1 w-full rounded border p-2"
                   value={asset.title ?? ''}
+                  disabled={readOnly}
                   onChange={(event) =>
                     setAssets((items) =>
                       items.map((item) => (item.id === asset.id ? { ...item, title: event.target.value } : item)),
@@ -91,6 +101,7 @@ export function MediaLibraryOverlay({ open, onClose }: { open: boolean; onClose:
                 <textarea
                   className="mt-1 min-h-20 w-full rounded border p-2"
                   value={asset.altText ?? ''}
+                  disabled={readOnly}
                   onChange={(event) =>
                     setAssets((items) =>
                       items.map((item) => (item.id === asset.id ? { ...item, altText: event.target.value } : item)),

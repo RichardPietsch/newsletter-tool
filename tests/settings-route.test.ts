@@ -3,7 +3,7 @@ import type { GlobalSettings } from '@/lib/settings/schema';
 
 type SettingsRow = {
   id: string;
-  ownerId: string;
+  tenantId: string;
   settings: GlobalSettings;
   updatedAt: Date;
 };
@@ -12,7 +12,8 @@ type Condition = { op: 'eq'; column: string; value: string };
 
 const mocks = vi.hoisted(() => ({
   rows: [] as SettingsRow[],
-  authUserId: 'owner-1',
+  authUserId: 'user-1',
+  authTenantId: 'tenant-1',
   recordAuditEvent: vi.fn(async () => true),
 }));
 
@@ -25,18 +26,25 @@ vi.mock('drizzle-orm', () => ({
 vi.mock('@/lib/db/schema', () => ({
   appSettings: {
     id: 'id',
-    ownerId: 'ownerId',
+    tenantId: 'tenantId',
     settings: 'settings',
     updatedAt: 'updatedAt',
   },
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
-  requireApiUser: vi.fn(async () => ({ user: { id: mocks.authUserId, email: 'owner@example.com' }, response: null })),
+  requireTenantApiContext: vi.fn(async () => ({
+    context: {
+      user: { id: mocks.authUserId, email: 'user@example.com' },
+      tenant: { id: mocks.authTenantId },
+      mode: 'member',
+      sessionId: 'session-1',
+    },
+    response: null,
+  })),
 }));
 
 vi.mock('@/lib/db', () => ({
-  DEFAULT_USER_ID: 'demo-user',
   db: {
     select: () => ({
       from: () => ({
@@ -73,7 +81,8 @@ async function responseJson(response: Response) {
 describe('settings API route', () => {
   beforeEach(() => {
     mocks.rows = [];
-    mocks.authUserId = 'owner-1';
+    mocks.authUserId = 'user-1';
+    mocks.authTenantId = 'tenant-1';
     mocks.recordAuditEvent.mockClear();
   });
 
@@ -102,8 +111,8 @@ describe('settings API route', () => {
     };
     mocks.rows = [
       {
-        id: 'owner-1',
-        ownerId: 'owner-1',
+        id: 'tenant-1',
+        tenantId: 'tenant-1',
         settings: previousSettings,
         updatedAt: new Date('2026-07-16T10:00:00.000Z'),
       },
@@ -126,7 +135,9 @@ describe('settings API route', () => {
     expect(response.status).toBe(200);
     expect(payload.headerVariants).toHaveLength(settings.headerVariants.length);
     expect(mocks.rows[0].settings).toEqual(settings);
-    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({ userId: 'owner-1', eventType: 'settings.updated' });
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ actorUserId: 'user-1', tenantId: 'tenant-1', eventType: 'settings.updated' }),
+    );
   });
 
   it('returns 400 for invalid settings payloads', async () => {

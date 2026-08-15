@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { and, eq } from 'drizzle-orm';
 import { renderNewsletter, safeFilename } from '@/email/render-newsletter';
 import { forbidden, notFound, validationError } from '@/lib/api/api-error';
-import { requireApiUser } from '@/lib/auth/current-user';
+import { requireTenantApiContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { serverEnv } from '@/lib/env';
 import { newsletters } from '@/lib/db/schema';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { serializeNewsletterTemplate } from '@/lib/newsletter/template-files';
 import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
-import { getUserSettings } from '@/lib/settings/store';
+import { getTenantSettings } from '@/lib/settings/store';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 
@@ -19,20 +19,21 @@ type NewsletterExportRouteContext = {
 };
 
 export async function GET(request: NextRequest, { params }: NewsletterExportRouteContext) {
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext();
   if (auth.response) return auth.response;
   const { id } = await params;
   const logContext = {
     event: 'newsletter.export.requested',
     requestId: requestIdFrom(request),
-    userId: auth.user.id,
+    userId: auth.context.user.id,
+    tenantId: auth.context.tenant.id,
     newsletterId: id,
   };
   logger.info(logContext);
   const [newsletter] = await db
     .select()
     .from(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
 
   if (!newsletter) {
     logger.warn({ ...logContext, event: 'newsletter.export.not_found' });
@@ -59,7 +60,14 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
       document,
     });
     logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'yml' });
-    await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.exported', entityId: id });
+    await recordAuditEvent({
+      actorUserId: auth.context.user.id,
+      tenantId: auth.context.tenant.id,
+      eventType: 'newsletter.exported',
+      entityType: 'newsletter',
+      entityId: id,
+      correlationId: logContext.requestId,
+    });
 
     return new NextResponse(yml, {
       headers: {
@@ -75,11 +83,18 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
     return validationError('Newsletter kann nicht exportiert werden.', issues);
   }
 
-  const settings = await getUserSettings(auth.user.id);
+  const settings = await getTenantSettings(auth.context.tenant.id);
   const html = renderNewsletter(document, settings);
   const exportHtml = `<!--email_off-->${html}<!--/email_off-->`;
   logger.info({ ...logContext, event: 'newsletter.export.completed' }, { format: 'html' });
-  await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.exported', entityId: id });
+  await recordAuditEvent({
+    actorUserId: auth.context.user.id,
+    tenantId: auth.context.tenant.id,
+    eventType: 'newsletter.exported',
+    entityType: 'newsletter',
+    entityId: id,
+    correlationId: logContext.requestId,
+  });
 
   return new NextResponse(exportHtml, {
     headers: {

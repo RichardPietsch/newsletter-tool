@@ -5,7 +5,7 @@ import type { NewsletterDocument } from '@/lib/newsletter/schema';
 
 type NewsletterRow = {
   id: string;
-  ownerId: string;
+  tenantId: string;
   title: string;
   document: NewsletterDocument;
   sentAt: Date | null;
@@ -17,7 +17,8 @@ type Condition = { op: 'eq'; column: string; value: string } | { op: 'and'; cond
 
 const mocks = vi.hoisted(() => ({
   rows: [] as NewsletterRow[],
-  authUserId: 'owner-1',
+  authUserId: 'user-1',
+  authTenantId: 'tenant-1',
   recordAuditEvent: vi.fn(async () => true),
 }));
 
@@ -38,7 +39,7 @@ function matchingRows(condition: Condition | undefined) {
   const filters = conditionFilters(condition);
   return mocks.rows.filter((row) => {
     if (filters.id && row.id !== filters.id) return false;
-    if (filters.ownerId && row.ownerId !== filters.ownerId) return false;
+    if (filters.tenantId && row.tenantId !== filters.tenantId) return false;
     return true;
   });
 }
@@ -51,7 +52,7 @@ vi.mock('drizzle-orm', () => ({
 vi.mock('@/lib/db/schema', () => ({
   newsletters: {
     id: 'id',
-    ownerId: 'ownerId',
+    tenantId: 'tenantId',
     title: 'title',
     document: 'document',
     sentAt: 'sentAt',
@@ -61,7 +62,15 @@ vi.mock('@/lib/db/schema', () => ({
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
-  requireApiUser: vi.fn(async () => ({ user: { id: mocks.authUserId, email: 'owner@example.com' }, response: null })),
+  requireTenantApiContext: vi.fn(async () => ({
+    context: {
+      user: { id: mocks.authUserId, email: 'user@example.com' },
+      tenant: { id: mocks.authTenantId },
+      mode: 'member',
+      sessionId: 'session-1',
+    },
+    response: null,
+  })),
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -92,23 +101,22 @@ vi.mock('@/lib/db', () => ({
       }),
     }),
     insert: () => ({
-      values: (value: Omit<NewsletterRow, 'createdAt' | 'updatedAt' | 'sentAt'> & Partial<NewsletterRow>) => ({
-        returning: async () => {
-          const row: NewsletterRow = {
-            createdAt: new Date('2026-07-16T12:00:00.000Z'),
-            updatedAt: new Date('2026-07-16T12:00:00.000Z'),
-            sentAt: null,
-            ...value,
-          };
-          mocks.rows.push(row);
-          return [row];
-        },
-      }),
+      values: (value: Omit<NewsletterRow, 'createdAt' | 'updatedAt' | 'sentAt'> & Partial<NewsletterRow>) => {
+        const inserted: NewsletterRow = {
+          createdAt: new Date('2026-07-16T12:00:00.000Z'),
+          updatedAt: new Date('2026-07-16T12:00:00.000Z'),
+          sentAt: null,
+          ...value,
+        };
+        mocks.rows.push(inserted);
+        return { returning: async () => [inserted] };
+      },
     }),
   },
 }));
 
 import { DELETE, GET, PATCH, POST, PUT } from '@/app/api/newsletters/[id]/route';
+import { POST as POST_COLLECTION } from '@/app/api/newsletters/route';
 
 function routeContext(id: string) {
   return { params: Promise.resolve({ id }) };
@@ -126,7 +134,7 @@ function row(overrides: Partial<NewsletterRow> = {}): NewsletterRow {
   const document = createDefaultDocument('Original');
   return {
     id: 'own',
-    ownerId: 'owner-1',
+    tenantId: 'tenant-1',
     title: document.title,
     document,
     sentAt: null,
@@ -143,7 +151,8 @@ async function responseJson(response: Response) {
 describe('newsletter detail API route', () => {
   beforeEach(() => {
     mocks.rows = [];
-    mocks.authUserId = 'owner-1';
+    mocks.authUserId = 'user-1';
+    mocks.authTenantId = 'tenant-1';
     mocks.recordAuditEvent.mockClear();
   });
 
@@ -155,11 +164,43 @@ describe('newsletter detail API route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.id).toBe('own');
-    expect(payload.ownerId).toBe('owner-1');
+    expect(payload.tenantId).toBe('tenant-1');
   });
 
-  it('hides newsletters owned by someone else', async () => {
-    mocks.rows = [row({ ownerId: 'other-user' })];
+  it('records exactly one creation event when a blank newsletter is started', async () => {
+    const response = await POST_COLLECTION(
+      new Request('http://localhost:3000/api/newsletters', {
+        method: 'POST',
+        headers: { origin: 'http://localhost:3000' },
+      }),
+    );
+
+    expect(response.status).toBe(303);
+    expect(mocks.rows).toHaveLength(1);
+    expect(mocks.rows[0].tenantId).toBe('tenant-1');
+    expect(mocks.recordAuditEvent).toHaveBeenCalledOnce();
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'user-1',
+        tenantId: 'tenant-1',
+        eventType: 'newsletter.created',
+        metadata: { source: 'blank' },
+      }),
+    );
+  });
+
+  it('shares the tenant work state with another member of the same tenant', async () => {
+    mocks.rows = [row()];
+    mocks.authUserId = 'user-2';
+
+    const response = await GET(new Request('http://localhost:3000/api/newsletters/own'), routeContext('own'));
+
+    expect(response.status).toBe(200);
+    expect((await responseJson(response)).tenantId).toBe('tenant-1');
+  });
+
+  it('hides newsletters belonging to another tenant', async () => {
+    mocks.rows = [row({ tenantId: 'tenant-2' })];
 
     const response = await GET(new Request('http://localhost:3000/api/newsletters/own'), routeContext('own'));
 
@@ -176,6 +217,7 @@ describe('newsletter detail API route', () => {
     expect(response.status).toBe(200);
     expect(payload.title).toBe('Updated');
     expect(mocks.rows[0].document.blocks).toHaveLength(3);
+    expect(mocks.recordAuditEvent).not.toHaveBeenCalled();
   });
 
   it('rejects PUT updates for sent newsletters', async () => {
@@ -224,11 +266,14 @@ describe('newsletter detail API route', () => {
     expect(unsentResponse.status).toBe(200);
     expect(unsentPayload.sentAt).toBeNull();
     expect(mocks.rows[0].sentAt).toBeNull();
-    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
-      userId: 'owner-1',
-      eventType: 'newsletter.marked_sent',
-      entityId: 'own',
-    });
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'user-1',
+        tenantId: 'tenant-1',
+        eventType: 'newsletter.marked_sent',
+        entityId: 'own',
+      }),
+    );
   });
 
   it('deletes an owned newsletter', async () => {
@@ -240,11 +285,14 @@ describe('newsletter detail API route', () => {
     expect(response.status).toBe(200);
     expect(payload).toEqual({ ok: true });
     expect(mocks.rows).toHaveLength(0);
-    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
-      userId: 'owner-1',
-      eventType: 'newsletter.deleted',
-      entityId: 'own',
-    });
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'user-1',
+        tenantId: 'tenant-1',
+        eventType: 'newsletter.deleted',
+        entityId: 'own',
+      }),
+    );
   });
 
   it('clones newsletters with fresh block IDs', async () => {
@@ -265,5 +313,14 @@ describe('newsletter detail API route', () => {
     expect(cloneGrid?.type).toBe('eventGrid');
     if (sourceGrid?.type !== 'eventGrid' || cloneGrid?.type !== 'eventGrid') throw new Error('event grid missing');
     expect(cloneGrid.items.map((item) => item.id)).not.toEqual(sourceGrid.items.map((item) => item.id));
+    expect(mocks.recordAuditEvent).toHaveBeenCalledOnce();
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'user-1',
+        tenantId: 'tenant-1',
+        eventType: 'newsletter.created',
+        metadata: expect.objectContaining({ source: 'clone', sourceNewsletterId: 'own' }),
+      }),
+    );
   });
 });

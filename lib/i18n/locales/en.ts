@@ -1,6 +1,30 @@
 import type { UiDictionary } from '../types';
 
 export const en = {
+  admin: {
+    closedAlphaIntro: 'Closed alpha operation and latest activity status.',
+    createTenant: 'Create tenant',
+    internalNote: 'Internal note (optional)',
+    activeAccounts: 'Active accounts',
+    lastLogin: 'Last login',
+    lastActivity: 'Last activity',
+    recentErrors: 'Errors (7 days)',
+    allTenants: 'All tenants',
+    allSeverities: 'All severities',
+    backToTenants: '← Tenants',
+    internalAdminNotes: 'Internal admin notes',
+    startSupport: 'Start read-only support mode',
+    createAccount: 'Create account',
+    recentEvents: 'Recent events and errors',
+    supportBanner: 'Read-only support mode:',
+    exitSupport: 'Leave support mode',
+    supportReadOnly: 'The workspace is read-only in support mode.',
+    settingsReadOnly: 'These settings are read-only in support mode.',
+    confirmLoginTitle: 'Confirm login',
+    confirmLoginIntro: 'Confirm the login to use this one-time access link.',
+    confirmLoginButton: 'Log in securely',
+    invalidLoginLink: 'This access link is invalid.',
+  },
   account: {
     title: 'Account',
     email: 'Email',

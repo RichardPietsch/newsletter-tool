@@ -23,6 +23,7 @@ export function EditorShell({
   account,
   usedHeaderVariantIds = [],
   sentAt = null,
+  forceReadOnly = false,
 }: {
   id: string;
   document: NewsletterDocument;
@@ -30,6 +31,7 @@ export function EditorShell({
   account: AccountInfo;
   usedHeaderVariantIds?: string[];
   sentAt?: string | null;
+  forceReadOnly?: boolean;
 }) {
   const [overlay, setOverlay] = useState<EditorOverlay>(null);
   const [saveIssues, setSaveIssues] = useState<NewsletterSaveIssue[]>([]);
@@ -41,7 +43,7 @@ export function EditorShell({
   useEffect(() => initStore(id, document), [id, document]);
 
   const { sentAtState, isReadOnly, renameNewsletter, toggleNewsletterSent, cloneNewsletter, deleteNewsletter } =
-    useNewsletterActions({ id, sentAt });
+    useNewsletterActions({ id, sentAt, forceReadOnly });
   const { exportError, exportIssues, handleExport, handleHtmlExport, handleTemplateExport, clearExportError } =
     useNewsletterExport({ id, openExportDialog: () => openOverlay('export') });
 
@@ -68,6 +70,7 @@ export function EditorShell({
         settings={settings}
         account={account}
         usedHeaderVariantIds={usedHeaderVariantIds}
+        readOnly={forceReadOnly}
         title={doc.title}
         sentAt={sentAtState}
         exportError={exportError}

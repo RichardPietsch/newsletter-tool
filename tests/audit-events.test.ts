@@ -19,9 +19,16 @@ describe('audit events', () => {
     expect(writer).toHaveBeenCalledOnce();
     expect(writer.mock.calls[0]?.[0]).toEqual({
       id: expect.any(String),
-      userId: 'user-1',
+      tenantId: null,
+      actorUserId: 'user-1',
       eventType: 'newsletter.exported',
+      severity: 'info',
+      outcome: 'succeeded',
+      summary: 'newsletter.exported',
+      correlationId: expect.any(String),
+      entityType: null,
       entityId: 'newsletter-1',
+      metadata: {},
       createdAt: expect.any(Date),
     });
   });

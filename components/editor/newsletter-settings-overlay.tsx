@@ -14,6 +14,7 @@ export function NewsletterSettingsOverlay({
   onToggleSent,
   onClone,
   onDelete,
+  readOnly = false,
 }: {
   open: boolean;
   title: string;
@@ -23,6 +24,7 @@ export function NewsletterSettingsOverlay({
   onToggleSent: () => Promise<void>;
   onClone: () => Promise<void>;
   onDelete: () => Promise<void>;
+  readOnly?: boolean;
 }) {
   const [draftTitle, setDraftTitle] = useState(title);
   const [status, setStatus] = useState<'idle' | 'saving' | 'error'>('idle');
@@ -57,13 +59,13 @@ export function NewsletterSettingsOverlay({
             <input
               className="min-w-0 flex-1 rounded border p-2"
               value={draftTitle}
-              disabled={isSent}
+              disabled={isSent || readOnly}
               onChange={(event) => setDraftTitle(event.target.value)}
             />
             <button
               type="button"
               className="rounded bg-blue-700 px-4 py-2 text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-              disabled={isSent || !draftTitle.trim() || status === 'saving'}
+              disabled={isSent || readOnly || !draftTitle.trim() || status === 'saving'}
               onClick={() => void saveTitle()}
             >
               {t('newsletterSettings.save')}
@@ -84,6 +86,7 @@ export function NewsletterSettingsOverlay({
                 : 'mt-4 rounded border border-green-700 px-4 py-2 text-green-800'
             }
             onClick={() => void onToggleSent()}
+            disabled={readOnly}
           >
             {isSent ? t('newsletterSettings.unmarkSent') : t('newsletterSettings.markSent')}
           </button>
@@ -95,6 +98,7 @@ export function NewsletterSettingsOverlay({
             type="button"
             className="mt-4 rounded bg-blue-700 px-4 py-2 text-white"
             onClick={() => void onClone()}
+            disabled={readOnly}
           >
             {t('misc.cloneNewsletter')}
           </button>
@@ -106,6 +110,7 @@ export function NewsletterSettingsOverlay({
             type="button"
             className="mt-4 rounded bg-red-700 px-4 py-2 text-white"
             onClick={() => void onDelete()}
+            disabled={readOnly}
           >
             {t('newsletterSettings.delete')}
           </button>

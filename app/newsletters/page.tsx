@@ -3,19 +3,19 @@ export const dynamic = 'force-dynamic';
 import { desc, eq } from 'drizzle-orm';
 import { MdiIcon } from '@/components/editor/icons';
 import { NewsletterOverviewShell } from '@/components/editor/newsletter-overview-shell';
-import { requirePageUser } from '@/lib/auth/current-user';
+import { requireTenantPageContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
-import { getUserSettings } from '@/lib/settings/store';
+import { getTenantSettings } from '@/lib/settings/store';
 
 export default async function Page() {
-  const user = await requirePageUser();
+  const context = await requireTenantPageContext();
   const rows = await db
     .select()
     .from(newsletters)
-    .where(eq(newsletters.ownerId, user.id))
+    .where(eq(newsletters.tenantId, context.tenant.id))
     .orderBy(desc(newsletters.updatedAt));
-  const settings = await getUserSettings(user.id);
+  const settings = await getTenantSettings(context.tenant.id);
   const usedHeaderVariantIds = rows.flatMap((row) => {
     const document = row.document as { blocks?: Array<{ type?: string; headerVariantId?: string }> };
     return (
@@ -28,20 +28,27 @@ export default async function Page() {
   return (
     <NewsletterOverviewShell
       settings={settings}
+      readOnly={context.mode === 'support'}
       usedHeaderVariantIds={Array.from(new Set(usedHeaderVariantIds))}
-      account={{ email: user.email, lastLoginAt: user.lastLoginAt?.toISOString() ?? null }}
+      account={{ email: context.user.email, lastLoginAt: context.user.lastLoginAt?.toISOString() ?? null }}
       firstNewsletterHref={rows[0] ? `/newsletters/${rows[0].id}` : undefined}
     >
       <main className="mx-auto max-w-3xl p-8">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-3xl font-bold">{t('misc.newslettersTitle')}</h1>
           <a className="text-sm text-slate-600 underline" href="/account">
-            {user.email}
+            {context.user.email}
           </a>
         </div>
-        <form action="/api/newsletters" method="post">
-          <button className="my-6 rounded bg-blue-700 px-4 py-2 text-white">{t('misc.createNewsletter')}</button>
-        </form>
+        {context.mode !== 'support' ? (
+          <form action="/api/newsletters" method="post">
+            <button className="my-6 rounded bg-blue-700 px-4 py-2 text-white">{t('misc.createNewsletter')}</button>
+          </form>
+        ) : (
+          <p className="my-6 rounded border border-amber-300 bg-amber-50 p-3 text-amber-900">
+            {t('admin.supportReadOnly')}
+          </p>
+        )}
         <div className="space-y-3">
           {rows.map((newsletter) => (
             <a

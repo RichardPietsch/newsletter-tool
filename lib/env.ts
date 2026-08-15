@@ -8,8 +8,8 @@ const rawEnvSchema = z.object({
   AUTH_COOKIE_NAME: z.string().optional(),
   AUTH_MAGIC_LINK_TTL_MINUTES: z.string().optional(),
   AUTH_SESSION_DAYS: z.string().optional(),
-  AUTH_ALLOWED_EMAILS: z.string().optional(),
-  AUTH_ALLOWED_EMAIL_DOMAINS: z.string().optional(),
+  AUTH_SESSION_IDLE_HOURS: z.string().optional(),
+  AUTH_RATE_LIMIT_SECRET: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
   SMTP_USER: z.string().optional(),
@@ -24,13 +24,6 @@ const rawEnvSchema = z.object({
 });
 
 const productionBuildPhase = 'phase-production-build';
-
-function splitCsv(value: string) {
-  return value
-    .split(',')
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-}
 
 function assertUrl(value: string, key: string, errors: string[]) {
   try {
@@ -73,13 +66,22 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
   const appUrl = read('APP_URL', 'http://localhost:3000');
   const authCookieName = read('AUTH_COOKIE_NAME', 'newsletter_session', false);
   const magicLinkTtlMinutes = readPositiveInteger(
-    read('AUTH_MAGIC_LINK_TTL_MINUTES', '15', false),
+    read('AUTH_MAGIC_LINK_TTL_MINUTES', '10', false),
     'AUTH_MAGIC_LINK_TTL_MINUTES',
     errors,
   );
+  if (magicLinkTtlMinutes > 10) errors.push('AUTH_MAGIC_LINK_TTL_MINUTES must not exceed 10 minutes.');
   const sessionDays = readPositiveInteger(read('AUTH_SESSION_DAYS', '14', false), 'AUTH_SESSION_DAYS', errors);
-  const authAllowedEmails = splitCsv(read('AUTH_ALLOWED_EMAILS', '', false));
-  const authAllowedEmailDomains = splitCsv(read('AUTH_ALLOWED_EMAIL_DOMAINS', '', false));
+  const sessionIdleHours = readPositiveInteger(
+    read('AUTH_SESSION_IDLE_HOURS', '12', false),
+    'AUTH_SESSION_IDLE_HOURS',
+    errors,
+  );
+  const authRateLimitSecret = read(
+    'AUTH_RATE_LIMIT_SECRET',
+    'development-only-rate-limit-secret',
+    requireProductionValues,
+  );
   const smtpHost = read('SMTP_HOST', 'localhost');
   const smtpPort = readPositiveInteger(read('SMTP_PORT', '1025', false), 'SMTP_PORT', errors);
   const smtpUser = read('SMTP_USER', '', requireProductionValues);
@@ -96,10 +98,6 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
   assertUrl(s3Endpoint, 'S3_ENDPOINT', errors);
   assertUrl(publicAssetBaseUrl, 'PUBLIC_ASSET_BASE_URL', errors);
 
-  if (requireProductionValues && authAllowedEmails.length === 0 && authAllowedEmailDomains.length === 0) {
-    errors.push('AUTH_ALLOWED_EMAILS or AUTH_ALLOWED_EMAIL_DOMAINS must be configured in production.');
-  }
-
   if (errors.length > 0) {
     throw new Error(`Invalid server environment:\n${errors.map((error) => `- ${error}`).join('\n')}`);
   }
@@ -113,8 +111,8 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
       cookieName: authCookieName,
       magicLinkTtlMinutes,
       sessionDays,
-      allowedEmails: authAllowedEmails,
-      allowedEmailDomains: authAllowedEmailDomains,
+      sessionIdleHours,
+      rateLimitSecret: authRateLimitSecret,
     },
     smtp: {
       host: smtpHost,

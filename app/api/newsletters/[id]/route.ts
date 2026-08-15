@@ -6,12 +6,13 @@ import { nanoid } from 'nanoid';
 import { conflict, notFound, validationError } from '@/lib/api/api-error';
 import { parseJson } from '@/lib/api/parse-json';
 import { validateMutationOrigin } from '@/lib/api/origin';
-import { requireApiUser } from '@/lib/auth/current-user';
+import { requireTenantApiContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { newsletters } from '@/lib/db/schema';
 import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { newsletterDocumentSchema, type NewsletterDocument } from '@/lib/newsletter/schema';
 import { recordAuditEvent } from '@/lib/db/audit-events';
+import { requestIdFrom } from '@/lib/logging/logger';
 
 type NewsletterRouteContext = {
   params: Promise<{ id: string }>;
@@ -28,13 +29,13 @@ const patchSchema = z.object({
 });
 
 export async function GET(_: Request, { params }: NewsletterRouteContext) {
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext();
   if (auth.response) return auth.response;
   const { id } = await params;
   const [newsletter] = await db
     .select()
     .from(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!newsletter) return notFound();
   const migratedDocument = safeMigrateNewsletterDocument(newsletter.document);
   if (!migratedDocument.success)
@@ -47,13 +48,13 @@ export async function GET(_: Request, { params }: NewsletterRouteContext) {
 export async function PUT(request: Request, { params }: NewsletterRouteContext) {
   const originError = validateMutationOrigin(request);
   if (originError) return originError;
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext(request, true);
   if (auth.response) return auth.response;
   const { id } = await params;
   const [current] = await db
     .select()
     .from(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!current) return notFound();
   if (current.sentAt) return conflict('Versendete Newsletter können nicht mehr bearbeitet werden.');
 
@@ -67,7 +68,7 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
       document: parsed.data.document,
       updatedAt: new Date(),
     })
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)))
     .returning();
 
   return newsletter ? NextResponse.json(newsletter) : notFound();
@@ -76,7 +77,7 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
 export async function PATCH(request: Request, { params }: NewsletterRouteContext) {
   const originError = validateMutationOrigin(request);
   if (originError) return originError;
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext(request, true);
   if (auth.response) return auth.response;
   const { id } = await params;
   const parsed = await parseJson(request, patchSchema);
@@ -85,7 +86,7 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
   const [current] = await db
     .select()
     .from(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!current) return notFound();
   if (current.sentAt && patch.title) return conflict('Versendete Newsletter können nicht umbenannt werden.');
 
@@ -94,11 +95,18 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
   const [newsletter] = await db
     .update(newsletters)
     .set({ title: patch.title ?? current.title, sentAt, updatedAt: new Date() })
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)))
     .returning();
 
   if (newsletter && patch.sent === true && !wasSent) {
-    await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.marked_sent', entityId: id });
+    await recordAuditEvent({
+      actorUserId: auth.context.user.id,
+      tenantId: auth.context.tenant.id,
+      eventType: 'newsletter.marked_sent',
+      entityType: 'newsletter',
+      entityId: id,
+      correlationId: requestIdFrom(request),
+    });
   }
 
   const responseSentAt = newsletter.sentAt instanceof Date ? newsletter.sentAt.toISOString() : newsletter.sentAt;
@@ -108,14 +116,22 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
 export async function DELETE(request: Request, { params }: NewsletterRouteContext) {
   const originError = validateMutationOrigin(request);
   if (originError) return originError;
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext(request, true);
   if (auth.response) return auth.response;
   const { id } = await params;
   const [newsletter] = await db
     .delete(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)))
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)))
     .returning({ id: newsletters.id });
-  if (newsletter) await recordAuditEvent({ userId: auth.user.id, eventType: 'newsletter.deleted', entityId: id });
+  if (newsletter)
+    await recordAuditEvent({
+      actorUserId: auth.context.user.id,
+      tenantId: auth.context.tenant.id,
+      eventType: 'newsletter.deleted',
+      entityType: 'newsletter',
+      entityId: id,
+      correlationId: requestIdFrom(request),
+    });
   return newsletter ? NextResponse.json({ ok: true }) : notFound();
 }
 
@@ -134,13 +150,13 @@ function cloneDocumentWithFreshIds(document: NewsletterDocument) {
 export async function POST(request: Request, { params }: NewsletterRouteContext) {
   const originError = validateMutationOrigin(request);
   if (originError) return originError;
-  const auth = await requireApiUser();
+  const auth = await requireTenantApiContext(request, true);
   if (auth.response) return auth.response;
   const { id } = await params;
   const [current] = await db
     .select()
     .from(newsletters)
-    .where(and(eq(newsletters.id, id), eq(newsletters.ownerId, auth.user.id)));
+    .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!current) return notFound();
 
   const migratedDocument = safeMigrateNewsletterDocument(current.document);
@@ -153,8 +169,19 @@ export async function POST(request: Request, { params }: NewsletterRouteContext)
   const cloneId = nanoid();
   const [newsletter] = await db
     .insert(newsletters)
-    .values({ id: cloneId, ownerId: auth.user.id, title: clonedDocument.title, document: clonedDocument })
+    .values({ id: cloneId, tenantId: auth.context.tenant.id, title: clonedDocument.title, document: clonedDocument })
     .returning();
+
+  await recordAuditEvent({
+    actorUserId: auth.context.user.id,
+    tenantId: auth.context.tenant.id,
+    eventType: 'newsletter.created',
+    summary: 'Newsletter als Kopie gestartet.',
+    entityType: 'newsletter',
+    entityId: cloneId,
+    correlationId: requestIdFrom(request),
+    metadata: { source: 'clone', sourceNewsletterId: id },
+  });
 
   return NextResponse.json({ ...newsletter, location: `/newsletters/${cloneId}` }, { status: 201 });
 }

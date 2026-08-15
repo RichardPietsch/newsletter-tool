@@ -45,7 +45,7 @@ export function conflict(message: string) {
   return apiError(409, 'CONFLICT', message);
 }
 
-export function forbidden(message: string) {
+export function forbidden(message = 'Nicht erlaubt') {
   return apiError(403, 'FORBIDDEN', message);
 }
 

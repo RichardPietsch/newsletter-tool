@@ -10,16 +10,23 @@ export function SettingsOverlay({
   onClose,
   settings,
   usedHeaderVariantIds,
+  readOnly = false,
 }: {
   open: boolean;
   onClose: () => void;
   settings: GlobalSettings;
   usedHeaderVariantIds: string[];
+  readOnly?: boolean;
 }) {
   if (!open) return null;
   return (
     <Overlay title={t('misc.settingsTitle')} onClose={onClose}>
-      <SettingsEditor initialSettings={settings} usedHeaderVariantIds={usedHeaderVariantIds} embedded />
+      <SettingsEditor
+        initialSettings={settings}
+        usedHeaderVariantIds={usedHeaderVariantIds}
+        embedded
+        readOnly={readOnly}
+      />
     </Overlay>
   );
 }

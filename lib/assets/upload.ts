@@ -67,7 +67,7 @@ async function normalizeImage(buffer: Buffer, format: string, width?: number) {
   return buffer;
 }
 
-export async function validateAndUpload(file: File, upload: AssetUploader = putAsset) {
+export async function validateAndUpload(file: File, upload: AssetUploader = putAsset, tenantId?: string) {
   const input = Buffer.from(await file.arrayBuffer());
   if (input.length > UPLOAD_LIMITS.maxBytes)
     throw new UploadValidationError('FILE_TOO_LARGE', 'Datei ist größer als 10 MB.');
@@ -88,7 +88,8 @@ export async function validateAndUpload(file: File, upload: AssetUploader = putA
 
   const output = await normalizeImage(input, inputMetadata.format!, inputMetadata.width);
   const outputMetadata = await sharp(output, { animated: true }).metadata();
-  const key = `${nanoid()}-${file.name.replace(/[^a-z0-9._-]/gi, '-')}`;
+  const prefix = tenantId ? `${tenantId.replace(/[^a-z0-9_-]/gi, '-')}/` : '';
+  const key = `${prefix}${nanoid()}-${file.name.replace(/[^a-z0-9._-]/gi, '-')}`;
   const publicUrl = await upload(key, output, mimeType);
 
   return {

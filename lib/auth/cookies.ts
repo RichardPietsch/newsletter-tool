@@ -6,7 +6,7 @@ export function sessionCookieOptions(): Partial<ResponseCookie> {
   return {
     httpOnly: true,
     secure: serverEnv.isProduction,
-    sameSite: 'lax',
+    sameSite: 'strict',
     path: '/',
     maxAge: 60 * 60 * 24 * SESSION_DAYS,
   };

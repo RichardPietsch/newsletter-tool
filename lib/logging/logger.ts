@@ -5,6 +5,7 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 export type LogContext = {
   event: string;
   userId?: string;
+  tenantId?: string;
   newsletterId?: string;
   requestId?: string;
 };

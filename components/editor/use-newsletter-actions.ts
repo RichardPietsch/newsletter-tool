@@ -4,11 +4,19 @@ import { useState } from 'react';
 import { t } from '@/lib/i18n';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 
-export function useNewsletterActions({ id, sentAt }: { id: string; sentAt?: string | null }) {
+export function useNewsletterActions({
+  id,
+  sentAt,
+  forceReadOnly = false,
+}: {
+  id: string;
+  sentAt?: string | null;
+  forceReadOnly?: boolean;
+}) {
   const [sentAtState, setSentAtState] = useState<string | null>(sentAt ?? null);
   const setStatus = useNewsletterStore((state) => state.setStatus);
   const setTitle = useNewsletterStore((state) => state.setTitle);
-  const isReadOnly = Boolean(sentAtState);
+  const isReadOnly = forceReadOnly || Boolean(sentAtState);
 
   async function renameNewsletter(nextTitle: string) {
     if (isReadOnly) return;
@@ -22,6 +30,7 @@ export function useNewsletterActions({ id, sentAt }: { id: string; sentAt?: stri
   }
 
   async function toggleNewsletterSent() {
+    if (forceReadOnly) return;
     const nextSent = !sentAtState;
     const message = nextSent ? t('newsletterSettings.confirmSent') : t('newsletterSettings.confirmUnsent');
     if (!window.confirm(message)) return;
@@ -37,6 +46,7 @@ export function useNewsletterActions({ id, sentAt }: { id: string; sentAt?: stri
   }
 
   async function cloneNewsletter() {
+    if (forceReadOnly) return;
     const response = await fetch(`/api/newsletters/${id}`, { method: 'POST' });
     if (!response.ok) return;
     const payload = (await response.json()) as { location?: string };
@@ -44,6 +54,7 @@ export function useNewsletterActions({ id, sentAt }: { id: string; sentAt?: stri
   }
 
   async function deleteNewsletter() {
+    if (forceReadOnly) return;
     if (!window.confirm(t('newsletterSettings.confirmDelete'))) return;
     const response = await fetch(`/api/newsletters/${id}`, { method: 'DELETE' });
     if (response.ok) window.location.href = '/newsletters';

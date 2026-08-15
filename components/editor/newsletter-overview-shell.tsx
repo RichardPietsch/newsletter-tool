@@ -20,12 +20,14 @@ export function NewsletterOverviewShell({
   account,
   usedHeaderVariantIds,
   firstNewsletterHref,
+  readOnly = false,
 }: {
   children: ReactNode;
   settings: GlobalSettings;
   account: AccountInfo;
   usedHeaderVariantIds: string[];
   firstNewsletterHref?: string;
+  readOnly?: boolean;
 }) {
   const [overlay, setOverlay] = useState<'media' | 'settings' | 'account' | null>(null);
 
@@ -37,12 +39,13 @@ export function NewsletterOverviewShell({
         onOpenAccount={() => setOverlay('account')}
       />
       <div className="flex-1">{children}</div>
-      <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} />
+      <MediaLibraryOverlay open={overlay === 'media'} onClose={() => setOverlay(null)} readOnly={readOnly} />
       <SettingsOverlay
         open={overlay === 'settings'}
         onClose={() => setOverlay(null)}
         settings={settings}
         usedHeaderVariantIds={usedHeaderVariantIds}
+        readOnly={readOnly}
       />
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
       <OnboardingTour variant="overview" accountEmail={account.email} firstNewsletterHref={firstNewsletterHref} />

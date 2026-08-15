@@ -5,7 +5,7 @@ const productionEnv = {
   NODE_ENV: 'production',
   DATABASE_URL: 'postgres://newsletter:newsletter@db:5432/newsletter',
   APP_URL: 'https://newsletter.example.com',
-  AUTH_ALLOWED_EMAILS: 'editor@example.com',
+  AUTH_RATE_LIMIT_SECRET: 'test-rate-limit-secret-at-least-32-characters',
   SMTP_HOST: 'smtp.example.com',
   SMTP_USER: 'user',
   SMTP_PASSWORD: 'password',
@@ -37,20 +37,25 @@ describe('server environment validation', () => {
     expect(env.databaseUrl).toBe('postgres://newsletter:newsletter@localhost:5432/newsletter');
   });
 
-  it('normalizes allow lists and parses numeric settings', () => {
+  it('parses numeric authentication settings', () => {
     const env = parseServerEnv({
       ...productionEnv,
-      AUTH_MAGIC_LINK_TTL_MINUTES: '20',
+      AUTH_MAGIC_LINK_TTL_MINUTES: '8',
       AUTH_SESSION_DAYS: '45',
-      AUTH_ALLOWED_EMAILS: ' Editor@Example.com ',
-      AUTH_ALLOWED_EMAIL_DOMAINS: ' Club.Example ',
       SMTP_PORT: '465',
     });
 
-    expect(env.auth.magicLinkTtlMinutes).toBe(20);
+    expect(env.auth.magicLinkTtlMinutes).toBe(8);
     expect(env.auth.sessionDays).toBe(45);
-    expect(env.auth.allowedEmails).toEqual(['editor@example.com']);
-    expect(env.auth.allowedEmailDomains).toEqual(['club.example']);
     expect(env.smtp.port).toBe(465);
+  });
+
+  it('rejects magic links that would remain valid for more than ten minutes', () => {
+    expect(() =>
+      parseServerEnv({
+        ...productionEnv,
+        AUTH_MAGIC_LINK_TTL_MINUTES: '11',
+      }),
+    ).toThrow(/must not exceed 10 minutes/);
   });
 });

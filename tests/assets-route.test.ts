@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 type AssetRow = {
   id: string;
-  ownerId: string;
+  tenantId: string;
   title: string;
   altText: string;
   storageKey: string;
@@ -18,11 +18,12 @@ type AssetRow = {
 
 type Condition = { op: 'eq'; column: string; value: string } | { op: 'and'; conditions: Condition[] };
 
-type UploadedAsset = Omit<AssetRow, 'id' | 'ownerId' | 'title' | 'altText'>;
+type UploadedAsset = Omit<AssetRow, 'id' | 'tenantId' | 'title' | 'altText'>;
 
 const mocks = vi.hoisted(() => ({
   rows: [] as AssetRow[],
-  authUserId: 'owner-1',
+  authUserId: 'user-1',
+  authTenantId: 'tenant-1',
   uploadResult: null as UploadedAsset | null,
   uploadError: null as Error | null,
   recordAuditEvent: vi.fn(async () => true),
@@ -45,7 +46,7 @@ function matchingRows(condition: Condition | undefined) {
   const filters = conditionFilters(condition);
   return mocks.rows.filter((row) => {
     if (filters.id && row.id !== filters.id) return false;
-    if (filters.ownerId && row.ownerId !== filters.ownerId) return false;
+    if (filters.tenantId && row.tenantId !== filters.tenantId) return false;
     return true;
   });
 }
@@ -58,7 +59,7 @@ vi.mock('drizzle-orm', () => ({
 vi.mock('@/lib/db/schema', () => ({
   assets: {
     id: 'id',
-    ownerId: 'ownerId',
+    tenantId: 'tenantId',
     title: 'title',
     altText: 'altText',
     storageKey: 'storageKey',
@@ -67,7 +68,15 @@ vi.mock('@/lib/db/schema', () => ({
 }));
 
 vi.mock('@/lib/auth/current-user', () => ({
-  requireApiUser: vi.fn(async () => ({ user: { id: mocks.authUserId, email: 'owner@example.com' }, response: null })),
+  requireTenantApiContext: vi.fn(async () => ({
+    context: {
+      user: { id: mocks.authUserId, email: 'user@example.com' },
+      tenant: { id: mocks.authTenantId },
+      mode: 'member',
+      sessionId: 'session-1',
+    },
+    response: null,
+  })),
 }));
 
 vi.mock('@/lib/assets/upload', () => {
@@ -125,7 +134,7 @@ import { UploadValidationError } from '@/lib/assets/upload';
 function asset(overrides: Partial<AssetRow> = {}): AssetRow {
   return {
     id: 'asset-1',
-    ownerId: 'owner-1',
+    tenantId: 'tenant-1',
     title: 'Bild',
     altText: 'Alt',
     storageKey: 'asset.jpg',
@@ -162,14 +171,15 @@ async function responseJson(response: Response) {
 describe('assets API route', () => {
   beforeEach(() => {
     mocks.rows = [];
-    mocks.authUserId = 'owner-1';
+    mocks.authUserId = 'user-1';
+    mocks.authTenantId = 'tenant-1';
     mocks.uploadResult = null;
     mocks.uploadError = null;
     mocks.recordAuditEvent.mockClear();
   });
 
-  it('returns assets only for the authenticated owner', async () => {
-    mocks.rows = [asset(), asset({ id: 'asset-2', ownerId: 'other-user' })];
+  it('returns assets only for the authenticated tenant', async () => {
+    mocks.rows = [asset(), asset({ id: 'asset-2', tenantId: 'tenant-2' })];
 
     const response = await GET();
     const payload = (await response.json()) as AssetRow[];
@@ -198,8 +208,8 @@ describe('assets API route', () => {
     expect(payload.error).toMatchObject({ code: 'BAD_REQUEST' });
   });
 
-  it('returns 404 when updating an asset owned by someone else', async () => {
-    mocks.rows = [asset({ ownerId: 'other-user' })];
+  it('returns 404 when updating an asset from another tenant', async () => {
+    mocks.rows = [asset({ tenantId: 'tenant-2' })];
 
     const response = await PUT(jsonRequest({ id: 'asset-1', title: 'Neu' }));
 
@@ -223,11 +233,12 @@ describe('assets API route', () => {
     const payload = await responseJson(response);
 
     expect(response.status).toBe(200);
-    expect(mocks.recordAuditEvent).toHaveBeenCalledWith({
-      userId: 'owner-1',
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
+      actorUserId: 'user-1',
+      tenantId: 'tenant-1',
       eventType: 'asset.uploaded',
       entityId: payload.id,
-    });
+    }));
   });
 
   it('updates title and alt text for owned assets', async () => {

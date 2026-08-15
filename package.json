@@ -8,9 +8,11 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx drizzle/seed.ts",
-    "db:ensure": "tsx scripts/ensure-db.ts",
+    "db:ensure": "pnpm db:migrate",
+    "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
+    "audit:purge": "tsx scripts/purge-audit-events.ts",
     "check:copy": "node scripts/check-ui-copy.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

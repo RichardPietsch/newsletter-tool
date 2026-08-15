@@ -15,7 +15,7 @@ export async function consumeMagicLinkToken(tokenHash: string, consumedAt: Date,
         gt(authMagicLinks.expiresAt, consumedAt),
       ),
     )
-    .returning({ id: authMagicLinks.id, userId: authMagicLinks.userId });
+    .returning({ id: authMagicLinks.id, userId: authMagicLinks.userId, email: authMagicLinks.email });
 
   return row ?? null;
 }

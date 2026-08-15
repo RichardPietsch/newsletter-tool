@@ -8,7 +8,7 @@ Desktop-orientierter Next.js Newsletter-Editor. Der Stack verwendet Next.js 16.2
 - `components/`: dreispaltiger Editor mit Side-Rail, Canvas, Einfügeflächen, Overlay und Inspector.
 - `lib/newsletter/`: Zod-Schemas, Defaults, Operationen, Zustand Store und Undo/Redo. Die Modul-Registry in `lib/newsletter/module-registry.ts` sammelt neue Modul-Metadaten inkrementell; aktuell sind `quote` und `sectionHeading` registriert. Neue Module sollen dort künftig Label-Key, Default-Erzeugung und Schema-Referenz ergänzen; serverseitige E-Mail-Renderer werden separat über `email/module-render-registry.ts` angebunden, bevor Canvas-/Inspector-Registries nachgezogen werden.
 - `email/`: zentrale E-Mail-Theme-Werte und MJML-Modulrenderer. `theme.css` ist die menschlich lesbare Referenz; `theme.ts` enthält dieselben Token für die Pipeline.
-- `lib/db/`: Drizzle Schema für `users`, `newsletters`, `assets`, `app_settings`, Magic Links und Sessions.
+- `lib/db/`: Drizzle Schema für Mandanten, Benutzerrollen, tenantbezogene Fachdaten, Auditereignisse, Magic Links und Sessions.
 - `lib/auth/`: Passwordless Authentifizierung mit gehashten Einmal-Token, HTTP-only Session-Cookies und Zugriffsschutz für Pages/API-Routen.
 
 ## Start
@@ -70,7 +70,7 @@ Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit 
 
 1. DNS vorbereiten, z. B. `newsletter.example.com` für die App und `assets.example.com` für öffentlich erreichbare Newsletter-Bilder.
 2. `.env.production.example` als Vorlage verwenden und die Werte in Portainer als Stack-Environment-Variablen oder lokal in einer nicht committeten `.env.production` pflegen. Die Production-Compose-Datei nutzt keine Beispiel-Env-Datei als Fallback mehr.
-3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten, MinIO/S3-Zugangsdaten und entweder `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS`. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
+3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
 4. Stack mit Production-Compose starten:
 
 ```bash
@@ -91,17 +91,17 @@ pnpm db:migrate
 pnpm db:seed
 ```
 
-Für Docker und schnelle lokale Reparaturen gibt es zusätzlich:
+Für die Runtime und Docker gibt es zusätzlich den kompatiblen Alias:
 
 ```bash
 pnpm db:ensure
 ```
 
-Dieser Befehl legt die MVP-Tabellen bei Bedarf per `create table if not exists` an und seedet den lokalen Default-User. Der Docker-Web-Service führt ihn vor `pnpm dev` automatisch aus, damit der Button "Neuen Newsletter erstellen" nicht gegen eine leere Datenbank läuft. Das Skript ist bewusst ohne Top-Level-`await` geschrieben, damit es im Docker-Container mit der von `tsx` genutzten CommonJS-Transformation läuft.
+Dieser Befehl führt ausschließlich die versionierten Drizzle-Migrationen aus. Der lokale Docker-Web-Service führt anschließend zusätzlich den idempotenten Entwicklungsseed aus; Produktion erzeugt niemals implizit Accounts.
 
 ## Umgebungsvariablen
 
-Siehe `.env.example` für lokale Entwicklung und `.env.production.example` für Production. Für Portainer werden die Werte als Stack-Environment-Variablen erwartet; `docker-compose.prod.yml` verwendet keine vorausgefüllte Beispiel-Env-Datei als automatischen Fallback. Serverseitige Umgebungsvariablen werden zentral in `lib/env.ts` validiert: In lokaler Entwicklung greifen sichere Defaults, während `NODE_ENV=production` beim Runtime-Start fehlende Pflichtwerte bewusst blockiert. Für den Login sind `APP_URL`, `AUTH_ALLOWED_EMAILS` oder `AUTH_ALLOWED_EMAIL_DOMAINS` sowie SMTP-Variablen relevant. In Produktion muss mindestens eine Auth-Allowlist gesetzt sein. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
+Siehe `.env.example` für lokale Entwicklung und `.env.production.example` für Production. Für Portainer werden die Werte als Stack-Environment-Variablen erwartet; `docker-compose.prod.yml` verwendet keine vorausgefüllte Beispiel-Env-Datei als automatischen Fallback. Serverseitige Umgebungsvariablen werden zentral in `lib/env.ts` validiert: In lokaler Entwicklung greifen sichere Defaults, während `NODE_ENV=production` beim Runtime-Start fehlende Pflichtwerte bewusst blockiert. Für den Login sind `APP_URL`, `AUTH_RATE_LIMIT_SECRET` und SMTP-Variablen relevant. Der Accountbestand wird ausschließlich durch Adminanlage und Bootstrap bestimmt, nicht durch eine E-Mail-Allowlist. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
 
 ## Tests und Qualität
 
@@ -132,7 +132,22 @@ Der Bereich `/settings` ist über das Zahnrad in der linken Funktionsleiste erre
 
 ## Login und Zugriffsschutz
 
-Die Anwendung nutzt Passwordless Login per Magic Link. Der Login erzeugt einen kryptografisch sicheren Einmal-Token, speichert nur dessen SHA-256-Hash in `auth_magic_links`, versendet den Link per SMTP und setzt nach erfolgreicher Verifikation ein HTTP-only Session-Cookie. Newsletter, Assets und Einstellungen werden über `ownerId` bzw. nutzerbezogene Settings eindeutig dem angemeldeten Nutzer zugeordnet. Lokale Testmails landen im Docker-Setup in Mailpit (`http://localhost:8025`).
+Die Anwendung nutzt ausschließlich Passwordless Login per Magic Link. Nur bereits manuell angelegte, aktive Accounts aktiver Mandanten erhalten einen Link; die Loginseite legt niemals Benutzer an und antwortet unabhängig vom Accountbestand gleich. Der kryptografisch zufällige Einmal-Token wird nur als SHA-256-Hash gespeichert, läuft nach zehn Minuten ab und wird erst nach einer Bestätigungsseite per POST atomar verbraucht. Dadurch verbrauchen übliche E-Mail-Sicherheitsscanner den Link nicht allein durch einen GET-Abruf. Sessions prüfen bei jedem Request Benutzer- und Mandantenstatus. Newsletter, Assets und Einstellungen gehören dem serverseitig aus der Session abgeleiteten Mandanten. Lokale Testmails landen im Docker-Setup in Mailpit (`http://localhost:8025`).
+
+## Alpha-Administration und Support
+
+Der einzige Plattform-Administrator wird einmalig per CLI gebootstrapped; es gibt keine Adminanlage in der Webanwendung:
+
+```bash
+pnpm db:migrate
+pnpm admin:bootstrap --email admin@example.com --name "Plattform Admin"
+```
+
+Anschließend fordert der Admin regulär einen Magic Link an und verwaltet Mandanten unter `/admin`. Das Admin-E-Mail-Konto muss wegen seiner Plattformrechte mit MFA geschützt sein. Mitarbeiter werden ohne Passwort und ohne automatischen E-Mail-Versand angelegt. Deaktivierungen widerrufen aktive Sessions, löschen aber keine Daten.
+
+Der Supportmodus speichert den betrachteten Mandanten in der serverseitigen Adminsession. Er zeigt einen permanenten Hinweis, bleibt vollständig lesend und blockiert direkte POST-, PUT-, PATCH- und DELETE-Aufrufe serverseitig mit Auditereignis. Verlassen wird er über den permanenten Banner.
+
+Auditereignisse werden 90 Tage aufbewahrt. `pnpm audit:purge` führt die idempotente Bereinigung aus; der Production-Compose-Stack enthält dafür einen täglich laufenden separaten Service. Ausführliche Betriebsanweisungen stehen in `docs/admin-operations.md`.
 
 ## Annahmen und Einschränkungen
 

@@ -1,8 +1,9 @@
 import { t } from '@/lib/i18n';
 export const dynamic = 'force-dynamic';
-import { requirePageUser } from '@/lib/auth/current-user';
+import { requirePageContext } from '@/lib/auth/current-user';
 export default async function AccountPage() {
-  const user = await requirePageUser();
+  const context = await requirePageContext();
+  const user = context.user;
   return (
     <main className="mx-auto max-w-xl p-8">
       <h1 className="text-3xl font-bold">{t('account.title')}</h1>
@@ -15,6 +16,11 @@ export default async function AccountPage() {
       <a href="/logout" className="mt-6 inline-block rounded border px-4 py-2 text-red-700">
         {t('account.logout')}
       </a>
+      {user.role === 'platform_admin' ? (
+        <a href="/admin" className="ml-3 mt-6 inline-block rounded border px-4 py-2 text-blue-700">
+          Administration
+        </a>
+      ) : null}
     </main>
   );
 }

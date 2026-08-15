@@ -28,6 +28,7 @@ export function EditorOverlays({
   onHtmlExport,
   onTemplateExport,
   onCloseExportError,
+  readOnly = false,
 }: {
   overlay: EditorOverlay;
   settings?: GlobalSettings;
@@ -45,16 +46,18 @@ export function EditorOverlays({
   onHtmlExport: () => Promise<void>;
   onTemplateExport: () => Promise<void>;
   onCloseExportError: () => void;
+  readOnly?: boolean;
 }) {
   return (
     <>
-      <MediaLibraryOverlay open={overlay === 'media'} onClose={onCloseOverlay} />
+      <MediaLibraryOverlay open={overlay === 'media'} onClose={onCloseOverlay} readOnly={readOnly} />
       {settings ? (
         <SettingsOverlay
           open={overlay === 'settings'}
           onClose={onCloseOverlay}
           settings={settings}
           usedHeaderVariantIds={usedHeaderVariantIds}
+          readOnly={readOnly}
         />
       ) : null}
       <AccountOverlay open={overlay === 'account'} onClose={onCloseOverlay} account={account} />
@@ -67,6 +70,7 @@ export function EditorOverlays({
         onToggleSent={onToggleSent}
         onClone={onClone}
         onDelete={onDelete}
+        readOnly={readOnly}
       />
       {overlay === 'export' ? (
         <Overlay title={t('export.dialogTitle')} onClose={onCloseOverlay}>
