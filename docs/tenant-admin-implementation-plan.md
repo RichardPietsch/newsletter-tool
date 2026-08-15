@@ -30,14 +30,14 @@ Vorhanden sind `users`, `newsletters`, `assets`, `app_settings`, `auth_magic_lin
 
 Alle fachlichen Zugriffe sind derzeit an die Benutzer-ID gebunden:
 
-| Bereich | Lesezugriff | Schreibzugriff | heutige Trennung |
-| --- | --- | --- | --- |
-| Newsletter-Liste | `app/newsletters/page.tsx`, `GET /api/newsletters` | `POST /api/newsletters` | `owner_id = session.user.id` |
-| Newsletter-Detail | `app/newsletters/[id]/page.tsx`, `GET /api/newsletters/[id]` | PUT, PATCH, DELETE und Clone auf derselben API | Newsletter-ID plus `owner_id` |
-| Export | `GET /api/newsletters/[id]/export` | nur Audit-Nebenwirkung | Newsletter-ID plus `owner_id`; Einstellungen pro Benutzer |
-| Assets | `GET /api/assets` | POST-Upload, PUT-Metadaten | `owner_id` |
-| Einstellungen | `/settings`, `GET /api/settings` | `PUT /api/settings` | `owner_id`; Datensatz-ID ist Benutzer-ID |
-| Beispieldaten | YAML und statische Demo-Bilder | Seed beim ersten Benutzerlogin | Kopie pro Benutzer, nicht idempotent |
+| Bereich           | Lesezugriff                                                  | Schreibzugriff                                 | heutige Trennung                                          |
+| ----------------- | ------------------------------------------------------------ | ---------------------------------------------- | --------------------------------------------------------- |
+| Newsletter-Liste  | `app/newsletters/page.tsx`, `GET /api/newsletters`           | `POST /api/newsletters`                        | `owner_id = session.user.id`                              |
+| Newsletter-Detail | `app/newsletters/[id]/page.tsx`, `GET /api/newsletters/[id]` | PUT, PATCH, DELETE und Clone auf derselben API | Newsletter-ID plus `owner_id`                             |
+| Export            | `GET /api/newsletters/[id]/export`                           | nur Audit-Nebenwirkung                         | Newsletter-ID plus `owner_id`; Einstellungen pro Benutzer |
+| Assets            | `GET /api/assets`                                            | POST-Upload, PUT-Metadaten                     | `owner_id`                                                |
+| Einstellungen     | `/settings`, `GET /api/settings`                             | `PUT /api/settings`                            | `owner_id`; Datensatz-ID ist Benutzer-ID                  |
+| Beispieldaten     | YAML und statische Demo-Bilder                               | Seed beim ersten Benutzerlogin                 | Kopie pro Benutzer, nicht idempotent                      |
 
 Es gibt keine Server Actions. Autosave ruft `PUT /api/newsletters/[id]` auf. Es gibt keine Queue, keinen Worker und keinen Scheduler. Dateiuploads gehen über S3/MinIO; die Objekt-Keys haben noch kein Mandantenpräfix. Bilder müssen wegen des E-Mail-Exports öffentlich erreichbar sein, die Editor-Metadaten müssen dennoch tenant-isoliert bleiben.
 
@@ -190,8 +190,8 @@ Eine kleine Tabelle speichert atomare Zeitfensterzähler für HMAC-gehashte Logi
 4. `newsletters`, `assets` und `app_settings` werden über den bisherigen Owner auf `tenant_id` zurückgefüllt. Nicht zuordenbare Entwicklungsdaten brechen die Migration ab statt still einem falschen Tenant zugeordnet zu werden.
 5. Tenantspalten werden `NOT NULL`, passende Foreign Keys/Indizes/Unique-Constraints werden aktiviert und `owner_id` wird entfernt.
 6. Alte Magic Links und Sessions werden kontrolliert verworfen bzw. widerrufen. Die Magic-Link-Tabelle bleibt erhalten, erhält die benötigten Indizes und wird auf den scanner-sicheren zweistufigen Verbrauch umgestellt.
-7. `scripts/ensure-db.ts` wird durch `pnpm db:migrate` ersetzt. Docker- und Playwright-Startpfade führen Migrationen, aber keine implizite Accountanlage aus.
-8. Der Entwicklungsseed legt idempotent Entwicklungsmandant, einen ausdrücklich konfigurierten Testaccount und genau eine Tenantkopie des Beispiel-Newsletters an. Er legt weder Passwörter noch Magic Links oder Sessions an und ist in Produktion für Account-Provisionierung verboten.
+7. `scripts/ensure-db.ts` wird durch `pnpm db:migrate` ersetzt. Production- und Playwright-Startpfade führen Migrationen, aber keine implizite Accountanlage aus.
+8. Der lokale Entwicklungsseed legt idempotent Entwicklungsmandant, einen konfigurierbaren Testaccount, einen konfigurierbaren Plattform-Admin und genau eine Tenantkopie des Beispiel-Newsletters an. Er legt weder Passwörter noch Magic Links oder Sessions an und ist in Produktion vollständig gesperrt.
 9. Die Tenantanlage ruft direkt nach der transaktionalen Anlage dieselbe idempotente Templateinitialisierung auf. `seed_key`-Constraints verhindern Duplikate auch bei Wiederholung oder Parallelität. Block- und Asset-IDs werden pro Tenantkopie neu erzeugt; die YAML-Ausgangsdatei bleibt unverändert.
 10. Ein CLI-Kommando `pnpm admin:bootstrap --email <adresse> --name <name>` legt ausschließlich Identität und Rolle des initialen Administrators an und bricht ab, wenn bereits ein Plattform-Administrator existiert. Es erzeugt weder Link noch Session; der Administrator fordert seinen ersten Magic Link regulär über die Loginseite an.
 

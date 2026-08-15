@@ -26,6 +26,8 @@ docker compose up --build
 
 Startet Next.js, PostgreSQL, MinIO und Mailpit für lokale Login-E-Mails. MinIO läuft lokal auf `http://localhost:9000`, Konsole auf `http://localhost:9001`. Mailpit ist unter `http://localhost:8025` erreichbar und zeigt lokal versendete Magic-Link-E-Mails an. Der Compose-Stack verwendet die offiziellen Docker-Hub-Images `minio/minio:latest` und `minio/mc:latest`, weil die zuvor eingetragenen datierten `minio/mc`-Tags nicht auf Docker Hub existierten.
 
+Der ausschließlich lokale Entwicklungsseed legt automatisch `admin@example.test` als Plattform-Admin und `local@example.test` als Mitarbeiter des Entwicklungsmandanten an. Beide Adressen melden sich über `/login` per Magic Link an; die Nachrichten erscheinen in Mailpit. Die Adressen können über `DEV_ADMIN_EMAIL` beziehungsweise `DEV_SEED_EMAIL` in `.env.example` angepasst werden.
+
 Für eine saubere lokale Erstinitialisierung nach Schemaänderungen:
 
 ```bash
@@ -97,11 +99,11 @@ Für die Runtime und Docker gibt es zusätzlich den kompatiblen Alias:
 pnpm db:ensure
 ```
 
-Dieser Befehl führt ausschließlich die versionierten Drizzle-Migrationen aus. Der lokale Docker-Web-Service führt anschließend zusätzlich den idempotenten Entwicklungsseed aus; Produktion erzeugt niemals implizit Accounts.
+Dieser Befehl führt ausschließlich die versionierten Drizzle-Migrationen aus. Der lokale Docker-Web-Service führt anschließend zusätzlich den idempotenten Entwicklungsseed einschließlich lokalem Test-Admin aus; Produktion erzeugt niemals implizit Accounts.
 
 ## Umgebungsvariablen
 
-Siehe `.env.example` für lokale Entwicklung und `.env.production.example` für Production. Für Portainer werden die Werte als Stack-Environment-Variablen erwartet; `docker-compose.prod.yml` verwendet keine vorausgefüllte Beispiel-Env-Datei als automatischen Fallback. Serverseitige Umgebungsvariablen werden zentral in `lib/env.ts` validiert: In lokaler Entwicklung greifen sichere Defaults, während `NODE_ENV=production` beim Runtime-Start fehlende Pflichtwerte bewusst blockiert. Für den Login sind `APP_URL`, `AUTH_RATE_LIMIT_SECRET` und SMTP-Variablen relevant. Der Accountbestand wird ausschließlich durch Adminanlage und Bootstrap bestimmt, nicht durch eine E-Mail-Allowlist. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
+Siehe `.env.example` für lokale Entwicklung und `.env.production.example` für Production. Für Portainer werden die Werte als Stack-Environment-Variablen erwartet; `docker-compose.prod.yml` verwendet keine vorausgefüllte Beispiel-Env-Datei als automatischen Fallback. Serverseitige Umgebungsvariablen werden zentral in `lib/env.ts` validiert: In lokaler Entwicklung greifen sichere Defaults, während `NODE_ENV=production` beim Runtime-Start fehlende Pflichtwerte bewusst blockiert. Für den Login sind `APP_URL`, `AUTH_RATE_LIMIT_SECRET` und SMTP-Variablen relevant. Abgesehen von den ausdrücklich lokalen Seed-Accounts wird der Accountbestand ausschließlich durch Adminanlage und Bootstrap bestimmt, nicht durch eine E-Mail-Allowlist. In Produktion muss `PUBLIC_ASSET_BASE_URL` öffentlich per HTTPS erreichbar sein. Lokale MinIO-URLs (`localhost`, `127.0.0.1` oder private Netze) sind nur für lokale Testexports gedacht und in externen Versandtools nicht erreichbar.
 
 ## Tests und Qualität
 
@@ -136,7 +138,7 @@ Die Anwendung nutzt ausschließlich Passwordless Login per Magic Link. Nur berei
 
 ## Alpha-Administration und Support
 
-Der einzige Plattform-Administrator wird einmalig per CLI gebootstrapped; es gibt keine Adminanlage in der Webanwendung:
+In Produktion wird der einzige Plattform-Administrator einmalig per CLI gebootstrapped; es gibt keine Adminanlage in der Webanwendung:
 
 ```bash
 pnpm db:migrate
@@ -144,6 +146,8 @@ pnpm admin:bootstrap --email admin@example.com --name "Plattform Admin"
 ```
 
 Anschließend fordert der Admin regulär einen Magic Link an und verwaltet Mandanten unter `/admin`. Das Admin-E-Mail-Konto muss wegen seiner Plattformrechte mit MFA geschützt sein. Mitarbeiter werden ohne Passwort und ohne automatischen E-Mail-Versand angelegt. Deaktivierungen widerrufen aktive Sessions, löschen aber keine Daten.
+
+Im lokalen Docker-Setup übernimmt der produktionsgesperrte Entwicklungsseed diesen Schritt automatisch mit `admin@example.test`.
 
 Der Supportmodus speichert den betrachteten Mandanten in der serverseitigen Adminsession. Er zeigt einen permanenten Hinweis, bleibt vollständig lesend und blockiert direkte POST-, PUT-, PATCH- und DELETE-Aufrufe serverseitig mit Auditereignis. Verlassen wird er über den permanenten Banner.
 

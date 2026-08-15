@@ -5,9 +5,13 @@
 1. Vor der ersten Migration einer bestehenden Installation ein PostgreSQL-Backup erstellen.
 2. Pflichtvariablen setzen, insbesondere `DATABASE_URL`, `APP_URL`, SMTP/S3 und ein zufälliges `AUTH_RATE_LIMIT_SECRET` mit mindestens 32 Zeichen.
 3. `pnpm db:migrate` ausführen. Die Migration ordnet vorhandene Entwicklungsdaten kontrolliert dem Entwicklungsmandanten zu und widerruft alte Links und Sessions.
-4. Für lokale Entwicklung optional `pnpm db:seed` ausführen. Dieser Seed ist idempotent und in Produktion gesperrt.
+4. Für lokale Entwicklung optional `pnpm db:seed` ausführen. Dieser Seed ist idempotent, in Produktion gesperrt und erzeugt standardmäßig den Plattform-Admin `admin@example.test` sowie den Mitarbeiter `local@example.test`. Im lokalen Docker-Stack wird er automatisch ausgeführt.
 
 ## Einziger Plattform-Administrator
+
+Lokal kann sich der automatisch erzeugte Admin `admin@example.test` direkt über `/login` einen Magic Link an Mailpit senden lassen. `DEV_ADMIN_EMAIL` und `DEV_ADMIN_NAME` überschreiben diese Entwicklungswerte.
+
+In Produktion wird der Admin ausschließlich explizit gebootstrapped:
 
 ```bash
 pnpm admin:bootstrap --email admin@example.com --name "Plattform Admin"
