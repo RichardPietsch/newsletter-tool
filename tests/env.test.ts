@@ -58,4 +58,26 @@ describe('server environment validation', () => {
       }),
     ).toThrow(/must not exceed 10 minutes/);
   });
+
+  it('normalizes optional first-administrator bootstrap configuration', () => {
+    const env = parseServerEnv({
+      ...productionEnv,
+      BOOTSTRAP_ADMIN_EMAIL: ' Owner@Example.COM ',
+      BOOTSTRAP_ADMIN_NAME: ' Installation Owner ',
+    });
+
+    expect(env.bootstrap).toEqual({
+      adminEmail: 'owner@example.com',
+      adminName: 'Installation Owner',
+    });
+  });
+
+  it('rejects an invalid bootstrap administrator email', () => {
+    expect(() =>
+      parseServerEnv({
+        ...productionEnv,
+        BOOTSTRAP_ADMIN_EMAIL: 'not-an-email',
+      }),
+    ).toThrow(/BOOTSTRAP_ADMIN_EMAIL must be a valid email address/);
+  });
 });

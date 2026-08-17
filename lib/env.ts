@@ -10,6 +10,8 @@ const rawEnvSchema = z.object({
   AUTH_SESSION_DAYS: z.string().optional(),
   AUTH_SESSION_IDLE_HOURS: z.string().optional(),
   AUTH_RATE_LIMIT_SECRET: z.string().optional(),
+  BOOTSTRAP_ADMIN_EMAIL: z.string().optional(),
+  BOOTSTRAP_ADMIN_NAME: z.string().optional(),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),
   SMTP_USER: z.string().optional(),
@@ -82,6 +84,12 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
     'development-only-rate-limit-secret',
     requireProductionValues,
   );
+  const bootstrapAdminEmail = raw.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase() || null;
+  const bootstrapAdminName = raw.BOOTSTRAP_ADMIN_NAME?.trim() || 'Installation Owner';
+  if (bootstrapAdminEmail && !z.string().email().safeParse(bootstrapAdminEmail).success) {
+    errors.push('BOOTSTRAP_ADMIN_EMAIL must be a valid email address.');
+  }
+  if (bootstrapAdminName.length > 160) errors.push('BOOTSTRAP_ADMIN_NAME must not exceed 160 characters.');
   const smtpHost = read('SMTP_HOST', 'localhost');
   const smtpPort = readPositiveInteger(read('SMTP_PORT', '1025', false), 'SMTP_PORT', errors);
   const smtpUser = read('SMTP_USER', '', requireProductionValues);
@@ -113,6 +121,10 @@ export function parseServerEnv(input: NodeJS.ProcessEnv = process.env) {
       sessionDays,
       sessionIdleHours,
       rateLimitSecret: authRateLimitSecret,
+    },
+    bootstrap: {
+      adminEmail: bootstrapAdminEmail,
+      adminName: bootstrapAdminName,
     },
     smtp: {
       host: smtpHost,

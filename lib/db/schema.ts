@@ -1,20 +1,12 @@
 import { sql } from 'drizzle-orm';
-import {
-  check,
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  uniqueIndex,
-} from 'drizzle-orm/pg-core';
+import { check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 export type TenantStatus = 'active' | 'inactive';
 export type UserRole = 'platform_admin' | 'tenant_member';
 export type UserStatus = 'active' | 'inactive';
 export type AuditSeverity = 'info' | 'warning' | 'error';
 export type AuditOutcome = 'succeeded' | 'failed' | 'blocked';
+export type BootstrapSource = 'cli' | 'environment';
 
 export const tenants = pgTable(
   'tenants',
@@ -57,10 +49,31 @@ export const users = pgTable(
       sql`(${table.role} = 'platform_admin' and ${table.tenantId} is null) or (${table.role} = 'tenant_member' and ${table.tenantId} is not null)`,
     ),
     normalizedEmailCheck: check('users_normalized_email_check', sql`${table.email} = lower(btrim(${table.email}))`),
-    oneAdminIdx: uniqueIndex('users_single_platform_admin_idx').on(table.role).where(sql`${table.role} = 'platform_admin'`),
+    oneAdminIdx: uniqueIndex('users_single_platform_admin_idx')
+      .on(table.role)
+      .where(sql`${table.role} = 'platform_admin'`),
     normalizedEmailIdx: uniqueIndex('users_email_lower_idx').on(sql`lower(${table.email})`),
     tenantStatusIdx: index('users_tenant_status_idx').on(table.tenantId, table.status),
     tenantLoginIdx: index('users_tenant_login_idx').on(table.tenantId, table.lastLoginAt),
+  }),
+);
+
+export const installationState = pgTable(
+  'installation_state',
+  {
+    id: text('id').primaryKey(),
+    initialAdminUserId: text('initial_admin_user_id')
+      .references(() => users.id)
+      .notNull(),
+    bootstrapSource: text('bootstrap_source').$type<BootstrapSource>().notNull(),
+    bootstrapCompletedAt: timestamp('bootstrap_completed_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    singletonCheck: check('installation_state_singleton_check', sql`${table.id} = 'primary'`),
+    sourceCheck: check('installation_state_source_check', sql`${table.bootstrapSource} in ('cli', 'environment')`),
+    adminIdx: uniqueIndex('installation_state_initial_admin_idx').on(table.initialAdminUserId),
   }),
 );
 

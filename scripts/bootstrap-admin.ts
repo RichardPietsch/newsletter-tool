@@ -1,8 +1,5 @@
-import { count, eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { db, pool } from '@/lib/db';
-import { users } from '@/lib/db/schema';
-import { normalizeEmail } from '@/lib/auth/config';
+import { pool } from '@/lib/db';
+import { bootstrapInitialAdmin, recoverPlatformAdmin } from '@/lib/admin/bootstrap';
 
 function argument(name: string) {
   const index = process.argv.indexOf(`--${name}`);
@@ -13,19 +10,28 @@ async function main() {
   const email = argument('email');
   const name = argument('name');
   if (!email || !name || !email.includes('@')) {
-    throw new Error('Usage: pnpm admin:bootstrap --email admin@example.com --name "Admin Name"');
+    throw new Error(
+      'Usage: pnpm admin:bootstrap --email admin@example.com --name "Admin Name" ' +
+        '[--recover --current-email current@example.com]',
+    );
   }
-  const [{ value }] = await db.select({ value: count() }).from(users).where(eq(users.role, 'platform_admin'));
-  if (value > 0) throw new Error('A platform administrator already exists.');
-  await db.insert(users).values({
-    id: nanoid(),
-    tenantId: null,
-    role: 'platform_admin',
-    status: 'active',
-    email: normalizeEmail(email),
-    name,
-  });
-  console.log(`Platform administrator created for ${normalizeEmail(email)}. No link or session was generated.`);
+
+  if (process.argv.includes('--recover')) {
+    const currentEmail = argument('current-email');
+    if (!currentEmail) throw new Error('--current-email is required for explicit administrator recovery.');
+    await recoverPlatformAdmin({ currentEmail, email, name });
+    console.log('Platform administrator recovered. Existing administrator sessions were revoked.');
+    return;
+  }
+
+  const result = await bootstrapInitialAdmin({ email, name, source: 'cli' });
+  console.log(
+    result.status === 'created'
+      ? 'Platform administrator created. No link or session was generated.'
+      : result.status === 'registered'
+        ? 'Existing platform administrator registered as installation owner.'
+        : 'Installation is already initialized for this platform administrator.',
+  );
 }
 
 main()

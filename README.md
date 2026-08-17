@@ -72,7 +72,7 @@ Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit 
 
 1. DNS vorbereiten, z. B. `newsletter.example.com` für die App und `assets.example.com` für öffentlich erreichbare Newsletter-Bilder.
 2. `.env.production.example` als Vorlage verwenden und die Werte in Portainer als Stack-Environment-Variablen oder lokal in einer nicht committeten `.env.production` pflegen. Die Production-Compose-Datei nutzt keine Beispiel-Env-Datei als Fallback mehr.
-3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
+3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Für die komfortable Erstinstallation zusätzlich `BOOTSTRAP_ADMIN_EMAIL` und `BOOTSTRAP_ADMIN_NAME` setzen. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
 4. Stack mit Production-Compose starten:
 
 ```bash
@@ -81,9 +81,10 @@ docker compose --env-file .env.production -f docker-compose.prod.yml up --build 
 
 5. Reverse Proxy / Portainer so konfigurieren, dass HTTPS auf den internen Web-Service `web:3000` zeigt. PostgreSQL und die MinIO-Admin-Konsole sollen nicht öffentlich exposed werden.
 6. MinIO/Asset-Auslieferung so konfigurieren, dass `PUBLIC_ASSET_BASE_URL` von externen Mailclients erreichbar ist. Lokale oder private URLs funktionieren in exportierten Newslettern außerhalb des Servers nicht zuverlässig.
-7. Smoke-Test durchführen: Magic-Link anfordern, Newsletter erstellen, Bild hochladen, Export herunterladen und prüfen, ob alle Bild-URLs per HTTPS erreichbar sind.
+7. Der einmalige `bootstrap-admin`-Service führt die Migrationen aus und legt ausschließlich bei einer noch nicht initialisierten Installation den konfigurierten Plattform-Admin an. Danach den Magic-Link für `BOOTSTRAP_ADMIN_EMAIL` anfordern.
+8. Smoke-Test durchführen: Magic-Link anfordern, Newsletter erstellen, Bild hochladen, Export herunterladen und prüfen, ob alle Bild-URLs per HTTPS erreichbar sind.
 
-Noch offene Härtungsschritte vor einem breiteren Test: CSRF-/Origin-Schutz für mutierende APIs und bessere Upload-Fehlerbehandlung. Der Export blockiert in Production bereits lokale/private Bild-URLs sowie nicht per HTTPS erreichbare Bildquellen.
+Der Export blockiert in Production lokale/private Bild-URLs sowie nicht per HTTPS erreichbare Bildquellen.
 
 ## Datenbank
 
@@ -99,7 +100,7 @@ Für die Runtime und Docker gibt es zusätzlich den kompatiblen Alias:
 pnpm db:ensure
 ```
 
-Dieser Befehl führt ausschließlich die versionierten Drizzle-Migrationen aus. Der lokale Docker-Web-Service führt anschließend zusätzlich den idempotenten Entwicklungsseed einschließlich lokalem Test-Admin aus; Produktion erzeugt niemals implizit Accounts.
+Dieser Befehl führt ausschließlich die versionierten Drizzle-Migrationen aus. Der lokale Docker-Web-Service führt anschließend zusätzlich den idempotenten Entwicklungsseed einschließlich lokalem Test-Admin aus. Der Production-Stack erzeugt ausschließlich den explizit über `BOOTSTRAP_ADMIN_EMAIL` konfigurierten ersten Admin und speichert den Abschluss dauerhaft; spätere Env-Änderungen verändern keine Berechtigungen.
 
 ## Umgebungsvariablen
 
@@ -138,14 +139,16 @@ Die Anwendung nutzt ausschließlich Passwordless Login per Magic Link. Nur berei
 
 ## Alpha-Administration und Support
 
-In Produktion wird der einzige Plattform-Administrator einmalig per CLI gebootstrapped; es gibt keine Adminanlage in der Webanwendung:
+In Produktion wird der einzige Plattform-Administrator bevorzugt einmalig über die Deployment-Konfiguration angelegt:
 
-```bash
-pnpm db:migrate
-pnpm admin:bootstrap --email admin@example.com --name "Plattform Admin"
+```dotenv
+BOOTSTRAP_ADMIN_EMAIL=owner@example.com
+BOOTSTRAP_ADMIN_NAME="Installation Owner"
 ```
 
-Anschließend fordert der Admin regulär einen Magic Link an und verwaltet Mandanten unter `/admin`. Das Admin-E-Mail-Konto muss wegen seiner Plattformrechte mit MFA geschützt sein. Mitarbeiter werden ohne Passwort und ohne automatischen E-Mail-Versand angelegt. Deaktivierungen widerrufen aktive Sessions, löschen aber keine Daten.
+Der separate One-shot-Service `bootstrap-admin` führt zuerst Migrationen aus und initialisiert den Admin transaktional. Wiederholungen mit derselben Adresse sind No-ops; eine abweichende Adresse oder ein inkonsistenter Installationszustand bricht den Start ab, ohne Berechtigungen zu verändern. Alternativ bleibt `pnpm admin:bootstrap --email admin@example.com --name "Plattform Admin"` verfügbar. Anschließend fordert der Admin regulär einen Magic Link an und verwaltet Mandanten unter `/admin`. Das Admin-E-Mail-Konto muss wegen seiner Plattformrechte mit MFA geschützt sein. Mitarbeiter werden ohne Passwort und ohne automatischen E-Mail-Versand angelegt. Deaktivierungen widerrufen aktive Sessions, löschen aber keine Daten.
+
+Für eine ausdrücklich bestätigte Wiederherstellung über lokalen Serverzugriff steht `pnpm admin:recover --current-email bisher@example.com --email neu@example.com --name "Installation Owner"` bereit. Der Vorgang reaktiviert nur den vorhandenen Admin, widerruft alle Adminsessions und wird auditiert; der Env-Bootstrap führt niemals eine solche Wiederherstellung aus.
 
 Im lokalen Docker-Setup übernimmt der produktionsgesperrte Entwicklungsseed diesen Schritt automatisch mit `admin@example.test`.
 

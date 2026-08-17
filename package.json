@@ -12,6 +12,8 @@
     "db:seed": "tsx drizzle/seed.ts",
     "db:ensure": "pnpm db:migrate",
     "admin:bootstrap": "tsx scripts/bootstrap-admin.ts",
+    "admin:bootstrap-env": "tsx scripts/bootstrap-admin-env.ts",
+    "admin:recover": "tsx scripts/bootstrap-admin.ts --recover",
     "audit:purge": "tsx scripts/purge-audit-events.ts",
     "check:copy": "node scripts/check-ui-copy.mjs",
     "format": "prettier --write .",

@@ -22,6 +22,8 @@ export type AuditEventType =
   | 'support.ended'
   | 'support.started'
   | 'support.write_blocked'
+  | 'system.admin_recovered'
+  | 'system.bootstrap_admin_initialized'
   | 'tenant.created'
   | 'tenant.deactivated'
   | 'tenant.reactivated';

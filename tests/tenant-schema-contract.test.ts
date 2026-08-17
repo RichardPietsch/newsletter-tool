@@ -9,6 +9,8 @@ describe('tenant schema contract', () => {
   const templates = readFileSync(path.join(process.cwd(), 'lib/newsletter/template-files.ts'), 'utf8');
   const adminOperations = readFileSync(path.join(process.cwd(), 'lib/admin/operations.ts'), 'utf8');
   const developmentSeed = readFileSync(path.join(process.cwd(), 'drizzle/seed.ts'), 'utf8');
+  const bootstrap = readFileSync(path.join(process.cwd(), 'lib/admin/bootstrap.ts'), 'utf8');
+  const productionCompose = readFileSync(path.join(process.cwd(), 'docker-compose.prod.yml'), 'utf8');
 
   it('requires tenant IDs on every business-data table', () => {
     for (const table of ['newsletters', 'assets', 'appSettings']) {
@@ -43,5 +45,14 @@ describe('tenant schema contract', () => {
     expect(developmentSeed).toContain("process.env.DEV_ADMIN_EMAIL || 'admin@example.test'");
     expect(developmentSeed).toContain("role: 'platform_admin'");
     expect(developmentSeed).toContain('.onConflictDoNothing()');
+  });
+
+  it('persists and serializes the one-time production administrator bootstrap', () => {
+    expect(schema).toContain("'installation_state'");
+    expect(schema).toContain('installation_state_singleton_check');
+    expect(bootstrap).toContain('pg_advisory_xact_lock');
+    expect(bootstrap).toContain("eventType: 'system.bootstrap_admin_initialized'");
+    expect(productionCompose).toContain('bootstrap-admin:');
+    expect(productionCompose).toContain('condition: service_completed_successfully');
   });
 });
