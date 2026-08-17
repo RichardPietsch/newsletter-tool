@@ -5,7 +5,7 @@ import { createAuditEventRecord, recordAuditEvent } from '@/lib/db/audit-events'
 import { auditEvents, authMagicLinks, tenants, users } from '@/lib/db/schema';
 import { sendEmail } from '@/lib/email/send-email';
 import { magicLinkEmail } from '@/lib/email/templates/magic-link';
-import { serverEnv } from '@/lib/env';
+import { publicAppUrl } from '@/lib/app-url';
 import { logger } from '@/lib/logging/logger';
 import { createSession } from './session';
 import { MAGIC_LINK_TTL_MINUTES, normalizeEmail } from './config';
@@ -63,7 +63,7 @@ export async function requestMagicLink(
     userAgent: metadata.userAgent?.slice(0, 512) || null,
   });
 
-  const url = new URL('/auth/magic-link/verify', serverEnv.appUrl);
+  const url = publicAppUrl('/auth/magic-link/verify');
   url.searchParams.set('token', token);
   const message = magicLinkEmail({ url: url.toString(), ttlMinutes: MAGIC_LINK_TTL_MINUTES });
   try {

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { validateMutationOrigin } from '@/lib/api/origin';
+import { publicAppUrl } from '@/lib/app-url';
 import { AUTH_COOKIE_NAME, sessionCookieOptions } from '@/lib/auth/cookies';
 import { verifyMagicLink } from '@/lib/auth/magic-link';
 import {
@@ -23,10 +24,10 @@ function clearMagicLinkConfirmationCookie(response: NextResponse) {
 }
 
 export async function GET(request: Request) {
-  const url = new URL('/auth/magic-link/confirm', request.url);
+  const url = publicAppUrl('/auth/magic-link/confirm');
   const token = new URL(request.url).searchParams.get('token');
   if (!token || token.length < 32 || token.length > 256) {
-    return NextResponse.redirect(new URL('/login?error=invalid-or-expired', request.url), 303);
+    return NextResponse.redirect(publicAppUrl('/login?error=invalid-or-expired'), 303);
   }
   url.searchParams.set('token', token);
   const response = NextResponse.redirect(url, 303);
@@ -49,14 +50,14 @@ export async function POST(request: Request) {
     form = await request.formData();
   } catch {
     return clearMagicLinkConfirmationCookie(
-      NextResponse.redirect(new URL('/login?error=invalid-or-expired', request.url), 303),
+      NextResponse.redirect(publicAppUrl('/login?error=invalid-or-expired'), 303),
     );
   }
   const token = form.get('token');
   if (typeof token !== 'string' || token.length < 32 || token.length > 256) {
     logger.warn({ event: 'auth.magic_link.verify_rejected', requestId }, { reason: 'missing_token' });
     return clearMagicLinkConfirmationCookie(
-      NextResponse.redirect(new URL('/login?error=invalid-or-expired', request.url), 303),
+      NextResponse.redirect(publicAppUrl('/login?error=invalid-or-expired'), 303),
     );
   }
   const originError = validateMutationOrigin(request);
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
   if (!result) {
     logger.warn({ event: 'auth.magic_link.verify_rejected', requestId }, { reason: 'invalid_or_expired' });
     return clearMagicLinkConfirmationCookie(
-      NextResponse.redirect(new URL('/login?error=invalid-or-expired', request.url), 303),
+      NextResponse.redirect(publicAppUrl('/login?error=invalid-or-expired'), 303),
     );
   }
   logger.info({
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     tenantId: result.user.tenantId ?? undefined,
   });
   const destination = result.user.role === 'platform_admin' ? '/admin' : '/newsletters';
-  const response = NextResponse.redirect(new URL(destination, request.url), 303);
+  const response = NextResponse.redirect(publicAppUrl(destination), 303);
   response.cookies.set(AUTH_COOKIE_NAME, result.sessionToken, sessionCookieOptions());
   response.headers.set('cache-control', 'no-store');
   response.headers.set('referrer-policy', 'no-referrer');
