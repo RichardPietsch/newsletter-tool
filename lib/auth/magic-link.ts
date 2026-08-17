@@ -63,7 +63,7 @@ export async function requestMagicLink(
     userAgent: metadata.userAgent?.slice(0, 512) || null,
   });
 
-  const url = new URL('/auth/magic-link/confirm', serverEnv.appUrl);
+  const url = new URL('/auth/magic-link/verify', serverEnv.appUrl);
   url.searchParams.set('token', token);
   const message = magicLinkEmail({ url: url.toString(), ttlMinutes: MAGIC_LINK_TTL_MINUTES });
   try {

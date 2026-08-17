@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({
   rows: [] as Array<{ user: Record<string, unknown>; tenant: Record<string, unknown> | null }>,
   insertValues: vi.fn(async () => undefined),
-  sendEmail: vi.fn(async () => undefined),
+  sendEmail: vi.fn(async (_message: { html: string }) => undefined),
   recordAuditEvent: vi.fn(async () => true),
 }));
 
@@ -64,6 +64,9 @@ describe('magic-link account provisioning', () => {
     await request();
     expect(mocks.insertValues).toHaveBeenCalledOnce();
     expect(mocks.sendEmail).toHaveBeenCalledOnce();
+    expect(mocks.sendEmail.mock.calls[0]?.[0]).toMatchObject({
+      html: expect.stringContaining('/auth/magic-link/verify?token='),
+    });
   });
 
   it('does not send a link for a deactivated tenant', async () => {
