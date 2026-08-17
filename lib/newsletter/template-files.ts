@@ -4,7 +4,7 @@ import sharp from 'sharp';
 import { nanoid } from 'nanoid';
 import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { serverEnv } from '@/lib/env';
+import { publicAppUrl } from '@/lib/app-url';
 import { assets as assetTable, newsletters } from '@/lib/db/schema';
 import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
 import { migrateNewsletterDocument } from './migrations';
@@ -47,7 +47,7 @@ function readYamlString(lines: string[], key: string) {
 }
 
 function publicDemoAssetUrl(filename: string) {
-  return new URL(`/assets/newsletter-templates/agc-demo-assets/${filename}`, serverEnv.appUrl).toString();
+  return publicAppUrl(`/assets/newsletter-templates/agc-demo-assets/${filename}`).toString();
 }
 
 function demoFilenameFromUrl(src?: string) {

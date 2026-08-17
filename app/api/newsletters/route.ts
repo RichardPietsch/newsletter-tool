@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { nanoid } from 'nanoid';
 import { desc, eq } from 'drizzle-orm';
 import { requireTenantApiContext } from '@/lib/auth/current-user';
@@ -41,5 +42,5 @@ export async function POST(request: Request) {
     entityId: id,
     metadata: { source: 'blank' },
   });
-  return new Response(null, { status: 303, headers: { Location: `/newsletters/${id}` } });
+  return new Response(null, { status: 303, headers: { Location: publicAppUrl(`/newsletters/${id}`).toString() } });
 }

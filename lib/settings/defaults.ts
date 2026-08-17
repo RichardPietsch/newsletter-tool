@@ -1,9 +1,9 @@
-import { serverEnv } from '@/lib/env';
+import { publicAppUrl } from '@/lib/app-url';
 import type { TiptapDoc, TiptapNode } from '@/lib/newsletter/schema';
 import type { GlobalSettings } from './schema';
 
 function appAssetUrl(path: string) {
-  return new URL(path, serverEnv.appUrl).toString();
+  return publicAppUrl(path).toString();
 }
 
 export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] {

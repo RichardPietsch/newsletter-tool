@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { badRequest, notFound } from '@/lib/api/api-error';
 import { validateMutationOrigin } from '@/lib/api/origin';
 import { setAccountStatus } from '@/lib/admin/operations';
@@ -26,5 +27,5 @@ export async function POST(request: Request, { params }: Context) {
     requestIdFrom(request),
   );
   if (!user) return notFound();
-  return NextResponse.redirect(new URL(`/admin/tenants/${id}`, request.url), 303);
+  return NextResponse.redirect(publicAppUrl(`/admin/tenants/${id}`), 303);
 }

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { validateMutationOrigin } from '@/lib/api/origin';
 import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
@@ -31,5 +32,5 @@ export async function POST(request: Request) {
       await tx.insert(auditEvents).values(event);
     });
   }
-  return NextResponse.redirect(new URL('/admin', request.url), 303);
+  return NextResponse.redirect(publicAppUrl('/admin'), 303);
 }

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { badRequest, notFound } from '@/lib/api/api-error';
 import { validateMutationOrigin } from '@/lib/api/origin';
 import { requireAdminApiContext } from '@/lib/auth/current-user';
@@ -35,5 +36,5 @@ export async function POST(request: Request) {
       .where(eq(sessions.id, auth.context.sessionId));
     await tx.insert(auditEvents).values(event);
   });
-  return NextResponse.redirect(new URL('/newsletters', request.url), 303);
+  return NextResponse.redirect(publicAppUrl('/newsletters'), 303);
 }

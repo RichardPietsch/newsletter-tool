@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { z } from 'zod';
 import { badRequest } from '@/lib/api/api-error';
 import { validateMutationOrigin } from '@/lib/api/origin';
@@ -18,5 +19,5 @@ export async function POST(request: Request) {
   const parsed = schema.safeParse({ name: form.get('name'), adminNotes: form.get('adminNotes') || undefined });
   if (!parsed.success) return badRequest('Ungültige Mandantendaten.');
   const id = await createTenant(parsed.data, auth.context.user, requestIdFrom(request));
-  return NextResponse.redirect(new URL(`/admin/tenants/${id}`, request.url), 303);
+  return NextResponse.redirect(publicAppUrl(`/admin/tenants/${id}`), 303);
 }

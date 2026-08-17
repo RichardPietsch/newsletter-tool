@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
+import { publicAppUrl } from '@/lib/app-url';
 import { z } from 'zod';
 import { badRequest } from '@/lib/api/api-error';
 import { validateMutationOrigin } from '@/lib/api/origin';
@@ -20,5 +21,5 @@ export async function POST(request: Request, { params }: Context) {
   const parsed = schema.safeParse({ name: form.get('name'), email: form.get('email') });
   if (!parsed.success) return badRequest('Ungültige Accountdaten.');
   await createTenantAccount(id, parsed.data, auth.context.user, requestIdFrom(request));
-  return NextResponse.redirect(new URL(`/admin/tenants/${id}`, request.url), 303);
+  return NextResponse.redirect(publicAppUrl(`/admin/tenants/${id}`), 303);
 }
