@@ -5,7 +5,7 @@ import type { NewsletterDocument } from '@/lib/newsletter/schema';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import { initStore, useNewsletterStore } from '@/lib/newsletter/store';
 import type { GlobalSettings } from '@/lib/settings/schema';
-import { newsletterPreviewCssVariables, type NewsletterPreviewMode } from '@/lib/newsletter/module-styles';
+import type { NewsletterPreviewMode } from '@/lib/newsletter/module-styles';
 import { EditorOverlays } from './editor-overlays';
 import { EditorTopBar } from './editor-top-bar';
 import type { AccountInfo, EditorOverlay } from './editor-types';
@@ -62,11 +62,7 @@ export function EditorShell({
         onOpenSettings={() => openOverlay('settings')}
         onOpenAccount={() => openOverlay('account')}
       />
-      <main
-        className="newsletter-preview flex-1 transition-colors"
-        data-newsletter-theme={previewMode}
-        style={{ ...newsletterPreviewCssVariables[previewMode], backgroundColor: 'var(--newsletter-background)' }}
-      >
+      <main className="flex-1 bg-[#f4f1ec]" data-editor-interface="newsletter-editor">
         <EditorTopBar
           title={doc.title}
           isReadOnly={isReadOnly}
@@ -75,7 +71,12 @@ export function EditorShell({
           onPreviewModeChange={setPreviewMode}
           onTitleChange={setTitle}
         />
-        <NewsletterCanvas settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
+        <NewsletterCanvas
+          settings={settings}
+          readOnly={isReadOnly}
+          validationIssues={saveIssues}
+          previewMode={previewMode}
+        />
       </main>
       <InspectorPanel settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       <EditorOverlays

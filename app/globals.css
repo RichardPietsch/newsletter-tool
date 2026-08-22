@@ -27,16 +27,20 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
 }
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(220, 38, 38)'],
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #dc2626'],
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(166, 58, 58)'],
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #a63a3a'] {
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(220, 38, 38)'],
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #dc2626'],
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(166, 58, 58)'],
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #a63a3a'] {
   color: var(--newsletter-accent) !important;
 }
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(109, 116, 120)'],
-.newsletter-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #6d7478'] {
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: rgb(109, 116, 120)'],
+.newsletter-export-preview[data-newsletter-theme='dark'] .ProseMirror [style*='color: #6d7478'] {
   color: var(--newsletter-muted) !important;
 }
-.newsletter-preview .ProseMirror a {
+.newsletter-export-preview .ProseMirror a {
   color: var(--newsletter-brand);
+}
+.newsletter-editor-ui {
+  color-scheme: light;
+  color: #475569;
 }

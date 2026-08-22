@@ -282,13 +282,19 @@ test('covers the main authenticated editor flow', async ({ page }) => {
   await expect(page).toHaveURL(/\/newsletters\/e2e-demo-newsletter$/);
   await expect(page.getByLabel('Newsletter-Titel')).toHaveValue('E2E Demo Newsletter');
 
-  const newsletterPreview = page.locator('.newsletter-preview');
+  const editorInterface = page.locator('[data-editor-interface="newsletter-editor"]');
+  const newsletterPreview = page.locator('.newsletter-export-preview');
+  const lockedGlobalHint = page.locator('[data-editor-ui="locked-global"]').first();
   const darkModeSwitch = page.getByRole('switch', { name: 'Dark-Mode-Vorschau umschalten' });
+  await expect(editorInterface).toHaveCSS('background-color', 'rgb(244, 241, 236)');
   await expect(newsletterPreview).toHaveAttribute('data-newsletter-theme', 'light');
   await expect(darkModeSwitch).not.toBeChecked();
   await darkModeSwitch.click();
   await expect(newsletterPreview).toHaveAttribute('data-newsletter-theme', 'dark');
   await expect(newsletterPreview).toHaveCSS('background-color', 'rgb(16, 25, 30)');
+  await expect(editorInterface).toHaveCSS('background-color', 'rgb(244, 241, 236)');
+  await expect(lockedGlobalHint).toHaveCSS('background-color', 'rgb(241, 245, 249)');
+  await expect(lockedGlobalHint).toHaveCSS('color', 'rgb(71, 85, 105)');
   await expect(darkModeSwitch).toBeChecked();
 
   await page.getByText('E2E Veranstaltungsabend').click();

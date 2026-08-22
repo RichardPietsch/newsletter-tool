@@ -15,16 +15,22 @@ import { FeaturedEventBlock } from '../blocks/featured-event-block';
 import { QuoteBlock } from '../blocks/quote-block';
 import { SectionHeadingBlock } from '../blocks/section-heading-block';
 import { EventGridBlock } from '../blocks/event-grid-block';
-import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+import {
+  newsletterModuleStyles as styles,
+  newsletterPreviewCssVariables,
+  type NewsletterPreviewMode,
+} from '@/lib/newsletter/module-styles';
 
 export function NewsletterCanvas({
   settings,
   readOnly = false,
   validationIssues = [],
+  previewMode,
 }: {
   settings?: GlobalSettings;
   readOnly?: boolean;
   validationIssues?: NewsletterSaveIssue[];
+  previewMode: NewsletterPreviewMode;
 }) {
   const doc = useNewsletterStore((state) => state.doc);
   const selectedId = useNewsletterStore((state) => state.selectedId);
@@ -36,9 +42,14 @@ export function NewsletterCanvas({
 
   return (
     <div
-      className="mx-auto w-[600px] py-8 transition-colors"
+      className="newsletter-export-preview mx-auto w-[600px] py-8 transition-colors"
       data-tour="editor-canvas"
-      style={{ color: styles.colorVariables.text }}
+      data-newsletter-theme={previewMode}
+      style={{
+        ...newsletterPreviewCssVariables[previewMode],
+        backgroundColor: styles.colorVariables.background,
+        color: styles.colorVariables.text,
+      }}
     >
       {doc.blocks.map((block, index) => {
         const previousBlock = doc.blocks[index - 1];

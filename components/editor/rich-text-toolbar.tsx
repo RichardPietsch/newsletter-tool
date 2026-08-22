@@ -142,7 +142,8 @@ function toggleLink(editor: Editor) {
 export function RichTextToolbar({ editor, automaticColor = '#17303d' }: { editor: Editor; automaticColor?: string }) {
   return (
     <div
-      className="mb-3 flex flex-wrap gap-1 rounded border bg-slate-50 p-2"
+      className="newsletter-editor-ui mb-3 flex flex-wrap gap-1 rounded border bg-slate-50 p-2 text-slate-700"
+      data-editor-ui="rich-text-toolbar"
       role="toolbar"
       aria-label={t('misc.toolbarLabel')}
     >

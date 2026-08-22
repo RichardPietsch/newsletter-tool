@@ -9,8 +9,8 @@ export function ImageBlock({ block }: { block: I }) {
         <img src={block.src} alt={block.decorative ? '' : block.alt || ''} className="block h-auto max-w-full" />
       ) : (
         <div
-          className="rounded border border-dashed p-8 text-center"
-          style={{ borderColor: styles.colorVariables.border, color: styles.colorVariables.muted }}
+          className="newsletter-editor-ui rounded border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-600"
+          data-editor-ui="empty-image"
         >
           {t('image.choose')}
         </div>

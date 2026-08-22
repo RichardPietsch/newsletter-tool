@@ -1,6 +1,6 @@
-import { t } from '@/lib/i18n';
 import type { GlobalSettings } from '@/lib/settings/schema';
 import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+import { LockedGlobalBadge } from '@/components/editor/locked-global-badge';
 
 export function HeaderBlock({
   branding,
@@ -27,7 +27,7 @@ export function HeaderBlock({
           {branding}
         </div>
       )}
-      <span className="mt-4 inline-block rounded bg-slate-100 px-2 py-1 text-xs">{t('shared.lockedGlobal')}</span>
+      <LockedGlobalBadge />
     </div>
   );
 }
