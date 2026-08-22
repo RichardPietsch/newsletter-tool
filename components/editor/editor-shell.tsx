@@ -5,7 +5,7 @@ import type { NewsletterDocument } from '@/lib/newsletter/schema';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import { initStore, useNewsletterStore } from '@/lib/newsletter/store';
 import type { GlobalSettings } from '@/lib/settings/schema';
-import type { NewsletterPreviewMode } from '@/lib/newsletter/module-styles';
+import { newsletterColorPalettes, type NewsletterPreviewMode } from '@/lib/newsletter/module-styles';
 import { EditorOverlays } from './editor-overlays';
 import { EditorTopBar } from './editor-top-bar';
 import type { AccountInfo, EditorOverlay } from './editor-types';
@@ -62,7 +62,11 @@ export function EditorShell({
         onOpenSettings={() => openOverlay('settings')}
         onOpenAccount={() => openOverlay('account')}
       />
-      <main className="flex-1 bg-[#f4f1ec]" data-editor-interface="newsletter-editor">
+      <main
+        className="flex-1 transition-colors"
+        data-editor-interface="newsletter-editor"
+        style={{ backgroundColor: newsletterColorPalettes[previewMode].background }}
+      >
         <EditorTopBar
           title={doc.title}
           isReadOnly={isReadOnly}
