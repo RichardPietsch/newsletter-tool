@@ -1,6 +1,7 @@
 import { t } from '@/lib/i18n';
 import type { ReactNode } from 'react';
 import type { GlobalSettings } from '@/lib/settings/schema';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 type RichTextNode = {
   type?: string;
@@ -56,7 +57,7 @@ export function FooterBlock({
       ];
 
   return (
-    <div className="p-8 text-center text-sm text-slate-500">
+    <div className="p-8 text-center text-sm transition-colors" style={{ color: styles.colorVariables.muted }}>
       {paragraphs.map((paragraph, index) => (
         <p key={index} className={paragraphHasContent(paragraph) ? undefined : 'h-4'}>
           {renderInlineNodes(paragraph.content, `footer-${index}`)}

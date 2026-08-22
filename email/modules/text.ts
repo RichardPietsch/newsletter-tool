@@ -1,5 +1,5 @@
 import { allowedTextColors, type TextBlock, type TiptapMark, type TiptapNode } from '@/lib/newsletter/schema';
-import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+import { newsletterEmailClasses as classes, newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 function esc(value: string) {
   return value.replace(
@@ -16,11 +16,27 @@ function renderMarks(text: string, marks: TiptapMark[] = []) {
     if (mark.type === 'textStyle') {
       const rawColor = mark.attrs?.color;
       if (rawColor && allowedTextColors.includes(rawColor)) {
-        const color = rawColor === '#111827' ? styles.navy : rawColor;
-        return `<span style="color:${color}">${current}</span>`;
+        const isAccent = rawColor === '#dc2626' || rawColor === styles.colors.accent;
+        const isMuted = rawColor === styles.colors.muted;
+        const color = isAccent
+          ? styles.colors.accent
+          : isMuted
+            ? styles.colors.muted
+            : rawColor === '#ffffff'
+              ? styles.colors.featureText
+              : styles.colors.text;
+        const colorClass = isAccent
+          ? classes.accent
+          : isMuted
+            ? classes.muted
+            : rawColor === '#ffffff'
+              ? classes.featureText
+              : classes.text;
+        return `<span class="${colorClass}" style="color:${color}">${current}</span>`;
       }
     }
-    if (mark.type === 'link') return `<a href="${esc(mark.attrs.href)}">${current}</a>`;
+    if (mark.type === 'link')
+      return `<a class="${classes.brand}" style="color:${styles.colors.brand}" href="${esc(mark.attrs.href)}">${current}</a>`;
     return current;
   }, text);
 }
@@ -51,5 +67,8 @@ function renderNodes(items: TiptapNode[] = []): string {
 export function renderText(block: TextBlock, options: { squareTop?: boolean } = {}) {
   const isBlue = block.background === 'blue';
   const radius = options.squareTop ? '0 0 4px 4px' : '4px';
-  return `<mj-section background-color="${isBlue ? styles.navy : styles.cardBackground}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text font-size="14px" line-height="1.8" color="${isBlue ? '#ffffff' : styles.navy}" padding="24px 32px 20px">${renderNodes(block.content.content)}</mj-text></mj-column></mj-section>`;
+  const colors = styles.colors;
+  const backgroundClass = isBlue ? classes.featureBackground : classes.surface;
+  const textClass = isBlue ? classes.featureText : classes.text;
+  return `<mj-section css-class="${backgroundClass}" background-color="${isBlue ? colors.featureBackground : colors.surface}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text css-class="${textClass}" font-size="14px" line-height="1.8" color="${isBlue ? colors.featureText : colors.text}" padding="24px 32px 20px">${renderNodes(block.content.content)}</mj-text></mj-column></mj-section>`;
 }

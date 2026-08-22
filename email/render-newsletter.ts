@@ -11,10 +11,10 @@ import { renderRegisteredEmailModule } from '@/email/module-render-registry';
 import { isRegisteredNewsletterBlock } from '@/lib/newsletter/module-registry';
 import { renderText } from './modules/text';
 import { emailTheme } from './theme';
+import { newsletterEmailClasses as classes, newsletterEmailDarkModeCss } from '@/lib/newsletter/module-styles';
 import { logger } from '@/lib/logging/logger';
 
-const MODULE_GAP =
-  '<mj-section background-color="#f4f1ec" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>';
+const MODULE_GAP = `<mj-section css-class="${classes.background}" background-color="${emailTheme.colors.background}" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>`;
 
 type MjmlRenderResult = {
   html: string;
@@ -52,7 +52,7 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
       return `${needsGap ? `${MODULE_GAP}\n` : ''}${rendered}`;
     })
     .join('\n');
-  const mjml = `<mjml><mj-head><mj-title>${doc.title}</mj-title><mj-preview>${doc.title}</mj-preview><mj-attributes><mj-all font-family="${emailTheme.font}" /><mj-body background-color="${emailTheme.colors.bg}" width="${emailTheme.container}px" /></mj-attributes></mj-head><mj-body>${body}</mj-body></mjml>`;
+  const mjml = `<mjml><mj-head><mj-title>${doc.title}</mj-title><mj-preview>${doc.title}</mj-preview><mj-raw><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"></mj-raw><mj-style>${newsletterEmailDarkModeCss}</mj-style><mj-attributes><mj-all font-family="${emailTheme.font}" /></mj-attributes></mj-head><mj-body background-color="${emailTheme.colors.background}" width="${emailTheme.container}px">${body}</mj-body></mjml>`;
   const { html, errors } = renderMjml(mjml, { validationLevel: 'soft' });
   if (errors.length) logger.warn({ event: 'newsletter.mjml.warnings' }, { warningCount: errors.length });
   return '<!doctype html>\n' + html.replace('<html ', '<html lang="de" ');

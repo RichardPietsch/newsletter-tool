@@ -282,6 +282,15 @@ test('covers the main authenticated editor flow', async ({ page }) => {
   await expect(page).toHaveURL(/\/newsletters\/e2e-demo-newsletter$/);
   await expect(page.getByLabel('Newsletter-Titel')).toHaveValue('E2E Demo Newsletter');
 
+  const newsletterPreview = page.locator('.newsletter-preview');
+  const darkModeSwitch = page.getByRole('switch', { name: 'Dark-Mode-Vorschau umschalten' });
+  await expect(newsletterPreview).toHaveAttribute('data-newsletter-theme', 'light');
+  await expect(darkModeSwitch).not.toBeChecked();
+  await darkModeSwitch.click();
+  await expect(newsletterPreview).toHaveAttribute('data-newsletter-theme', 'dark');
+  await expect(newsletterPreview).toHaveCSS('background-color', 'rgb(16, 25, 30)');
+  await expect(darkModeSwitch).toBeChecked();
+
   await page.getByText('E2E Veranstaltungsabend').click();
   const inspector = page.locator('[data-tour="inspector"]');
   await expect(inspector.getByLabel('Newsletter-Titel')).toHaveValue('E2E Veranstaltungsabend');

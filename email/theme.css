@@ -1,10 +1,23 @@
+/* Human-readable reference. The executable source of truth lives in lib/newsletter/module-styles.ts. */
 :root {
+  color-scheme: light dark;
   --email-container: 600px;
   --email-font: Arial, Helvetica, sans-serif;
   --email-bg: #f4f1ec;
   --email-surface: #ffffff;
   --email-text: #17303d;
-  --email-muted: #5d6b82;
+  --email-muted: #6d7478;
   --email-brand: #1d4ed8;
   --email-border: #d7dee8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --email-bg: #10191e;
+    --email-surface: #1d2a31;
+    --email-text: #f5f1eb;
+    --email-muted: #b9c5ca;
+    --email-brand: #91afff;
+    --email-border: #43565f;
+  }
 }

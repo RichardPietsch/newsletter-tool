@@ -15,6 +15,7 @@ import { FeaturedEventBlock } from '../blocks/featured-event-block';
 import { QuoteBlock } from '../blocks/quote-block';
 import { SectionHeadingBlock } from '../blocks/section-heading-block';
 import { EventGridBlock } from '../blocks/event-grid-block';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 export function NewsletterCanvas({
   settings,
@@ -34,7 +35,11 @@ export function NewsletterCanvas({
   if (!doc) return null;
 
   return (
-    <div className="mx-auto w-[600px] py-8" data-tour="editor-canvas">
+    <div
+      className="mx-auto w-[600px] py-8 transition-colors"
+      data-tour="editor-canvas"
+      style={{ color: styles.colorVariables.text }}
+    >
       {doc.blocks.map((block, index) => {
         const previousBlock = doc.blocks[index - 1];
         const nextBlock = doc.blocks[index + 1];

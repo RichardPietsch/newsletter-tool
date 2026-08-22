@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { newsletterEditableTextColors, newsletterLegacyTextColors } from './module-styles';
 import { CURRENT_NEWSLETTER_SCHEMA_VERSION } from './migrations/version';
 export const allowedUrl = (v: string) => {
   try {
@@ -11,7 +12,7 @@ export const allowedUrl = (v: string) => {
 const url = z.string().trim().refine(allowedUrl, 'Nur http, https oder mailto erlaubt');
 const base = z.object({ id: z.string().min(1), locked: z.boolean().optional() });
 
-export const allowedTextColors = ['#dc2626', '#6d7478', '#17303d', '#111827'] as const;
+export const allowedTextColors = [...newsletterEditableTextColors, '#17303d', ...newsletterLegacyTextColors] as const;
 const allowedTextColorSchema = z.enum(allowedTextColors);
 const headingAttrsSchema = z.object({ level: z.union([z.literal(2), z.literal(3)]) }).strict();
 const linkAttrsSchema = z

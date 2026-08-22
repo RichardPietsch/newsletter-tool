@@ -79,6 +79,7 @@ export const en = {
     addComponentHere: 'Add component here',
     textEditAria: 'Edit text module directly',
     textLoading: 'Loading editor …',
+    darkModePreview: 'Toggle dark mode preview',
   },
   newsletterSettings: {
     save: 'Save',

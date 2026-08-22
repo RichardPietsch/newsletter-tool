@@ -4,6 +4,7 @@ import { t } from '@/lib/i18n';
 
 import { useState } from 'react';
 import type { Editor } from '@tiptap/react';
+import { newsletterEditableTextColors } from '@/lib/newsletter/module-styles';
 
 type IconButtonProps = {
   label: string;
@@ -15,8 +16,8 @@ type IconButtonProps = {
 const buttonClass =
   'inline-flex h-9 w-9 items-center justify-center rounded border bg-white text-slate-700 hover:border-blue-600 hover:text-blue-700 aria-pressed:border-blue-600 aria-pressed:bg-blue-50 aria-pressed:text-blue-700';
 const accentTextColors = [
-  { label: t('misc.textColorGray'), value: '#6d7478', className: 'bg-slate-500' },
-  { label: t('misc.textColorRed'), value: '#dc2626', className: 'bg-red-600' },
+  { label: t('misc.textColorGray'), value: newsletterEditableTextColors[0] },
+  { label: t('misc.textColorRed'), value: newsletterEditableTextColors[1] },
 ];
 
 function IconButton({ label, pressed, onClick, children }: IconButtonProps) {
@@ -109,7 +110,11 @@ function ColorMenu({ editor, automaticColor }: { editor: Editor; automaticColor:
                 setOpen(false);
               }}
             >
-              <span aria-hidden="true" className={`h-4 w-4 rounded-full border ${color.className}`} />
+              <span
+                aria-hidden="true"
+                className="h-4 w-4 rounded-full border"
+                style={{ backgroundColor: color.value }}
+              />
             </button>
           ))}
         </div>

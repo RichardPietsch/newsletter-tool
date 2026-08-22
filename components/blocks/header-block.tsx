@@ -1,5 +1,6 @@
 import { t } from '@/lib/i18n';
 import type { GlobalSettings } from '@/lib/settings/schema';
+import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 export function HeaderBlock({
   branding,
@@ -16,12 +17,15 @@ export function HeaderBlock({
 
   return (
     <div
-      className={`mt-6 overflow-hidden bg-white px-8 py-5 text-center ${squareBottom ? 'rounded-t-[4px]' : 'rounded-[4px]'}`}
+      className={`mt-6 overflow-hidden px-8 py-5 text-center transition-colors ${squareBottom ? 'rounded-t-[4px]' : 'rounded-[4px]'}`}
+      style={{ backgroundColor: styles.colorVariables.surface, color: styles.colorVariables.text }}
     >
       {variant ? (
         <img src={variant.imageUrl} alt={variant.alt} className="mx-auto w-full max-w-[200px] object-contain" />
       ) : (
-        <div className="text-center text-xl font-bold text-blue-700">{branding}</div>
+        <div className="text-center text-xl font-bold" style={{ color: styles.colorVariables.brand }}>
+          {branding}
+        </div>
       )}
       <span className="mt-4 inline-block rounded bg-slate-100 px-2 py-1 text-xs">{t('shared.lockedGlobal')}</span>
     </div>

@@ -5,6 +5,7 @@ import type { NewsletterDocument } from '@/lib/newsletter/schema';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import { initStore, useNewsletterStore } from '@/lib/newsletter/store';
 import type { GlobalSettings } from '@/lib/settings/schema';
+import { newsletterPreviewCssVariables, type NewsletterPreviewMode } from '@/lib/newsletter/module-styles';
 import { EditorOverlays } from './editor-overlays';
 import { EditorTopBar } from './editor-top-bar';
 import type { AccountInfo, EditorOverlay } from './editor-types';
@@ -35,6 +36,7 @@ export function EditorShell({
 }) {
   const [overlay, setOverlay] = useState<EditorOverlay>(null);
   const [saveIssues, setSaveIssues] = useState<NewsletterSaveIssue[]>([]);
+  const [previewMode, setPreviewMode] = useState<NewsletterPreviewMode>('light');
   const doc = useNewsletterStore((state) => state.doc);
   const setTitle = useNewsletterStore((state) => state.setTitle);
   const openOverlay = useCallback((nextOverlay: Exclude<EditorOverlay, null>) => setOverlay(nextOverlay), []);
@@ -60,8 +62,19 @@ export function EditorShell({
         onOpenSettings={() => openOverlay('settings')}
         onOpenAccount={() => openOverlay('account')}
       />
-      <main className="flex-1 bg-[#f4f1ec]">
-        <EditorTopBar title={doc.title} isReadOnly={isReadOnly} saveIssues={saveIssues} onTitleChange={setTitle} />
+      <main
+        className="newsletter-preview flex-1 transition-colors"
+        data-newsletter-theme={previewMode}
+        style={{ ...newsletterPreviewCssVariables[previewMode], backgroundColor: 'var(--newsletter-background)' }}
+      >
+        <EditorTopBar
+          title={doc.title}
+          isReadOnly={isReadOnly}
+          saveIssues={saveIssues}
+          previewMode={previewMode}
+          onPreviewModeChange={setPreviewMode}
+          onTitleChange={setTitle}
+        />
         <NewsletterCanvas settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
       </main>
       <InspectorPanel settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />

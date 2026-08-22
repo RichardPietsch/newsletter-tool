@@ -1,5 +1,6 @@
 import type { GlobalSettings } from '@/lib/settings/schema';
 import type { TiptapMark, TiptapNode } from '@/lib/newsletter/schema';
+import { newsletterEmailClasses as classes, newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 function escapeHtml(value: string) {
   return value.replace(
@@ -32,5 +33,5 @@ export function renderFooter(contact: string, legal: string, settings?: GlobalSe
   const content = settings
     ? renderNodes(settings.footerRichText.content)
     : `${escapeHtml(contact)}<br/>${escapeHtml(legal)}`;
-  return `<mj-section padding="16px 24px 32px"><mj-column><mj-text align="center" font-size="12px" color="#5d6b82" line-height="1.5" padding="0">${content}</mj-text></mj-column></mj-section>`;
+  return `<mj-section css-class="${classes.background}" background-color="${styles.colors.background}" padding="16px 24px 32px"><mj-column><mj-text css-class="${classes.muted}" align="center" font-size="12px" color="${styles.colors.muted}" line-height="1.5" padding="0">${content}</mj-text></mj-column></mj-section>`;
 }

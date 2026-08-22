@@ -2,10 +2,11 @@ import type { EventGridBlock, EventItem } from '@/lib/newsletter/schema';
 import { newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
+  const colors = styles.colorVariables;
   return (
     <article
       className={`${wide ? 'md:col-span-2 ' : ''}overflow-hidden rounded-[4px]`}
-      style={{ backgroundColor: styles.teaserBackground }}
+      style={{ backgroundColor: colors.teaser }}
     >
       {item.image?.src && (
         <img
@@ -16,26 +17,26 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
         />
       )}
       <div style={{ padding: styles.eventGrid.cardPadding }}>
-        <div className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: styles.red }}>
+        <div className="text-[10px] font-bold uppercase tracking-[0.24em]" style={{ color: colors.accent }}>
           {item.category}
         </div>
-        <h3 className="mt-3 font-serif text-xl leading-tight" style={{ color: styles.serifText }}>
+        <h3 className="mt-3 font-serif text-xl leading-tight" style={{ color: colors.text }}>
           {item.title}
         </h3>
         {(item.date || item.location) && (
-          <p className="mt-3 text-sm" style={{ color: styles.mutedText }}>
+          <p className="mt-3 text-sm" style={{ color: colors.muted }}>
             {[item.date, item.location].filter(Boolean).join(' · ')}
           </p>
         )}
         {item.description && (
-          <p className="mt-3 text-sm leading-relaxed" style={{ color: styles.bodyText }}>
+          <p className="mt-3 text-sm leading-relaxed" style={{ color: colors.text }}>
             {item.description}
           </p>
         )}
         {item.buttonUrl && (
           <span
             className="mt-5 inline-block border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em]"
-            style={{ borderColor: styles.navy, color: styles.navy }}
+            style={{ borderColor: colors.text, color: colors.text }}
           >
             {item.buttonLabel}
           </span>
@@ -46,16 +47,17 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
 }
 
 export function EventGridBlock({ block }: { block: EventGridBlock }) {
+  const colors = styles.colorVariables;
   const listLayout = block.layout === 'list';
   return (
     <div
       style={{
-        backgroundColor: styles.newsletterBackground,
+        backgroundColor: colors.background,
         padding: `${styles.eventGrid.outerPaddingY}px ${styles.eventGrid.outerPaddingX}px`,
       }}
     >
       {block.heading && (
-        <div className="mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: styles.red }}>
+        <div className="mb-4 px-2 text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: colors.accent }}>
           {block.heading}
         </div>
       )}

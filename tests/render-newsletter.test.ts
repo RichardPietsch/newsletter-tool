@@ -5,6 +5,11 @@ import { validateNewsletterForExport } from '@/lib/newsletter/export-validation'
 import { insertBlock } from '@/lib/newsletter/operations';
 import { createDefaultSettings } from '@/lib/settings/defaults';
 import type { ImageBlock, NewsletterDocument, TextBlock } from '@/lib/newsletter/schema';
+import {
+  newsletterColorPalettes,
+  newsletterEmailClasses,
+  newsletterPreviewCssVariables,
+} from '@/lib/newsletter/module-styles';
 
 const htmlSnippet = (html: string) =>
   html
@@ -90,13 +95,36 @@ describe('MJML newsletter rendering', () => {
     expect(html).not.toMatch(/\b(?:flex|grid|items-center|justify-between|p-\d|px-\d|py-\d|text-sm|bg-white)\b/);
   });
 
+  it('exports the centrally defined dark-mode palette with email-client fallbacks', () => {
+    const html = renderNewsletter(documentWithBlocks([richTextBlock(), imageBlock()]));
+
+    expect(html).toContain('name="color-scheme" content="light dark"');
+    expect(html).toContain('name="supported-color-schemes" content="light dark"');
+    expect(html).toContain('@media (prefers-color-scheme: dark)');
+    expect(html).toContain('[data-ogsc]');
+    expect(html).toContain(`.${newsletterEmailClasses.surface}`);
+    expect(html).toContain(`.${newsletterEmailClasses.text}`);
+    for (const [token, color] of Object.entries(newsletterColorPalettes.dark)) {
+      if (token !== 'border') expect(html).toContain(color);
+    }
+  });
+
+  it('uses the same central color values for editor preview and email export', () => {
+    expect(Object.values(newsletterPreviewCssVariables.light)).toEqual(
+      expect.arrayContaining(Object.values(newsletterColorPalettes.light)),
+    );
+    expect(Object.values(newsletterPreviewCssVariables.dark)).toEqual(
+      expect.arrayContaining(Object.values(newsletterColorPalettes.dark)),
+    );
+  });
+
   it('renders text module paragraphs, H2, H3 and links as email HTML', () => {
     const html = renderNewsletter(documentWithBlocks([richTextBlock()]));
 
     expect(html).toContain('<h2 style="margin:0 0 8px');
     expect(html).toContain('Hauptüberschrift</h2>');
     expect(html).toContain('<p style="margin:8px 0 12px;font-size:14px;line-height:1.8">Intro mit');
-    expect(html).toContain('<a href="https://example.com/events">Link</a>');
+    expect(html).toContain('href="https://example.com/events">Link</a>');
     expect(html).toContain('<h3 style="margin:0 0 8px');
     expect(html).toContain('Unterüberschrift</h3>');
   });

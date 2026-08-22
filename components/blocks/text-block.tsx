@@ -14,11 +14,15 @@ export function TextBlock({
   squareTop?: boolean;
 }) {
   const isBlue = block.background === 'blue';
+  const colors = styles.colorVariables;
 
   return (
     <div
       className={`overflow-hidden p-6 ${squareTop ? 'rounded-b-[4px]' : 'rounded-[4px]'}`}
-      style={{ backgroundColor: isBlue ? styles.navy : styles.cardBackground, color: isBlue ? '#ffffff' : styles.navy }}
+      style={{
+        backgroundColor: isBlue ? colors.featureBackground : colors.surface,
+        color: isBlue ? colors.featureText : colors.text,
+      }}
     >
       <TextRichEditor block={block} readOnly={readOnly} isBlue={isBlue} />
     </div>
