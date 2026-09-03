@@ -10,7 +10,7 @@ export function renderHeader(
   const variant = settings?.headerVariants.find((item) => item.id === headerVariantId) ?? settings?.headerVariants[0];
 
   const radius = options.squareBottom ? '4px 4px 0 0' : '4px';
-  const colors = styles.colors;
+  const colors = settings?.colors.light ?? styles.colors;
 
   if (variant) {
     return `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="24px 0 0"><mj-column css-class="${classes.surface}" background-color="${colors.surface}" border-radius="${radius}"><mj-image src="${variant.imageUrl}" alt="${variant.alt}" width="200px" align="center" padding="20px 32px" /></mj-column></mj-section>`;

@@ -6,6 +6,8 @@ import { useState } from 'react';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { FeaturedEventBlock } from '@/lib/newsletter/schema';
 import { AssetPickerDialog } from './asset-picker-dialog';
+import { EventPickerDialog } from './event-picker-dialog';
+import { eventRecordToFeaturedBlock } from '@/lib/events/snapshot';
 
 type Asset = {
   id: string;
@@ -77,6 +79,7 @@ export function FeaturedEventInspector({
   validationIssues?: NewsletterSaveIssue[];
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [eventPickerOpen, setEventPickerOpen] = useState(false);
   const hasIssue = (field: string) => validationIssues.some((issue) => issue.fieldKey === field);
 
   function selectAsset(asset: Asset) {
@@ -92,6 +95,14 @@ export function FeaturedEventInspector({
 
   return (
     <div className="space-y-4">
+      <button
+        type="button"
+        className="w-full rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
+        onClick={() => setEventPickerOpen(true)}
+      >
+        {t('misc.chooseFromRegister')}
+      </button>
+      <p className="text-xs text-slate-500">{t('misc.eventSnapshotHint')}</p>
       <label className="block text-sm font-medium">
         Hintergrund
         <select
@@ -163,13 +174,24 @@ export function FeaturedEventInspector({
       </div>
       <Field label="Overline" value={block.overline} onChange={(overline) => onChange({ overline })} />
       <Field
-        label="Titel"
+        label={t('misc.talkTitle')}
         value={block.title}
         required
         invalid={hasIssue('title')}
         onChange={(title) => onChange({ title })}
       />
+      <Field
+        label={t('misc.speakerName')}
+        value={block.speakerName}
+        onChange={(speakerName) => onChange({ speakerName })}
+      />
+      <Field
+        label={t('misc.speakerRole')}
+        value={block.speakerRole}
+        onChange={(speakerRole) => onChange({ speakerRole })}
+      />
       <Field label="Datum / Uhrzeit" value={block.date} onChange={(date) => onChange({ date })} />
+      <Field label={t('misc.place')} value={block.location} onChange={(location) => onChange({ location })} />
       <Area label="Beschreibung" value={block.description} onChange={(description) => onChange({ description })} />
       <Field
         label="Button-Label"
@@ -180,6 +202,11 @@ export function FeaturedEventInspector({
       />
       <Field label="Button-URL" value={block.buttonUrl} onChange={(buttonUrl) => onChange({ buttonUrl })} />
       <AssetPickerDialog open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={selectAsset} />
+      <EventPickerDialog
+        open={eventPickerOpen}
+        onClose={() => setEventPickerOpen(false)}
+        onSelect={(event) => onChange(eventRecordToFeaturedBlock(event, block))}
+      />
     </div>
   );
 }

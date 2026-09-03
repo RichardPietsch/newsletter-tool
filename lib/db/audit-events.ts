@@ -11,6 +11,8 @@ export type AuditEventType =
   | 'account.reactivated'
   | 'application.error'
   | 'asset.uploaded'
+  | 'event.created'
+  | 'event.deleted'
   | 'auth.login_failed'
   | 'auth.login_succeeded'
   | 'auth.magic_link.requested'

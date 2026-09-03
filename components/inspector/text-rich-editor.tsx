@@ -36,7 +36,7 @@ export function TextRichEditor({ block, readOnly, isBlue }: TextRichEditorProps)
     editorProps: {
       attributes: {
         class:
-          'min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h1+p]:mt-2 [&_h2]:mb-2 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h2+p]:mt-2 [&_h3]:mb-2 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_h3+p]:mt-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
+          'min-h-32 focus:outline-none [&_p]:text-[14px] [&_p]:leading-[1.8] [&_h1]:mb-2 [&_h1]:font-serif [&_h1]:text-3xl [&_h1]:font-normal [&_h1+p]:mt-2 [&_h2]:mb-2 [&_h2]:font-serif [&_h2]:text-2xl [&_h2]:font-normal [&_h2+p]:mt-2 [&_h3]:mb-2 [&_h3]:font-serif [&_h3]:text-xl [&_h3]:font-normal [&_h3+p]:mt-2 [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:opacity-80 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
         'aria-label': t('editor.textEditAria'),
       },
     },

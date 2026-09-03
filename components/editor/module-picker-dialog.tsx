@@ -5,16 +5,19 @@ import { t } from '@/lib/i18n';
 import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect } from 'react';
 
-type ModuleType = 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid';
+type ModuleType =
+  'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid' | 'backgroundSection';
 
 export function ModulePickerDialog({
   open,
   onOpenChange,
   onPick,
+  allowBackground = true,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   onPick: (type: ModuleType) => void;
+  allowBackground?: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -31,6 +34,7 @@ export function ModulePickerDialog({
     ['quote', 'Zitat', 'Editoriales Zitat mit roter Akzentlinie'],
     ['sectionHeading', 'Abschnitt', 'Kleine rote Abschnittsüberschrift'],
     ['eventGrid', 'Event-Raster', 'Mehrere Events im flexiblen Kartenraster'],
+    ['backgroundSection', 'Hintergrundbereich', 'Vollflächiger Hintergrund mit enthaltenen Modulen'],
     ['image', 'Bild', 'Inhaltliches oder dekoratives Bild'],
   ] as const;
 
@@ -41,29 +45,33 @@ export function ModulePickerDialog({
         <Dialog.Content className="fixed left-1/2 top-1/2 z-[101] w-[720px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-8 shadow-xl">
           <Dialog.Title className="text-2xl font-bold">{t('misc.addModule')}</Dialog.Title>
           <div className="mt-6 grid grid-cols-3 gap-4">
-            {cards.map((card) => (
-              <button
-                key={card[0]}
-                onClick={() => onPick(card[0])}
-                className="rounded-lg border p-5 text-left hover:border-blue-600 focus:border-blue-600"
-              >
-                <div className="text-3xl">
-                  {card[0] === 'text'
-                    ? '¶'
-                    : card[0] === 'featuredEvent'
-                      ? '★'
-                      : card[0] === 'quote'
-                        ? '“'
-                        : card[0] === 'sectionHeading'
-                          ? '—'
-                          : card[0] === 'eventGrid'
-                            ? '▦'
-                            : '🖼️'}
-                </div>
-                <div className="mt-3 font-semibold">{card[1]}</div>
-                <p className="text-sm text-slate-600">{card[2]}</p>
-              </button>
-            ))}
+            {cards
+              .filter((card) => allowBackground || card[0] !== 'backgroundSection')
+              .map((card) => (
+                <button
+                  key={card[0]}
+                  onClick={() => onPick(card[0])}
+                  className="rounded-lg border p-5 text-left hover:border-blue-600 focus:border-blue-600"
+                >
+                  <div className="text-3xl">
+                    {card[0] === 'text'
+                      ? '¶'
+                      : card[0] === 'featuredEvent'
+                        ? '★'
+                        : card[0] === 'quote'
+                          ? '“'
+                          : card[0] === 'sectionHeading'
+                            ? '—'
+                            : card[0] === 'eventGrid'
+                              ? '▦'
+                              : card[0] === 'backgroundSection'
+                                ? '▣'
+                                : '🖼️'}
+                  </div>
+                  <div className="mt-3 font-semibold">{card[1]}</div>
+                  <p className="text-sm text-slate-600">{card[2]}</p>
+                </button>
+              ))}
           </div>
           <Dialog.Close className="mt-6 rounded border px-4 py-2">{t('shared.close')}</Dialog.Close>
         </Dialog.Content>

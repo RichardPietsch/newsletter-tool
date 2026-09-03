@@ -1,5 +1,9 @@
 import { allowedTextColors, type TextBlock, type TiptapMark, type TiptapNode } from '@/lib/newsletter/schema';
-import { newsletterEmailClasses as classes, newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
+import {
+  newsletterEmailClasses as classes,
+  newsletterModuleStyles as styles,
+  type NewsletterColorPalette,
+} from '@/lib/newsletter/module-styles';
 
 function esc(value: string) {
   return value.replace(
@@ -8,7 +12,7 @@ function esc(value: string) {
   );
 }
 
-function renderMarks(text: string, marks: TiptapMark[] = []) {
+function renderMarks(text: string, marks: TiptapMark[] = [], colors: NewsletterColorPalette = styles.colors) {
   return marks.reduce((current, mark) => {
     if (mark.type === 'bold') return `<strong>${current}</strong>`;
     if (mark.type === 'italic') return `<em>${current}</em>`;
@@ -19,12 +23,12 @@ function renderMarks(text: string, marks: TiptapMark[] = []) {
         const isAccent = rawColor === '#dc2626' || rawColor === styles.colors.accent;
         const isMuted = rawColor === styles.colors.muted;
         const color = isAccent
-          ? styles.colors.accent
+          ? colors.accent
           : isMuted
-            ? styles.colors.muted
+            ? colors.muted
             : rawColor === '#ffffff'
-              ? styles.colors.featureText
-              : styles.colors.text;
+              ? colors.featureText
+              : colors.text;
         const colorClass = isAccent
           ? classes.accent
           : isMuted
@@ -36,21 +40,23 @@ function renderMarks(text: string, marks: TiptapMark[] = []) {
       }
     }
     if (mark.type === 'link')
-      return `<a class="${classes.brand}" style="color:${styles.colors.brand}" href="${esc(mark.attrs.href)}">${current}</a>`;
+      return `<a class="${classes.brand}" style="color:${colors.brand}" href="${esc(mark.attrs.href)}">${current}</a>`;
     return current;
   }, text);
 }
 
-function renderNodes(items: TiptapNode[] = []): string {
+function renderNodes(items: TiptapNode[] = [], colors: NewsletterColorPalette = styles.colors): string {
   return items
     .map((node, index) => {
-      if (node.type === 'text') return renderMarks(esc(node.text), node.marks);
+      if (node.type === 'text') return renderMarks(esc(node.text), node.marks, colors);
       if (node.type === 'hardBreak') return '<br />';
       if (node.type === 'bulletList')
-        return `<ul style="margin:0 0 12px 20px; padding:0">${renderNodes(node.content)}</ul>`;
+        return `<ul style="margin:0 0 12px 20px; padding:0">${renderNodes(node.content, colors)}</ul>`;
       if (node.type === 'orderedList')
-        return `<ol style="margin:0 0 12px 20px; padding:0">${renderNodes(node.content)}</ol>`;
-      if (node.type === 'listItem') return `<li>${renderNodes(node.content)}</li>`;
+        return `<ol style="margin:0 0 12px 20px; padding:0">${renderNodes(node.content, colors)}</ol>`;
+      if (node.type === 'listItem') return `<li>${renderNodes(node.content, colors)}</li>`;
+      if (node.type === 'blockquote')
+        return `<blockquote style="margin:16px 0;padding:0 0 0 18px;border-left:4px solid currentColor;font-style:italic;opacity:.82">${renderNodes(node.content, colors)}</blockquote>`;
       const tag = node.type === 'heading' ? `h${node.attrs.level}` : 'p';
       const previousNode = items[index - 1];
       const followsHeading = tag === 'p' && previousNode?.type === 'heading';
@@ -59,16 +65,19 @@ function renderNodes(items: TiptapNode[] = []): string {
         tag === 'p'
           ? 'font-size:14px;line-height:1.8'
           : 'font-family:Georgia, Times, serif;font-weight:400;line-height:1.25';
-      return `<${tag} style="${margin};${typography}">${renderNodes(node.content)}</${tag}>`;
+      return `<${tag} style="${margin};${typography}">${renderNodes(node.content, colors)}</${tag}>`;
     })
     .join('');
 }
 
-export function renderText(block: TextBlock, options: { squareTop?: boolean } = {}) {
+export function renderText(
+  block: TextBlock,
+  options: { squareTop?: boolean } = {},
+  colors: NewsletterColorPalette = styles.colors,
+) {
   const isBlue = block.background === 'blue';
   const radius = options.squareTop ? '0 0 4px 4px' : '4px';
-  const colors = styles.colors;
   const backgroundClass = isBlue ? classes.featureBackground : classes.surface;
   const textClass = isBlue ? classes.featureText : classes.text;
-  return `<mj-section css-class="${backgroundClass}" background-color="${isBlue ? colors.featureBackground : colors.surface}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text css-class="${textClass}" font-size="14px" line-height="1.8" color="${isBlue ? colors.featureText : colors.text}" padding="24px 32px 20px">${renderNodes(block.content.content)}</mj-text></mj-column></mj-section>`;
+  return `<mj-section css-class="${backgroundClass}" background-color="${isBlue ? colors.featureBackground : colors.surface}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text css-class="${textClass}" font-size="14px" line-height="1.8" color="${isBlue ? colors.featureText : colors.text}" padding="24px 32px 20px">${renderNodes(block.content.content, colors)}</mj-text></mj-column></mj-section>`;
 }

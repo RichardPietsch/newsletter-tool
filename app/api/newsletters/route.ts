@@ -10,6 +10,7 @@ import { newsletters } from '@/lib/db/schema';
 import { createDefaultDocument } from '@/lib/newsletter/defaults';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { getTenantSettings } from '@/lib/settings/store';
 
 export async function GET() {
   const auth = await requireTenantApiContext();
@@ -28,10 +29,9 @@ export async function POST(request: Request) {
   const auth = await requireTenantApiContext(request, true);
   if (auth.response) return auth.response;
   const id = nanoid();
-  const document = createDefaultDocument();
-  await db
-    .insert(newsletters)
-    .values({ id, tenantId: auth.context.tenant.id, title: document.title, document });
+  const settings = await getTenantSettings(auth.context.tenant.id);
+  const document = createDefaultDocument('Neuer Newsletter', settings.headerVariants[0]?.id);
+  await db.insert(newsletters).values({ id, tenantId: auth.context.tenant.id, title: document.title, document });
   await recordAuditEvent({
     eventType: 'newsletter.created',
     tenantId: auth.context.tenant.id,

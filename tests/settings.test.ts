@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderFooter } from '@/email/modules/footer';
 import { serverEnv } from '@/lib/env';
 import type { TiptapNode } from '@/lib/newsletter/schema';
+import { newsletterThemePalettes } from '@/lib/newsletter/module-styles';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 
@@ -58,6 +59,43 @@ describe('settings defaults', () => {
     expect(marksFromNode(contentFromNode(settings.footerRichText.content?.[1])?.[2])).toEqual([
       { type: 'link', attrs: { href: 'mailto:gastronomie@anglogermanclub.de' } },
     ]);
+    expect(settings.colors).toEqual(newsletterThemePalettes);
+  });
+
+  it('preserves deliberately customized header lists in current design settings', () => {
+    const settings = createDefaultSettings();
+    const customized = applyDefaultSettingsFallbacks({ ...settings, headerVariants: [] });
+
+    expect(customized.headerVariants).toEqual([]);
+  });
+
+  it('rejects invalid tenant color values', () => {
+    const settings = createDefaultSettings();
+    settings.colors.light.brand = 'blue';
+
+    expect(globalSettingsSchema.safeParse(settings).success).toBe(false);
+  });
+
+  it('accepts and reduces previously stored full color palettes', () => {
+    const settings = createDefaultSettings();
+    const legacyPalette = {
+      ...settings.colors.light,
+      border: '#d7dee8',
+      featureText: '#ffffff',
+      featureMuted: '#dbe5e9',
+      featureAccent: '#cddde3',
+      featureButtonBackground: '#dbe7eb',
+      featureButtonText: '#17303d',
+    };
+
+    const parsed = globalSettingsSchema.parse({
+      ...settings,
+      colors: { light: legacyPalette, dark: { ...legacyPalette, background: '#10191e' } },
+    });
+
+    expect(parsed.colors.light).toEqual(settings.colors.light);
+    expect(parsed.colors.light).not.toHaveProperty('featureText');
+    expect(parsed.colors.light).not.toHaveProperty('border');
   });
 
   it('upgrades old placeholder defaults without overwriting custom settings', () => {

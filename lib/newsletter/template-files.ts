@@ -6,7 +6,7 @@ import { and, eq, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { publicAppUrl } from '@/lib/app-url';
 import { assets as assetTable, newsletters } from '@/lib/db/schema';
-import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
+import { newsletterDocumentSchema, type NewsletterContentBlock, type NewsletterDocument } from './schema';
 import { migrateNewsletterDocument } from './migrations';
 
 type NewsletterTemplateFile = {
@@ -61,7 +61,7 @@ function applyDemoImage(
   demoAssets: DemoAssetSeedMap,
 ) {
   const filename = demoFilenameFromUrl(image?.src);
-  if (!filename || !demoAssets[filename]) return image;
+  if (!filename || !demoAssets[filename]) return image ? { ...image, decorative: image.decorative ?? false } : image;
   const asset = demoAssets[filename];
   return {
     ...image,
@@ -77,20 +77,26 @@ export function applyDemoAssetsToDocument(
   demoAssets: DemoAssetSeedMap,
 ): NewsletterDocument {
   if (Object.keys(demoAssets).length === 0) return document;
+  const applyToBlock = (block: NewsletterContentBlock): NewsletterContentBlock => {
+    if (block.type === 'image') {
+      const image = applyDemoImage(block, demoAssets);
+      return image ? { ...block, ...image } : block;
+    }
+    if (block.type === 'event') return { ...block, image: applyDemoImage(block.image, demoAssets) };
+    if (block.type === 'featuredEvent') return { ...block, image: applyDemoImage(block.image, demoAssets) };
+    if (block.type === 'eventGrid')
+      return {
+        ...block,
+        items: block.items.map((item) => ({ ...item, image: applyDemoImage(item.image, demoAssets) })),
+      };
+    return block;
+  };
   const nextDocument = {
     ...document,
     blocks: document.blocks.map((block) => {
-      if (block.type === 'image') {
-        const image = applyDemoImage(block, demoAssets);
-        return image ? { ...block, ...image } : block;
-      }
-      if (block.type === 'event') return { ...block, image: applyDemoImage(block.image, demoAssets) };
-      if (block.type === 'featuredEvent') return { ...block, image: applyDemoImage(block.image, demoAssets) };
-      if (block.type === 'eventGrid')
-        return {
-          ...block,
-          items: block.items.map((item) => ({ ...item, image: applyDemoImage(item.image, demoAssets) })),
-        };
+      if (block.type === 'backgroundSection')
+        return { ...block, blocks: block.blocks.map((child) => applyToBlock(child)) };
+      if (block.type !== 'header' && block.type !== 'footer') return applyToBlock(block);
       return block;
     }),
   };
@@ -159,13 +165,20 @@ async function readTemplateFiles() {
 }
 
 function documentWithFreshIds(document: NewsletterDocument): NewsletterDocument {
+  const freshContentBlock = (block: NewsletterContentBlock): NewsletterContentBlock => ({
+    ...block,
+    id: nanoid(),
+    ...(block.type === 'eventGrid' ? { items: block.items.map((item) => ({ ...item, id: nanoid() })) } : {}),
+  });
   const nextDocument = {
     ...document,
-    blocks: document.blocks.map((block) => ({
-      ...block,
-      id: nanoid(),
-      ...(block.type === 'eventGrid' ? { items: block.items.map((item) => ({ ...item, id: nanoid() })) } : {}),
-    })),
+    blocks: document.blocks.map((block) =>
+      block.type === 'backgroundSection'
+        ? { ...block, id: nanoid(), blocks: block.blocks.map(freshContentBlock) }
+        : block.type === 'header' || block.type === 'footer'
+          ? { ...block, id: nanoid() }
+          : freshContentBlock(block),
+    ),
   };
   return newsletterDocumentSchema.parse(nextDocument);
 }

@@ -27,11 +27,16 @@ export function FeaturedEventBlock({ block }: { block: B }) {
           {block.overline}
         </div>
         <h2 className="mt-3 font-serif text-3xl leading-tight">{block.title}</h2>
-        {block.date && (
-          <p className="mt-5 text-sm" style={{ color: isWhite ? colors.muted : colors.featureMuted }}>
-            {block.date}
+        {block.speakerName || block.speakerRole ? (
+          <p className="mt-2 text-sm font-medium" style={{ color: isWhite ? colors.muted : colors.featureMuted }}>
+            {[block.speakerName, block.speakerRole].filter(Boolean).join(' · ')}
           </p>
-        )}
+        ) : null}
+        {block.date || block.location ? (
+          <p className="mt-5 text-sm" style={{ color: isWhite ? colors.muted : colors.featureMuted }}>
+            {[block.date, block.location].filter(Boolean).join(' · ')}
+          </p>
+        ) : null}
         {block.description && (
           <p className="mt-3 text-sm leading-relaxed" style={{ color: isWhite ? colors.text : colors.featureMuted }}>
             {block.description}

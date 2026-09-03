@@ -15,7 +15,15 @@ export function Overlay({ title, onClose, children }: { title: string; onClose: 
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/40 p-6" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      className="fixed inset-0 z-[100] bg-slate-950/40 p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-slate-50 shadow-2xl">
         <header className="flex items-center justify-between border-b bg-white px-6 py-4">
           <h2 className="text-xl font-semibold">{title}</h2>

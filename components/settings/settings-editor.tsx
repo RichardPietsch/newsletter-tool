@@ -39,7 +39,7 @@ function FooterRichTextEditor({
     editorProps: {
       attributes: {
         class:
-          'min-h-48 rounded border bg-white p-3 text-slate-800 focus:outline-none [&_a]:text-blue-700 [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
+          'min-h-48 rounded border bg-white p-3 text-slate-800 focus:outline-none [&_a]:text-blue-700 [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:pl-5 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
         'aria-label': 'Globalen Footer als RichText bearbeiten',
       },
     },
@@ -71,15 +71,22 @@ export function SettingsEditor({
   usedHeaderVariantIds,
   embedded = false,
   readOnly = false,
+  initialSection,
 }: {
   initialSettings: GlobalSettings;
   usedHeaderVariantIds: string[];
   embedded?: boolean;
   readOnly?: boolean;
+  initialSection?: 'header' | 'footer';
 }) {
   const [settings, setSettings] = useState(initialSettings);
   const [status, setStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (!embedded || !initialSection) return;
+    document.getElementById(`global-settings-${initialSection}`)?.scrollIntoView({ block: 'start' });
+  }, [embedded, initialSection]);
 
   async function save(next = settings) {
     if (readOnly) return;
@@ -153,101 +160,101 @@ export function SettingsEditor({
         </p>
       ) : null}
       <fieldset disabled={readOnly}>
-      <section className="rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">{t('misc.headerVariants')}</h2>
-        <p className="mt-1 text-sm text-slate-600">{t('misc.headerVariantsDescription')}</p>
-        <label className="mt-4 inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-white">
-          {uploading ? 'Upload läuft …' : 'Header-Bild hochladen'}
-          <input
-            className="sr-only"
-            type="file"
-            accept="image/jpeg,image/png,image/gif"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void uploadHeaderImage(file);
-            }}
+        <section id="global-settings-header" className="scroll-mt-6 rounded-xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">{t('misc.headerVariants')}</h2>
+          <p className="mt-1 text-sm text-slate-600">{t('misc.headerVariantsDescription')}</p>
+          <label className="mt-4 inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-white">
+            {uploading ? 'Upload läuft …' : 'Header-Bild hochladen'}
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) void uploadHeaderImage(file);
+              }}
+            />
+          </label>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {settings.headerVariants.map((variant) => (
+              <article key={variant.id} className="rounded-lg border p-4">
+                <img src={variant.imageUrl} alt={variant.alt} className="h-28 w-full rounded object-contain" />
+                <label className="mt-3 block text-sm font-medium">
+                  Name
+                  <input
+                    className="mt-1 w-full rounded border p-2"
+                    value={variant.name}
+                    onChange={(event) => {
+                      const next = {
+                        ...settings,
+                        headerVariants: settings.headerVariants.map((item) =>
+                          item.id === variant.id ? { ...item, name: event.target.value } : item,
+                        ),
+                      };
+                      setSettings(next);
+                    }}
+                    onBlur={() => void save()}
+                  />
+                </label>
+                <label className="mt-3 block text-sm font-medium">
+                  {t('image.alt')}
+                  <input
+                    className="mt-1 w-full rounded border p-2"
+                    value={variant.alt}
+                    onChange={(event) => {
+                      const next = {
+                        ...settings,
+                        headerVariants: settings.headerVariants.map((item) =>
+                          item.id === variant.id ? { ...item, alt: event.target.value } : item,
+                        ),
+                      };
+                      setSettings(next);
+                    }}
+                    onBlur={() => void save()}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="mt-3 rounded border px-3 py-2 text-sm text-red-700 disabled:cursor-not-allowed disabled:text-slate-400"
+                  disabled={usedHeaderVariantIds.includes(variant.id)}
+                  title={
+                    usedHeaderVariantIds.includes(variant.id)
+                      ? 'Diese Variante wird in mindestens einem Newsletter verwendet.'
+                      : 'Header-Variante löschen'
+                  }
+                  onClick={() => {
+                    const next = {
+                      ...settings,
+                      headerVariants: settings.headerVariants.filter((item) => item.id !== variant.id),
+                    };
+                    setSettings(next);
+                    void save(next);
+                  }}
+                >
+                  {usedHeaderVariantIds.includes(variant.id) ? 'Wird verwendet' : 'Variante löschen'}
+                </button>
+              </article>
+            ))}
+            {settings.headerVariants.length === 0 && (
+              <p className="rounded border border-dashed p-6 text-slate-600">{t('misc.noHeaderVariant')}</p>
+            )}
+          </div>
+        </section>
+
+        <section id="global-settings-footer" className="mt-8 scroll-mt-6 rounded-xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-semibold">{t('misc.globalFooter')}</h2>
+          <p className="mt-1 text-sm text-slate-600">{t('misc.globalFooterDescription')}</p>
+          <FooterRichTextEditor
+            value={settings.footerRichText}
+            onChange={updateFooterRichText}
+            onBlur={(footerRichText) => void saveFooterRichText(footerRichText)}
+            readOnly={readOnly}
           />
-        </label>
-
-        <div className="mt-6 grid gap-4 md:grid-cols-2">
-          {settings.headerVariants.map((variant) => (
-            <article key={variant.id} className="rounded-lg border p-4">
-              <img src={variant.imageUrl} alt={variant.alt} className="h-28 w-full rounded object-contain" />
-              <label className="mt-3 block text-sm font-medium">
-                Name
-                <input
-                  className="mt-1 w-full rounded border p-2"
-                  value={variant.name}
-                  onChange={(event) => {
-                    const next = {
-                      ...settings,
-                      headerVariants: settings.headerVariants.map((item) =>
-                        item.id === variant.id ? { ...item, name: event.target.value } : item,
-                      ),
-                    };
-                    setSettings(next);
-                  }}
-                  onBlur={() => void save()}
-                />
-              </label>
-              <label className="mt-3 block text-sm font-medium">
-                {t('image.alt')}
-                <input
-                  className="mt-1 w-full rounded border p-2"
-                  value={variant.alt}
-                  onChange={(event) => {
-                    const next = {
-                      ...settings,
-                      headerVariants: settings.headerVariants.map((item) =>
-                        item.id === variant.id ? { ...item, alt: event.target.value } : item,
-                      ),
-                    };
-                    setSettings(next);
-                  }}
-                  onBlur={() => void save()}
-                />
-              </label>
-              <button
-                type="button"
-                className="mt-3 rounded border px-3 py-2 text-sm text-red-700 disabled:cursor-not-allowed disabled:text-slate-400"
-                disabled={usedHeaderVariantIds.includes(variant.id)}
-                title={
-                  usedHeaderVariantIds.includes(variant.id)
-                    ? 'Diese Variante wird in mindestens einem Newsletter verwendet.'
-                    : 'Header-Variante löschen'
-                }
-                onClick={() => {
-                  const next = {
-                    ...settings,
-                    headerVariants: settings.headerVariants.filter((item) => item.id !== variant.id),
-                  };
-                  setSettings(next);
-                  void save(next);
-                }}
-              >
-                {usedHeaderVariantIds.includes(variant.id) ? 'Wird verwendet' : 'Variante löschen'}
-              </button>
-            </article>
-          ))}
-          {settings.headerVariants.length === 0 && (
-            <p className="rounded border border-dashed p-6 text-slate-600">{t('misc.noHeaderVariant')}</p>
-          )}
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">{t('misc.globalFooter')}</h2>
-        <p className="mt-1 text-sm text-slate-600">{t('misc.globalFooterDescription')}</p>
-        <FooterRichTextEditor
-          value={settings.footerRichText}
-          onChange={updateFooterRichText}
-          onBlur={(footerRichText) => void saveFooterRichText(footerRichText)}
-          readOnly={readOnly}
-        />
-        <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>
-          {t('misc.saveFooter')}
-        </button>
-      </section>
+          <button className="mt-3 rounded bg-blue-700 px-4 py-2 text-white" onClick={() => void save()}>
+            {t('misc.saveFooter')}
+          </button>
+        </section>
       </fieldset>
     </div>
   );

@@ -2,9 +2,18 @@ import { and, eq, inArray, isNull } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 import { db } from '@/lib/db';
 import { createAuditEventRecord } from '@/lib/db/audit-events';
-import { auditEvents, sessions, tenants, users, type TenantStatus, type UserStatus } from '@/lib/db/schema';
+import {
+  appSettings,
+  auditEvents,
+  sessions,
+  tenants,
+  users,
+  type TenantStatus,
+  type UserStatus,
+} from '@/lib/db/schema';
 import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-files';
 import { normalizeEmail } from '@/lib/auth/config';
+import { createDefaultSettings } from '@/lib/settings/defaults';
 
 type Actor = { id: string };
 
@@ -31,15 +40,13 @@ export async function createTenant(
       lastActivityAt: event.createdAt,
     });
     await tx.insert(auditEvents).values(event);
+    await tx.insert(appSettings).values({ id, tenantId: id, settings: createDefaultSettings() });
   });
   await seedNewsletterTemplatesForTenant(id);
   return id;
 }
 
-export async function updateTenantDetails(
-  tenantId: string,
-  input: { name: string; adminNotes?: string | null },
-) {
+export async function updateTenantDetails(tenantId: string, input: { name: string; adminNotes?: string | null }) {
   const [tenant] = await db
     .update(tenants)
     .set({ name: input.name.trim(), adminNotes: input.adminNotes?.trim() || null, updatedAt: new Date() })
@@ -48,12 +55,7 @@ export async function updateTenantDetails(
   return tenant ?? null;
 }
 
-export async function setTenantStatus(
-  tenantId: string,
-  status: TenantStatus,
-  actor: Actor,
-  correlationId: string,
-) {
+export async function setTenantStatus(tenantId: string, status: TenantStatus, actor: Actor, correlationId: string) {
   const eventType = status === 'active' ? 'tenant.reactivated' : 'tenant.deactivated';
   const event = createAuditEventRecord({
     eventType,

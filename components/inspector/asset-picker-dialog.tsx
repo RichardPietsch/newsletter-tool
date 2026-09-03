@@ -5,6 +5,7 @@ import { t } from '@/lib/i18n';
 import { useEffect, useState } from 'react';
 import { Overlay } from '@/components/editor/overlay';
 import { getApiErrorMessage } from '@/lib/api/error-message';
+import { assetListFromPayload } from '@/lib/assets/list';
 
 type Asset = {
   id: string;
@@ -37,8 +38,8 @@ export function AssetPickerDialog({
       .then((response) =>
         response.ok ? response.json() : Promise.reject(new Error('Medien konnten nicht geladen werden.')),
       )
-      .then((payload) => {
-        if (active) setAssets(payload.assets ?? []);
+      .then((payload: Asset[] | { assets?: Asset[] }) => {
+        if (active) setAssets(assetListFromPayload(payload));
       })
       .catch((err: Error) => {
         if (active) setError(err.message);

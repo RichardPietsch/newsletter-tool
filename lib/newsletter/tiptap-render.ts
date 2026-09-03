@@ -36,6 +36,7 @@ export function renderTiptapHtml(nodes: TiptapNode[] = []): string {
       if (node.type === 'bulletList') return `<ul>${renderTiptapHtml(node.content)}</ul>`;
       if (node.type === 'orderedList') return `<ol>${renderTiptapHtml(node.content)}</ol>`;
       if (node.type === 'listItem') return `<li>${renderTiptapHtml(node.content)}</li>`;
+      if (node.type === 'blockquote') return `<blockquote>${renderTiptapHtml(node.content)}</blockquote>`;
       return `<p>${renderTiptapHtml(node.content)}</p>`;
     })
     .join('');

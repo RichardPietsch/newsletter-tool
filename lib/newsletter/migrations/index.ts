@@ -21,6 +21,7 @@ type NewsletterMigration = (document: MutableDocument) => MutableDocument;
 
 const migrations: Record<number, NewsletterMigration> = {
   0: (document) => ({ ...document, schemaVersion: 1 }),
+  1: (document) => ({ ...document, schemaVersion: 2 }),
 };
 
 function documentVersion(input: unknown) {
