@@ -41,6 +41,7 @@ export type TiptapMark = z.infer<typeof tiptapMarkSchema>;
 
 export type TiptapNode =
   | { type: 'paragraph'; content?: TiptapNode[] }
+  | { type: 'blockquote'; content?: TiptapNode[] }
   | { type: 'heading'; attrs: z.infer<typeof headingAttrsSchema>; content?: TiptapNode[] }
   | { type: 'text'; text: string; marks?: TiptapMark[] }
   | { type: 'hardBreak' }
@@ -51,6 +52,7 @@ export type TiptapNode =
 const tiptapNodeSchema: z.ZodType<TiptapNode> = z.lazy(() =>
   z.union([
     z.object({ type: z.literal('paragraph'), content: z.array(tiptapNodeSchema).optional() }).strict(),
+    z.object({ type: z.literal('blockquote'), content: z.array(tiptapNodeSchema).optional() }).strict(),
     z
       .object({ type: z.literal('heading'), attrs: headingAttrsSchema, content: z.array(tiptapNodeSchema).optional() })
       .strict(),
@@ -97,9 +99,12 @@ export const imageBlockSchema = base.extend({ type: z.literal('image'), ...image
 export const eventItemSchema = z
   .object({
     id: z.string().min(1),
+    sourceEventId: z.string().optional(),
     image: z.object(imageFields).optional(),
     category: z.string().optional(),
     title: z.string().min(1, 'Titel ist erforderlich'),
+    speakerName: z.string().optional(),
+    speakerRole: z.string().optional(),
     date: z.string().optional(),
     location: z.string().optional(),
     description: z.string().optional(),
@@ -115,8 +120,12 @@ export const eventItemSchema = z
 export const eventBlockSchema = base
   .extend({
     type: z.literal('event'),
+    sourceEventId: z.string().optional(),
     image: z.object(imageFields).optional(),
+    category: z.string().optional(),
     title: z.string().min(1, 'Titel ist erforderlich'),
+    speakerName: z.string().optional(),
+    speakerRole: z.string().optional(),
     date: z.string().optional(),
     location: z.string().optional(),
     description: z.string().optional(),
@@ -132,11 +141,15 @@ export const eventBlockSchema = base
 export const featuredEventBlockSchema = base
   .extend({
     type: z.literal('featuredEvent'),
+    sourceEventId: z.string().optional(),
     overline: z.string().default('Featured Event'),
     background: z.enum(['blue', 'white']).default('blue'),
     image: z.object(imageFields).optional(),
     title: z.string().min(1, 'Titel ist erforderlich'),
+    speakerName: z.string().optional(),
+    speakerRole: z.string().optional(),
     date: z.string().optional(),
+    location: z.string().optional(),
     description: z.string().optional(),
     buttonLabel: z.string().optional(),
     buttonUrl: url.optional().or(z.literal('')),
@@ -163,8 +176,7 @@ export const eventGridBlockSchema = base.extend({
   layout: z.enum(['grid', 'list']).default('grid'),
   items: z.array(eventItemSchema).min(1, 'Mindestens ein Event ist erforderlich'),
 });
-export const newsletterBlockSchema = z.union([
-  headerBlockSchema,
+export const newsletterContentBlockSchema = z.union([
   textBlockSchema,
   eventBlockSchema,
   featuredEventBlockSchema,
@@ -172,6 +184,16 @@ export const newsletterBlockSchema = z.union([
   sectionHeadingBlockSchema,
   eventGridBlockSchema,
   imageBlockSchema,
+]);
+export const backgroundSectionBlockSchema = base.extend({
+  type: z.literal('backgroundSection'),
+  background: z.enum(['neutral', 'blue']).default('neutral'),
+  blocks: z.array(newsletterContentBlockSchema).min(1, 'Mindestens ein Modul ist erforderlich'),
+});
+export const newsletterBlockSchema = z.union([
+  headerBlockSchema,
+  newsletterContentBlockSchema,
+  backgroundSectionBlockSchema,
   footerBlockSchema,
 ]);
 export const newsletterDocumentSchema = z
@@ -189,6 +211,7 @@ export const newsletterDocumentSchema = z
   });
 export type NewsletterDocument = z.infer<typeof newsletterDocumentSchema>;
 export type NewsletterBlock = z.infer<typeof newsletterBlockSchema>;
+export type NewsletterContentBlock = z.infer<typeof newsletterContentBlockSchema>;
 export type HeaderBlock = z.infer<typeof headerBlockSchema>;
 export type FooterBlock = z.infer<typeof footerBlockSchema>;
 export type TextBlock = z.infer<typeof textBlockSchema>;
@@ -199,6 +222,7 @@ export type SectionHeadingBlock = z.infer<typeof sectionHeadingBlockSchema>;
 export type EventGridBlock = z.infer<typeof eventGridBlockSchema>;
 export type EventItem = z.infer<typeof eventItemSchema>;
 export type ImageBlock = z.infer<typeof imageBlockSchema>;
+export type BackgroundSectionBlock = z.infer<typeof backgroundSectionBlockSchema>;
 export type NewsletterBlockPatch =
   | Partial<HeaderBlock>
   | Partial<TextBlock>
@@ -208,5 +232,6 @@ export type NewsletterBlockPatch =
   | Partial<SectionHeadingBlock>
   | Partial<EventGridBlock>
   | Partial<ImageBlock>
+  | Partial<BackgroundSectionBlock>
   | Partial<FooterBlock>;
 export const isLocked = (b: NewsletterBlock) => b.type === 'header' || b.type === 'footer' || b.locked === true;

@@ -23,6 +23,11 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
         <h3 className="mt-3 font-serif text-xl leading-tight" style={{ color: colors.text }}>
           {item.title}
         </h3>
+        {item.speakerName || item.speakerRole ? (
+          <p className="mt-2 text-sm font-medium" style={{ color: colors.muted }}>
+            {[item.speakerName, item.speakerRole].filter(Boolean).join(' · ')}
+          </p>
+        ) : null}
         {(item.date || item.location) && (
           <p className="mt-3 text-sm" style={{ color: colors.muted }}>
             {[item.date, item.location].filter(Boolean).join(' · ')}

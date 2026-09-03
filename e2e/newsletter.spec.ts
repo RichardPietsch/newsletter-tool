@@ -299,16 +299,16 @@ test('covers the main authenticated editor flow', async ({ page }) => {
 
   await page.getByText('E2E Veranstaltungsabend').click();
   const inspector = page.locator('[data-tour="inspector"]');
-  await expect(inspector.getByLabel('Newsletter-Titel')).toHaveValue('E2E Veranstaltungsabend');
+  await expect(inspector.getByLabel('Vortragstitel')).toHaveValue('E2E Veranstaltungsabend');
 
-  await inspector.getByLabel('Newsletter-Titel').fill('');
+  await inspector.getByLabel('Vortragstitel').fill('');
   await expect(page.getByText('Speichern fehlgeschlagen')).toBeVisible({ timeout: 5000 });
   await page.getByLabel('Speicherfehler anzeigen').click();
   await expect(page.getByRole('dialog', { name: 'Speichern nicht erfolgreich' })).toContainText(
     'Titel ist erforderlich',
   );
   await page.getByRole('button', { name: 'Schließen' }).click();
-  await inspector.getByLabel('Newsletter-Titel').fill('E2E Validierter Abend');
+  await inspector.getByLabel('Vortragstitel').fill('E2E Validierter Abend');
 
   await page.getByLabel('Komponente an dieser Stelle hinzufügen').first().click();
   await page.getByRole('button', { name: /Zitat/ }).click();

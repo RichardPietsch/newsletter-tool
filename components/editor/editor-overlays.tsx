@@ -6,6 +6,7 @@ import type { GlobalSettings } from '@/lib/settings/schema';
 import { AccountOverlay } from './account-overlay';
 import type { AccountInfo, EditorOverlay } from './editor-types';
 import { ExportIssuesOverlay } from './export-issues-overlay';
+import { EventLibraryOverlay } from './event-library-overlay';
 import { MediaLibraryOverlay } from './media-library-overlay';
 import { NewsletterSettingsOverlay } from './newsletter-settings-overlay';
 import { Overlay } from './overlay';
@@ -29,6 +30,7 @@ export function EditorOverlays({
   onTemplateExport,
   onCloseExportError,
   readOnly = false,
+  settingsSection,
 }: {
   overlay: EditorOverlay;
   settings?: GlobalSettings;
@@ -47,10 +49,12 @@ export function EditorOverlays({
   onTemplateExport: () => Promise<void>;
   onCloseExportError: () => void;
   readOnly?: boolean;
+  settingsSection?: 'header' | 'footer';
 }) {
   return (
     <>
       <MediaLibraryOverlay open={overlay === 'media'} onClose={onCloseOverlay} readOnly={readOnly} />
+      <EventLibraryOverlay open={overlay === 'events'} onClose={onCloseOverlay} readOnly={readOnly} />
       {settings ? (
         <SettingsOverlay
           open={overlay === 'settings'}
@@ -58,6 +62,7 @@ export function EditorOverlays({
           settings={settings}
           usedHeaderVariantIds={usedHeaderVariantIds}
           readOnly={readOnly}
+          initialSection={settingsSection}
         />
       ) : null}
       <AccountOverlay open={overlay === 'account'} onClose={onCloseOverlay} account={account} />

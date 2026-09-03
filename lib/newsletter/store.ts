@@ -1,12 +1,22 @@
 'use client';
 
 import { create } from 'zustand';
-import type { NewsletterBlockPatch, NewsletterDocument } from './schema';
+import type { NewsletterBlockPatch, NewsletterContentBlock, NewsletterDocument } from './schema';
 import { createBlock } from './defaults';
-import { deleteBlock, History, insertBlock, moveBlock, updateBlock } from './operations';
+import {
+  deleteBlock,
+  History,
+  insertBlock,
+  insertBlockIntoBackground,
+  moveBlock,
+  moveBlockIntoBackground,
+  removeBlockFromBackground,
+  updateBlock,
+} from './operations';
 
 type SaveStatus = 'saved' | 'saving' | 'error';
-type InsertableBlockType = 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid';
+export type InsertableBlockType =
+  'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid' | 'backgroundSection';
 
 type UninitializedState = {
   initialized: false;
@@ -31,6 +41,13 @@ type StoreActions = {
   setTitle: (title: string) => void;
   select: (id?: string) => void;
   insert: (index: number, type: InsertableBlockType) => void;
+  insertIntoBackground: (
+    backgroundId: string,
+    index: number,
+    type: Exclude<InsertableBlockType, 'backgroundSection'>,
+  ) => void;
+  removeFromBackground: (id: string) => void;
+  moveIntoBackground: (id: string, backgroundId: string) => void;
   delete: (id: string) => void;
   move: (id: string, direction: -1 | 1) => void;
   update: (id: string, patch: NewsletterBlockPatch) => void;
@@ -74,6 +91,25 @@ export const useNewsletterStore = create<NewsletterStore>((set, get) => ({
     const block = createBlock(type);
     const doc = commitDocument(state, insertBlock(state.doc, index, block));
     set({ doc, selectedId: block.id });
+  },
+  insertIntoBackground: (backgroundId, index, type) => {
+    const state = get();
+    if (!state.initialized) return;
+    const block = createBlock(type) as NewsletterContentBlock;
+    const doc = commitDocument(state, insertBlockIntoBackground(state.doc, backgroundId, index, block));
+    set({ doc, selectedId: block.id });
+  },
+  removeFromBackground: (id) => {
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, removeBlockFromBackground(state.doc, id));
+    set({ doc, selectedId: id });
+  },
+  moveIntoBackground: (id, backgroundId) => {
+    const state = get();
+    if (!state.initialized) return;
+    const doc = commitDocument(state, moveBlockIntoBackground(state.doc, id, backgroundId));
+    set({ doc, selectedId: id });
   },
   delete: (id) => {
     const state = get();

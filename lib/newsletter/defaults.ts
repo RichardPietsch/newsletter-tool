@@ -7,6 +7,7 @@ import type {
   EventItem,
   FeaturedEventBlock,
   ImageBlock,
+  BackgroundSectionBlock,
   NewsletterBlock,
   NewsletterDocument,
   QuoteBlock,
@@ -18,12 +19,12 @@ export const emptyTiptapDoc: TiptapDoc = {
   type: 'doc',
   content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Neuer Textbaustein' }] }],
 };
-export function createDefaultDocument(title = 'Neuer Newsletter'): NewsletterDocument {
+export function createDefaultDocument(title = 'Neuer Newsletter', headerVariantId = 'agc'): NewsletterDocument {
   return {
     schemaVersion: CURRENT_NEWSLETTER_SCHEMA_VERSION,
     title,
     blocks: [
-      { id: nanoid(), type: 'header', locked: true, branding: 'AGC Newsletter', headerVariantId: 'agc' },
+      { id: nanoid(), type: 'header', locked: true, branding: 'AGC Newsletter', headerVariantId },
       {
         id: nanoid(),
         type: 'footer',
@@ -50,11 +51,12 @@ export function createBlock(type: 'featuredEvent'): FeaturedEventBlock;
 export function createBlock(type: 'quote'): QuoteBlock;
 export function createBlock(type: 'sectionHeading'): SectionHeadingBlock;
 export function createBlock(type: 'eventGrid'): EventGridBlock;
+export function createBlock(type: 'backgroundSection'): BackgroundSectionBlock;
 export function createBlock(
-  type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid',
+  type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid' | 'backgroundSection',
 ): NewsletterBlock;
 export function createBlock(
-  type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid',
+  type: 'text' | 'event' | 'image' | 'featuredEvent' | 'quote' | 'sectionHeading' | 'eventGrid' | 'backgroundSection',
 ): NewsletterBlock {
   if (type === 'text') return { id: nanoid(), type: 'text', content: emptyTiptapDoc, background: 'white' };
   if (type === 'event')
@@ -82,6 +84,13 @@ export function createBlock(
       heading: 'Kommende Veranstaltungen',
       layout: 'grid',
       items: [createEventItem(), createEventItem()],
+    };
+  if (type === 'backgroundSection')
+    return {
+      id: nanoid(),
+      type: 'backgroundSection',
+      background: 'neutral',
+      blocks: [{ id: nanoid(), type: 'text', content: emptyTiptapDoc, background: 'white' }],
     };
   return { id: nanoid(), type: 'image', decorative: false, alt: '' };
 }

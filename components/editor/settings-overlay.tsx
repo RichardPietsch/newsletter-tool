@@ -11,12 +11,14 @@ export function SettingsOverlay({
   settings,
   usedHeaderVariantIds,
   readOnly = false,
+  initialSection,
 }: {
   open: boolean;
   onClose: () => void;
   settings: GlobalSettings;
   usedHeaderVariantIds: string[];
   readOnly?: boolean;
+  initialSection?: 'header' | 'footer';
 }) {
   if (!open) return null;
   return (
@@ -26,6 +28,7 @@ export function SettingsOverlay({
         usedHeaderVariantIds={usedHeaderVariantIds}
         embedded
         readOnly={readOnly}
+        initialSection={initialSection}
       />
     </Overlay>
   );

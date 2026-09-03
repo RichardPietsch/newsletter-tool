@@ -3,11 +3,7 @@ import type { NewsletterBlock, NewsletterDocument } from './schema';
 type ExportValidationMode = 'development' | 'production';
 
 export type ExportValidationIssueCode =
-  | 'LOCAL_IMAGE_URL'
-  | 'PRIVATE_IMAGE_URL'
-  | 'NON_HTTPS_IMAGE_URL'
-  | 'INVALID_IMAGE_URL'
-  | 'MISSING_IMAGE_ALT';
+  'LOCAL_IMAGE_URL' | 'PRIVATE_IMAGE_URL' | 'NON_HTTPS_IMAGE_URL' | 'INVALID_IMAGE_URL' | 'MISSING_IMAGE_ALT';
 
 export type ExportValidationIssue = {
   code: ExportValidationIssueCode;
@@ -66,8 +62,11 @@ function hostnameIssue(hostname: string): Pick<ExportValidationIssue, 'code' | '
 
 function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
   const images: ExportImageCandidate[] = [];
-  document.blocks.forEach((block, blockIndex) => {
-    const blockPath = `blocks[${blockIndex}]`;
+  const collectBlock = (block: NewsletterBlock, blockPath: string) => {
+    if (block.type === 'backgroundSection') {
+      block.blocks.forEach((child, childIndex) => collectBlock(child, `${blockPath}.blocks[${childIndex}]`));
+      return;
+    }
     if (block.type === 'image') {
       images.push({
         blockId: block.id,
@@ -116,7 +115,8 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
         });
       });
     }
-  });
+  };
+  document.blocks.forEach((block, blockIndex) => collectBlock(block, `blocks[${blockIndex}]`));
   return images;
 }
 

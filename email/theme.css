@@ -5,19 +5,23 @@
   --email-font: Arial, Helvetica, sans-serif;
   --email-bg: #f4f1ec;
   --email-surface: #ffffff;
+  --email-teaser: #dae1e2;
   --email-text: #17303d;
   --email-muted: #6d7478;
+  --email-accent: #a63a3a;
   --email-brand: #1d4ed8;
-  --email-border: #d7dee8;
+  --email-feature-bg: #17303d;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --email-bg: #10191e;
     --email-surface: #1d2a31;
+    --email-teaser: #293b43;
     --email-text: #f5f1eb;
     --email-muted: #b9c5ca;
+    --email-accent: #e28b83;
     --email-brand: #91afff;
-    --email-border: #43565f;
+    --email-feature-bg: #234653;
   }
 }

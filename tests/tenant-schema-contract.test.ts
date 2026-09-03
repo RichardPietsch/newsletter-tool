@@ -10,10 +10,11 @@ describe('tenant schema contract', () => {
   const adminOperations = readFileSync(path.join(process.cwd(), 'lib/admin/operations.ts'), 'utf8');
   const developmentSeed = readFileSync(path.join(process.cwd(), 'drizzle/seed.ts'), 'utf8');
   const bootstrap = readFileSync(path.join(process.cwd(), 'lib/admin/bootstrap.ts'), 'utf8');
+  const settingsDefaults = readFileSync(path.join(process.cwd(), 'lib/settings/defaults.ts'), 'utf8');
   const productionCompose = readFileSync(path.join(process.cwd(), 'docker-compose.prod.yml'), 'utf8');
 
   it('requires tenant IDs on every business-data table', () => {
-    for (const table of ['newsletters', 'assets', 'appSettings']) {
+    for (const table of ['newsletters', 'assets', 'events', 'appSettings']) {
       const section = schema.slice(
         schema.indexOf(`export const ${table}`),
         schema.indexOf(');', schema.indexOf(`export const ${table}`)) + 2,
@@ -32,6 +33,14 @@ describe('tenant schema contract', () => {
   it('seeds exactly one idempotent template copy per tenant', () => {
     expect(schema).toContain('newsletters_tenant_seed_idx');
     expect(templates).toContain('.onConflictDoNothing({ target: [newsletters.tenantId, newsletters.seedKey] })');
+  });
+
+  it('persists complete design defaults when a tenant is created', () => {
+    expect(adminOperations).toContain('tx.insert(appSettings)');
+    expect(adminOperations).toContain('createDefaultSettings()');
+    expect(settingsDefaults).toContain('colors:');
+    expect(settingsDefaults).toContain('headerVariants: createDefaultHeaderVariants()');
+    expect(settingsDefaults).toContain('footerRichText: defaultFooterRichText');
   });
 
   it('account status changes never delete newsletters', () => {

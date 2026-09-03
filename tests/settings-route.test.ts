@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { GlobalSettings } from '@/lib/settings/schema';
+import type { GlobalSettings, GlobalSettingsInput } from '@/lib/settings/schema';
 
 type SettingsRow = {
   id: string;
   tenantId: string;
-  settings: GlobalSettings;
+  settings: GlobalSettingsInput;
   updatedAt: Date;
 };
 
@@ -96,7 +96,7 @@ describe('settings API route', () => {
   });
 
   it('applies settings fallbacks for previous default footer content', async () => {
-    const previousSettings: GlobalSettings = {
+    const previousSettings: GlobalSettingsInput = {
       headerVariants: [],
       footerRichText: {
         type: 'doc',

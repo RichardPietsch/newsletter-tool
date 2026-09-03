@@ -203,6 +203,15 @@ export function RichTextToolbar({ editor, automaticColor = '#17303d' }: { editor
         </span>
       </IconButton>
       <IconButton
+        label={t('misc.blockquote')}
+        pressed={editor.isActive('blockquote')}
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+      >
+        <span aria-hidden="true" className="font-serif text-lg">
+          “
+        </span>
+      </IconButton>
+      <IconButton
         label={editor.isActive('link') ? t('misc.removeLink') : t('misc.setLink')}
         pressed={editor.isActive('link')}
         onClick={() => toggleLink(editor)}

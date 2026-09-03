@@ -9,6 +9,7 @@ type SideRailProps = {
   onExport?: () => void;
   onOpenNewsletterSettings?: () => void;
   onOpenMedia: () => void;
+  onOpenEvents: () => void;
   onOpenSettings: () => void;
   onOpenAccount: () => void;
 };
@@ -47,6 +48,7 @@ export function SideRail({
   onExport,
   onOpenNewsletterSettings,
   onOpenMedia,
+  onOpenEvents,
   onOpenSettings,
   onOpenAccount,
 }: SideRailProps) {
@@ -60,6 +62,9 @@ export function SideRail({
       </RailButton>
       <RailButton onClick={onOpenMedia} label={t('misc.mediaTitle')} tourId="nav-media">
         <MdiIcon name="media" />
+      </RailButton>
+      <RailButton onClick={onOpenEvents} label={t('misc.eventsTitle')}>
+        <MdiIcon name="events" />
       </RailButton>
       <RailButton onClick={onOpenSettings} label={t('misc.settingsTitle')} tourId="nav-settings">
         <MdiIcon name="cog" />

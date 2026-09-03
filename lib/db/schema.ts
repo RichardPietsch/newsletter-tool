@@ -123,6 +123,43 @@ export const assets = pgTable(
   }),
 );
 
+export const events = pgTable(
+  'events',
+  {
+    id: text('id').primaryKey(),
+    tenantId: text('tenant_id')
+      .references(() => tenants.id)
+      .notNull(),
+    category: text('category'),
+    title: text('title').notNull(),
+    speakerName: text('speaker_name'),
+    speakerRole: text('speaker_role'),
+    date: text('date'),
+    location: text('location'),
+    description: text('description'),
+    buttonLabel: text('button_label'),
+    buttonUrl: text('button_url'),
+    image: jsonb('image').$type<{
+      assetId?: string;
+      src?: string;
+      alt?: string;
+      decorative?: boolean;
+    }>(),
+    externalSource: text('external_source'),
+    externalId: text('external_id'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    tenantUpdatedIdx: index('events_tenant_updated_idx').on(table.tenantId, table.updatedAt),
+    tenantExternalIdx: uniqueIndex('events_tenant_external_idx').on(
+      table.tenantId,
+      table.externalSource,
+      table.externalId,
+    ),
+  }),
+);
+
 export const appSettings = pgTable(
   'app_settings',
   {

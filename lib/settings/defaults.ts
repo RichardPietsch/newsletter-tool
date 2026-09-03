@@ -1,6 +1,7 @@
 import { publicAppUrl } from '@/lib/app-url';
 import type { TiptapDoc, TiptapNode } from '@/lib/newsletter/schema';
-import type { GlobalSettings } from './schema';
+import { globalSettingsSchema, type GlobalSettings, type GlobalSettingsInput } from './schema';
+import { newsletterThemePalettes } from '@/lib/newsletter/module-styles';
 
 function appAssetUrl(path: string) {
   return publicAppUrl(path).toString();
@@ -71,6 +72,10 @@ export function createDefaultSettings(): GlobalSettings {
   return {
     headerVariants: createDefaultHeaderVariants(),
     footerRichText: defaultFooterRichText,
+    colors: {
+      light: { ...newsletterThemePalettes.light },
+      dark: { ...newsletterThemePalettes.dark },
+    },
   };
 }
 
@@ -84,21 +89,25 @@ function footerLines(settings: GlobalSettings) {
   return (settings.footerRichText.content ?? []).map(textFromNode);
 }
 
-export function applyDefaultSettingsFallbacks(settings: GlobalSettings): GlobalSettings {
+export function applyDefaultSettingsFallbacks(settings: GlobalSettingsInput): GlobalSettings {
   const defaults = createDefaultSettings();
-  const currentFooterLines = footerLines(settings);
+  const usesLegacySettingsShape = settings.colors === undefined;
+  const current = globalSettingsSchema.parse(settings);
+  const currentFooterLines = footerLines(current);
   const usesPreviousDefaultFooter =
     currentFooterLines.join('\n') === 'AGC · Newsletter\nImpressum und Datenschutz werden zentral gepflegt.' ||
     currentFooterLines.join('\n') ===
       'ACME GmbH · Musterstraße 1 · 12345 Berlin\nImpressum und Datenschutz werden zentral gepflegt.';
 
-  const missingDefaultHeaderVariants = defaults.headerVariants.filter(
-    (defaultVariant) => !settings.headerVariants.some((variant) => variant.id === defaultVariant.id),
-  );
+  const missingDefaultHeaderVariants = usesLegacySettingsShape
+    ? defaults.headerVariants.filter(
+        (defaultVariant) => !current.headerVariants.some((variant) => variant.id === defaultVariant.id),
+      )
+    : [];
 
   return {
-    ...settings,
-    headerVariants: [...settings.headerVariants, ...missingDefaultHeaderVariants],
-    footerRichText: usesPreviousDefaultFooter ? defaults.footerRichText : settings.footerRichText,
+    ...current,
+    headerVariants: [...current.headerVariants, ...missingDefaultHeaderVariants],
+    footerRichText: usesPreviousDefaultFooter ? defaults.footerRichText : current.footerRichText,
   };
 }

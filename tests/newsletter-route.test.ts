@@ -23,6 +23,10 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('@/lib/db/audit-events', () => ({ recordAuditEvent: mocks.recordAuditEvent }));
+vi.mock('@/lib/settings/store', async () => {
+  const { createDefaultSettings } = await import('@/lib/settings/defaults');
+  return { getTenantSettings: vi.fn(async () => createDefaultSettings()) };
+});
 
 function conditionFilters(condition: Condition | undefined) {
   const filters: Record<string, string> = {};

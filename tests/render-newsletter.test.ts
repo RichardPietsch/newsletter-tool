@@ -118,6 +118,21 @@ describe('MJML newsletter rendering', () => {
     );
   });
 
+  it('renders tenant-specific light and dark palettes', () => {
+    const settings = createDefaultSettings();
+    settings.colors.light.background = '#112233';
+    settings.colors.light.surface = '#223344';
+    settings.colors.dark.background = '#334455';
+    settings.colors.dark.text = '#abcdef';
+
+    const html = renderNewsletter(documentWithBlocks([richTextBlock()]), settings);
+
+    expect(html).toContain('#112233');
+    expect(html).toContain('#223344');
+    expect(html).toContain('#334455');
+    expect(html).toContain('#abcdef');
+  });
+
   it('renders text module paragraphs, H2, H3 and links as email HTML', () => {
     const html = renderNewsletter(documentWithBlocks([richTextBlock()]));
 

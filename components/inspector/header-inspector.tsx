@@ -9,10 +9,12 @@ export function HeaderInspector({
   block,
   settings,
   onChange,
+  onOpenGlobalSettings,
 }: {
   block: HeaderBlock;
   settings?: GlobalSettings;
   onChange: (patch: Partial<HeaderBlock>) => void;
+  onOpenGlobalSettings: () => void;
 }) {
   const variants = settings?.headerVariants ?? [];
   const selectedVariantId =
@@ -44,6 +46,13 @@ export function HeaderInspector({
           {t('misc.noHeaderVariantsConfigured')}
         </p>
       )}
+      <button
+        type="button"
+        className="w-full rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
+        onClick={onOpenGlobalSettings}
+      >
+        {t('misc.manageHeaderGlobally')}
+      </button>
     </div>
   );
 }

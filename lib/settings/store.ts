@@ -2,15 +2,17 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { appSettings } from '@/lib/db/schema';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from './defaults';
-import { globalSettingsSchema, type GlobalSettings } from './schema';
+import { globalSettingsSchema, type GlobalSettings, type GlobalSettingsInput } from './schema';
 
 export async function getTenantSettings(tenantId: string): Promise<GlobalSettings> {
   const [row] = await db.select().from(appSettings).where(eq(appSettings.tenantId, tenantId));
-  if (!row) return createDefaultSettings();
-  return applyDefaultSettingsFallbacks(globalSettingsSchema.parse(row.settings));
+  if (!row) return saveTenantSettings(tenantId, createDefaultSettings());
+  const stored = row.settings as GlobalSettingsInput;
+  const resolved = applyDefaultSettingsFallbacks(stored);
+  return stored.colors === undefined ? saveTenantSettings(tenantId, resolved) : resolved;
 }
 
-export async function saveTenantSettings(tenantId: string, settings: GlobalSettings): Promise<GlobalSettings> {
+export async function saveTenantSettings(tenantId: string, settings: GlobalSettingsInput): Promise<GlobalSettings> {
   const parsed = globalSettingsSchema.parse(settings);
   await db
     .insert(appSettings)

@@ -37,10 +37,15 @@ export function EditorShell({
   const [overlay, setOverlay] = useState<EditorOverlay>(null);
   const [saveIssues, setSaveIssues] = useState<NewsletterSaveIssue[]>([]);
   const [previewMode, setPreviewMode] = useState<NewsletterPreviewMode>('light');
+  const [settingsSection, setSettingsSection] = useState<'header' | 'footer'>();
   const doc = useNewsletterStore((state) => state.doc);
   const setTitle = useNewsletterStore((state) => state.setTitle);
   const openOverlay = useCallback((nextOverlay: Exclude<EditorOverlay, null>) => setOverlay(nextOverlay), []);
   const closeOverlay = useCallback(() => setOverlay(null), []);
+  const openGlobalSettings = useCallback((section?: 'header' | 'footer') => {
+    setSettingsSection(section);
+    setOverlay('settings');
+  }, []);
 
   useEffect(() => initStore(id, document), [id, document]);
 
@@ -59,13 +64,16 @@ export function EditorShell({
         onExport={handleExport}
         onOpenNewsletterSettings={() => openOverlay('newsletter')}
         onOpenMedia={() => openOverlay('media')}
-        onOpenSettings={() => openOverlay('settings')}
+        onOpenEvents={() => openOverlay('events')}
+        onOpenSettings={() => openGlobalSettings()}
         onOpenAccount={() => openOverlay('account')}
       />
       <main
         className="flex-1 transition-colors"
         data-editor-interface="newsletter-editor"
-        style={{ backgroundColor: newsletterColorPalettes[previewMode].background }}
+        style={{
+          backgroundColor: settings?.colors[previewMode].background ?? newsletterColorPalettes[previewMode].background,
+        }}
       >
         <EditorTopBar
           title={doc.title}
@@ -82,13 +90,19 @@ export function EditorShell({
           previewMode={previewMode}
         />
       </main>
-      <InspectorPanel settings={settings} readOnly={isReadOnly} validationIssues={saveIssues} />
+      <InspectorPanel
+        settings={settings}
+        readOnly={isReadOnly}
+        validationIssues={saveIssues}
+        onOpenGlobalSettings={openGlobalSettings}
+      />
       <EditorOverlays
         overlay={overlay}
         settings={settings}
         account={account}
         usedHeaderVariantIds={usedHeaderVariantIds}
         readOnly={forceReadOnly}
+        settingsSection={settingsSection}
         title={doc.title}
         sentAt={sentAtState}
         exportError={exportError}
