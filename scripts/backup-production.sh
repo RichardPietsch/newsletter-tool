@@ -74,6 +74,11 @@ database_listing="$staging_directory/database-contents.txt"
 
 tenant_design_rows=0
 tenant_design_complete_rows=0
+tenant_design_current_rows=0
+tenant_design_current_complete_rows=0
+tenant_header_variants=0
+tenant_header_corner_preferences=0
+tenant_header_rounded_enabled=0
 if grep -Eq '[[:space:]]TABLE[[:space:]]+public[[:space:]]+app_settings[[:space:]]' "$database_listing"; then
   grep -Eq '[[:space:]]TABLE DATA[[:space:]]+public[[:space:]]+app_settings[[:space:]]' "$database_listing" \
     || die 'PostgreSQL archive is missing tenant design data.'
@@ -81,16 +86,48 @@ if grep -Eq '[[:space:]]TABLE[[:space:]]+public[[:space:]]+app_settings[[:space:
   "${INFRA_COMPOSE[@]}" exec -T db pg_restore --data-only --table=public.app_settings --file=- \
     < "$staging_directory/database.dump" > "$tenant_design_data"
   design_counts="$(awk '
+    function occurrences(value, needle, count, position) {
+      count = 0
+      while ((position = index(value, needle)) > 0) {
+        count += 1
+        value = substr(value, position + length(needle))
+      }
+      return count
+    }
     /^COPY public\.app_settings / { in_copy = 1; next }
     in_copy && /^\\\.$/ { in_copy = 0; next }
     in_copy {
       total += 1
-      if (index($0, "headerVariants") && index($0, "footerRichText") && index($0, "colors")) complete += 1
+      row_headers = occurrences($0, "\"imageUrl\":")
+      row_corner_preferences = occurrences($0, "\"roundedCorners\":")
+      row_rounded_enabled = occurrences($0, "\"roundedCorners\": true")
+      row_corner_booleans = row_rounded_enabled + occurrences($0, "\"roundedCorners\": false")
+      headers += row_headers
+      corner_preferences += row_corner_preferences
+      rounded_enabled += row_rounded_enabled
+      has_core_design = index($0, "\"schemaVersion\":") && index($0, "\"headerVariants\":") && index($0, "\"footerRichText\":") && index($0, "\"colors\":")
+      is_current_version = $0 ~ /"schemaVersion":[[:space:]]*2[,}]/
+      has_complete_corner_preferences = row_headers == row_corner_preferences && row_corner_preferences == row_corner_booleans
+      if (has_core_design && (!is_current_version || has_complete_corner_preferences)) complete += 1
+      if (is_current_version) {
+        current += 1
+        if (has_core_design && has_complete_corner_preferences) current_complete += 1
+      }
     }
-    END { printf "%d|%d", total, complete }
+    END { printf "%d|%d|%d|%d|%d|%d|%d", total, complete, current, current_complete, headers, corner_preferences, rounded_enabled }
   ' "$tenant_design_data")"
-  IFS='|' read -r tenant_design_rows tenant_design_complete_rows <<< "$design_counts"
+  IFS='|' read -r \
+    tenant_design_rows \
+    tenant_design_complete_rows \
+    tenant_design_current_rows \
+    tenant_design_current_complete_rows \
+    tenant_header_variants \
+    tenant_header_corner_preferences \
+    tenant_header_rounded_enabled \
+    <<< "$design_counts"
   rm -f -- "$tenant_design_data"
+  [[ "$tenant_design_current_rows" -eq "$tenant_design_current_complete_rows" ]] \
+    || die "PostgreSQL archive contains incomplete current tenant design data ($tenant_design_current_complete_rows of $tenant_design_current_rows current rows complete)."
 fi
 rm -f -- "$database_listing"
 
@@ -113,6 +150,11 @@ postgres_volume=$POSTGRES_VOLUME
 minio_volume=$MINIO_VOLUME
 tenant_design_rows=$tenant_design_rows
 tenant_design_complete_rows=$tenant_design_complete_rows
+tenant_design_current_rows=$tenant_design_current_rows
+tenant_design_current_complete_rows=$tenant_design_current_complete_rows
+tenant_header_variants=$tenant_header_variants
+tenant_header_corner_preferences=$tenant_header_corner_preferences
+tenant_header_rounded_enabled=$tenant_header_rounded_enabled
 EOF
 
 checksum_create "$staging_directory" database.dump assets.tar.gz MANIFEST.txt \

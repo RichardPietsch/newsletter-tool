@@ -180,12 +180,17 @@ export const newsletterEmailClasses = {
   solidButton: 'newsletter-solid-button',
   outlineButton: 'newsletter-outline-button',
   accentBorder: 'newsletter-accent-border',
+  rounded: 'newsletter-rounded',
+  roundedTop: 'newsletter-rounded-top',
+  roundedBottom: 'newsletter-rounded-bottom',
 } as const;
 
 const backgroundRule = (className: string, color: string) =>
   `.${className}, .${className} > table { background:${color} !important; background-color:${color} !important; }`;
 const textRule = (className: string, color: string) =>
   `.${className}, .${className} > div { color:${color} !important; }`;
+const radiusRule = (className: string, radius: string) =>
+  `.${className}, .${className} > table { border-radius:${radius} !important; overflow:hidden !important; }`;
 
 function darkModeRules(prefix = '', colors: NewsletterColorPalette = newsletterColorPalettes.dark) {
   const classes = newsletterEmailClasses;
@@ -207,6 +212,9 @@ function darkModeRules(prefix = '', colors: NewsletterColorPalette = newsletterC
     `.${classes.outlineButton} td, .${classes.outlineButton} a { background:${colors.teaser} !important; background-color:${colors.teaser} !important; border-color:${colors.text} !important; color:${colors.text} !important; }`,
     `.${classes.muted} a { color:${colors.muted} !important; }`,
     `.${classes.accentBorder}, .${classes.accentBorder} > table { border-color:${colors.accent} !important; }`,
+    radiusRule(classes.rounded, '4px'),
+    radiusRule(classes.roundedTop, '4px 4px 0 0'),
+    radiusRule(classes.roundedBottom, '0 0 4px 4px'),
   ];
 
   const bodyRule = `${prefix || 'body'}, ${prefix ? `${prefix} > div` : 'body > div'} { background:${colors.background} !important; background-color:${colors.background} !important; }`;

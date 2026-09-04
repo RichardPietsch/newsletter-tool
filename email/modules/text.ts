@@ -77,7 +77,8 @@ export function renderText(
 ) {
   const isBlue = block.background === 'blue';
   const radius = options.squareTop ? '0 0 4px 4px' : '4px';
+  const radiusClass = options.squareTop ? classes.roundedBottom : classes.rounded;
   const backgroundClass = isBlue ? classes.featureBackground : classes.surface;
   const textClass = isBlue ? classes.featureText : classes.text;
-  return `<mj-section css-class="${backgroundClass}" background-color="${isBlue ? colors.featureBackground : colors.surface}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text css-class="${textClass}" font-size="14px" line-height="1.8" color="${isBlue ? colors.featureText : colors.text}" padding="24px 32px 20px">${renderNodes(block.content.content, colors)}</mj-text></mj-column></mj-section>`;
+  return `<mj-section css-class="${backgroundClass} ${radiusClass}" background-color="${isBlue ? colors.featureBackground : colors.surface}" padding="0" border-radius="${radius}"><mj-column border-radius="${radius}"><mj-text css-class="${textClass}" font-size="14px" line-height="1.8" color="${isBlue ? colors.featureText : colors.text}" padding="24px 32px 20px">${renderNodes(block.content.content, colors)}</mj-text></mj-column></mj-section>`;
 }

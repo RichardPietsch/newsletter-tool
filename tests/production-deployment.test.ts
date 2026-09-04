@@ -56,6 +56,14 @@ describe('production deployment safety contract', () => {
     expect(backupScript).toContain('pg_restore --list');
     expect(backupScript).toContain('PostgreSQL archive is missing tenant design data.');
     expect(backupScript).toContain('tenant_design_complete_rows=');
+    expect(backupScript).toContain('tenant_design_current_rows=');
+    expect(backupScript).toContain('tenant_design_current_complete_rows=');
+    expect(backupScript).toContain('tenant_header_variants=');
+    expect(backupScript).toContain('tenant_header_corner_preferences=');
+    expect(backupScript).toContain('tenant_header_rounded_enabled=');
+    expect(backupScript).toContain('has_complete_corner_preferences');
+    expect(backupScript).toContain('row_corner_preferences == row_corner_booleans');
+    expect(backupScript).toContain('PostgreSQL archive contains incomplete current tenant design data');
     expect(backupScript).toContain('mc mirror --overwrite');
     expect(backupScript).toContain('checksum_verify');
 

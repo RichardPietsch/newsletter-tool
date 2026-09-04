@@ -18,16 +18,16 @@ export function renderEventGrid(block: EventGridBlock, colors: NewsletterColorPa
     : '';
   if (block.layout === 'list') {
     for (const item of block.items) {
-      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser}" background-color="${colors.teaser}" border-radius="4px">${card(item, colors)}</mj-column></mj-section>`;
+      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" background-color="${colors.teaser}" border-radius="4px">${card(item, colors)}</mj-column></mj-section>`;
     }
     return out;
   }
   for (let i = 0; i < block.items.length; i += 2) {
     const remaining = block.items.length - i;
     if (remaining === 1) {
-      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser}" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column></mj-section>`;
+      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column></mj-section>`;
     } else {
-      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column><mj-column css-class="${classes.teaser}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i + 1], colors)}</mj-column></mj-section>`;
+      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column><mj-column css-class="${classes.teaser} ${classes.rounded}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i + 1], colors)}</mj-column></mj-section>`;
     }
   }
   return out;
