@@ -55,7 +55,8 @@ describe('tenant schema contract', () => {
     expect(settingsRead).not.toContain('saveTenantSettings');
     expect(settingsStore).toContain('.onConflictDoNothing({ target: appSettings.tenantId })');
     expect(settingsStore).toContain('tenantSettingsPersistenceUpgrade(existing.settings)');
-    expect(settingsStore).toContain('eq(appSettings.updatedAt, existing.updatedAt)');
+    expect(settingsStore).toContain('eq(appSettings.settings, existing.settings)');
+    expect(settingsStore).not.toContain('eq(appSettings.updatedAt, existing.updatedAt)');
     expect(settingsStore).toContain('Tenant design persistence validation failed');
     expect(migrationScript).toContain('ensureTenantSettingsPersistence()');
   });

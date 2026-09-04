@@ -5,6 +5,7 @@ import type { TiptapNode } from '@/lib/newsletter/schema';
 import { newsletterThemePalettes } from '@/lib/newsletter/module-styles';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
 import {
+  describeTenantSettingsPersistenceIssue,
   isCurrentPersistedTenantSettings,
   resolvePersistedTenantSettings,
   serializeTenantSettings,
@@ -144,6 +145,18 @@ describe('settings defaults', () => {
     const upgraded = tenantSettingsPersistenceUpgrade(custom);
 
     expect(upgraded).toEqual({ schemaVersion: 1, ...custom });
+  });
+
+  it('describes incomplete stored design documents without exposing their contents', () => {
+    const description = describeTenantSettingsPersistenceIssue({
+      headerVariants: [],
+      footerRichText: { type: 'doc', content: [] },
+    });
+
+    expect(description).toContain('schemaVersion');
+    expect(description).toContain('colors');
+    expect(description).not.toContain('footerRichText.content');
+    expect(describeTenantSettingsPersistenceIssue(undefined)).toBe('settings row missing');
   });
 
   it('accepts and reduces previously stored full color palettes', () => {
