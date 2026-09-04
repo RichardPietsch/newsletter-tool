@@ -158,6 +158,7 @@ export const de = {
     settingsIntro: 'Bearbeite globale Header-Varianten und den systemweiten Footer.',
     headerVariantsDescription:
       'Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.',
+    roundHeaderImage: 'Header-Grafik mit abgerundeten Ecken anzeigen',
     noHeaderVariant: 'Noch keine Header-Variante vorhanden. Lade ein JPEG, PNG oder GIF hoch.',
     globalFooter: 'Globaler Footer',
     globalFooterDescription:

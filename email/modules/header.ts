@@ -1,4 +1,4 @@
-import type { GlobalSettings } from '@/lib/settings/schema';
+import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
 import { newsletterEmailClasses as classes, newsletterModuleStyles as styles } from '@/lib/newsletter/module-styles';
 
 export function renderHeader(
@@ -13,7 +13,8 @@ export function renderHeader(
   const colors = settings?.colors.light ?? styles.colors;
 
   if (variant) {
-    return `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="24px 0 0"><mj-column css-class="${classes.surface}" background-color="${colors.surface}" border-radius="${radius}"><mj-image src="${variant.imageUrl}" alt="${variant.alt}" width="200px" align="center" padding="20px 32px" /></mj-column></mj-section>`;
+    const imageRadius = variant.roundedCorners ? `${ROUNDED_HEADER_IMAGE_RADIUS_PX}px` : '0';
+    return `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="24px 0 0"><mj-column css-class="${classes.surface}" background-color="${colors.surface}" border-radius="${radius}"><mj-image src="${variant.imageUrl}" alt="${variant.alt}" width="200px" align="center" padding="20px 32px" border-radius="${imageRadius}" /></mj-column></mj-section>`;
   }
 
   return `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="24px 0 0"><mj-column css-class="${classes.surface}" background-color="${colors.surface}" border-radius="${radius}"><mj-text css-class="${classes.brand}" align="center" font-size="20px" font-weight="700" color="${colors.brand}" padding="20px 32px">${branding}</mj-text></mj-column></mj-section>`;

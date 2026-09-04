@@ -12,7 +12,7 @@ import { nanoid } from 'nanoid';
 import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
-import type { GlobalSettings } from '@/lib/settings/schema';
+import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
 
 function FooterRichTextEditor({
   value,
@@ -118,6 +118,7 @@ export function SettingsEditor({
       name: asset.originalFilename.replace(/\.[^.]+$/, '') || 'Header-Variante',
       imageUrl: asset.publicUrl,
       alt: 'Newsletter Header',
+      roundedCorners: false,
     };
     const next = {
       ...settings,
@@ -179,7 +180,12 @@ export function SettingsEditor({
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {settings.headerVariants.map((variant) => (
               <article key={variant.id} className="rounded-lg border p-4">
-                <img src={variant.imageUrl} alt={variant.alt} className="h-28 w-full rounded object-contain" />
+                <img
+                  src={variant.imageUrl}
+                  alt={variant.alt}
+                  className="h-28 w-full object-contain"
+                  style={{ borderRadius: variant.roundedCorners ? ROUNDED_HEADER_IMAGE_RADIUS_PX : 0 }}
+                />
                 <label className="mt-3 block text-sm font-medium">
                   Name
                   <input
@@ -213,6 +219,24 @@ export function SettingsEditor({
                     }}
                     onBlur={() => void save()}
                   />
+                </label>
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300"
+                    checked={variant.roundedCorners}
+                    onChange={(event) => {
+                      const next = {
+                        ...settings,
+                        headerVariants: settings.headerVariants.map((item) =>
+                          item.id === variant.id ? { ...item, roundedCorners: event.target.checked } : item,
+                        ),
+                      };
+                      setSettings(next);
+                      void save(next);
+                    }}
+                  />
+                  {t('misc.roundHeaderImage')}
                 </label>
                 <button
                   type="button"

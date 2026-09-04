@@ -28,12 +28,17 @@ export const newsletterDesignColorsSchema = newsletterDesignColorsObjectSchema.d
   dark: { ...newsletterThemePalettes.dark },
 });
 
+export const ROUNDED_HEADER_IMAGE_RADIUS_PX = 8;
+
 export const headerVariantSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   imageUrl: z.string().url(),
   alt: z.string().min(1),
+  roundedCorners: z.boolean().default(false),
 });
+
+const persistedHeaderVariantSchema = headerVariantSchema.extend({ roundedCorners: z.boolean() });
 
 export const globalSettingsSchema = z.object({
   headerVariants: z.array(headerVariantSchema).default([]),
@@ -41,12 +46,12 @@ export const globalSettingsSchema = z.object({
   colors: newsletterDesignColorsSchema,
 });
 
-export const CURRENT_TENANT_SETTINGS_SCHEMA_VERSION = 1 as const;
+export const CURRENT_TENANT_SETTINGS_SCHEMA_VERSION = 2 as const;
 
 export const persistedGlobalSettingsSchema = z
   .object({
     schemaVersion: z.literal(CURRENT_TENANT_SETTINGS_SCHEMA_VERSION),
-    headerVariants: z.array(headerVariantSchema),
+    headerVariants: z.array(persistedHeaderVariantSchema),
     footerRichText: tiptapDocSchema,
     colors: newsletterDesignColorsObjectSchema,
   })

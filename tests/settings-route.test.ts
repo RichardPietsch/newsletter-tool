@@ -136,7 +136,7 @@ describe('settings API route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.headerVariants).toHaveLength(settings.headerVariants.length);
-    expect(mocks.rows[0].settings).toEqual({ schemaVersion: 1, ...settings });
+    expect(mocks.rows[0].settings).toEqual({ schemaVersion: 2, ...settings });
     expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
       expect.objectContaining({ actorUserId: 'user-1', tenantId: 'tenant-1', eventType: 'settings.updated' }),
     );

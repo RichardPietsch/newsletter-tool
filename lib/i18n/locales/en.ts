@@ -155,6 +155,7 @@ export const en = {
     settingsIntro: 'Edit global header variants and the system-wide footer.',
     headerVariantsDescription:
       'Each variant consists of an uploaded image and can be selected in the header inspector.',
+    roundHeaderImage: 'Show header image with rounded corners',
     noHeaderVariant: 'No header variant yet. Upload a JPEG, PNG or GIF.',
     globalFooter: 'Global footer',
     globalFooterDescription:
