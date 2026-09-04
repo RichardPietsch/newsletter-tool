@@ -2,9 +2,9 @@
 
 ## Erstinstallation und Migration
 
-1. Vor der ersten Migration einer bestehenden Installation ein PostgreSQL-Backup erstellen.
+1. Vor der ersten Migration einer bestehenden Installation ein PostgreSQL- und MinIO-Backup erstellen. Der sichere Ablauf einschließlich Übernahme vorhandener externer Volumes steht in [`production-deployment.md`](production-deployment.md).
 2. Pflichtvariablen setzen, insbesondere `DATABASE_URL`, `APP_URL`, SMTP/S3 und ein zufälliges `AUTH_RATE_LIMIT_SECRET` mit mindestens 32 Zeichen. Für den automatischen Erst-Admin zusätzlich `BOOTSTRAP_ADMIN_EMAIL` und `BOOTSTRAP_ADMIN_NAME` setzen.
-3. Der Production-Compose-Service `bootstrap-admin` führt `pnpm db:migrate` und anschließend den einmaligen Env-Bootstrap aus. Ohne Compose kann beides manuell ausgeführt werden.
+3. Das Production-Deployment führt zuerst den separaten Service `migrate` und danach den einmaligen Service `bootstrap-admin` aus. Ohne Compose kann beides manuell ausgeführt werden.
 4. Für lokale Entwicklung optional `pnpm db:seed` ausführen. Dieser Seed ist idempotent, in Produktion gesperrt und erzeugt standardmäßig den Plattform-Admin `admin@example.test` sowie den Mitarbeiter `local@example.test`. Im lokalen Docker-Stack wird er automatisch ausgeführt.
 
 ## Einziger Plattform-Administrator

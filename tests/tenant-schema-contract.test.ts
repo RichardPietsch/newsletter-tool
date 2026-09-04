@@ -12,6 +12,7 @@ describe('tenant schema contract', () => {
   const bootstrap = readFileSync(path.join(process.cwd(), 'lib/admin/bootstrap.ts'), 'utf8');
   const settingsDefaults = readFileSync(path.join(process.cwd(), 'lib/settings/defaults.ts'), 'utf8');
   const productionCompose = readFileSync(path.join(process.cwd(), 'docker-compose.prod.yml'), 'utf8');
+  const deploymentScript = readFileSync(path.join(process.cwd(), 'scripts/deploy-production.sh'), 'utf8');
 
   it('requires tenant IDs on every business-data table', () => {
     for (const table of ['newsletters', 'assets', 'events', 'appSettings']) {
@@ -62,6 +63,6 @@ describe('tenant schema contract', () => {
     expect(bootstrap).toContain('pg_advisory_xact_lock');
     expect(bootstrap).toContain("eventType: 'system.bootstrap_admin_initialized'");
     expect(productionCompose).toContain('bootstrap-admin:');
-    expect(productionCompose).toContain('condition: service_completed_successfully');
+    expect(deploymentScript).toContain('run --rm --no-deps bootstrap-admin');
   });
 });
