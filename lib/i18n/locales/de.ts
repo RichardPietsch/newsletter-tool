@@ -69,6 +69,12 @@ export const de = {
     deleteHeader: 'Header löschen',
     headerInUse: 'Wird in einem Newsletter verwendet',
     invalidColor: 'Bitte alle Farben als sechsstellige Hex-Werte angeben.',
+    appName: 'Newsletter Tool',
+    versionLabel: 'Version',
+    buildLabel: 'Build',
+    buildCommitTitle: 'Diesen Build-Commit auf GitHub öffnen',
+    compareWithGitHub: 'Mit GitHub vergleichen',
+    github: 'GitHub',
   },
   account: {
     title: 'Account',

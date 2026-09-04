@@ -1,4 +1,11 @@
 {
+  "name": "newsletter-tool",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RichardPietsch/newsletter-tool.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

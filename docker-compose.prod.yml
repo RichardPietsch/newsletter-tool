@@ -24,6 +24,8 @@ x-app-service: &app-service
   build:
     context: .
     target: production
+    args:
+      APP_BUILD_SHA: '${APP_BUILD_SHA:-unknown}'
   environment: *app-environment
 
 services:
