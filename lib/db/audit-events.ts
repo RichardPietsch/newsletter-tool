@@ -13,6 +13,7 @@ export type AuditEventType =
   | 'asset.uploaded'
   | 'event.created'
   | 'event.deleted'
+  | 'event.updated'
   | 'auth.login_failed'
   | 'auth.login_succeeded'
   | 'auth.magic_link.requested'

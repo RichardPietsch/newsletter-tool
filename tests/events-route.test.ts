@@ -129,6 +129,19 @@ describe('events API route', () => {
     );
   });
 
+  it('updates an owned event and records the register change', async () => {
+    const now = new Date();
+    mocks.rows = [{ id: 'event-1', tenantId: 'tenant-1', title: 'Alter Titel', createdAt: now, updatedAt: now }];
+
+    const response = await PUT(request('PUT', { id: 'event-1', title: 'Neuer Titel' }));
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ id: 'event-1', title: 'Neuer Titel' });
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ eventType: 'event.updated', tenantId: 'tenant-1', entityId: 'event-1' }),
+    );
+  });
+
   it('cannot update or delete an event from another tenant', async () => {
     const now = new Date();
     mocks.rows = [{ id: 'event-2', tenantId: 'tenant-2', title: 'Fremd', createdAt: now, updatedAt: now }];

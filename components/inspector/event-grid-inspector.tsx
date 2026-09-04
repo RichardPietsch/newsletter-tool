@@ -6,8 +6,9 @@ import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { EventGridBlock, EventItem } from '@/lib/newsletter/schema';
 import { Area, Field, SelectField } from './fields';
 import { useState } from 'react';
-import { EventPickerDialog } from './event-picker-dialog';
-import { appendEventRecordToGrid } from '@/lib/events/snapshot';
+import { eventItemToInput, eventRecordToItem } from '@/lib/events/snapshot';
+import { EventSourceControl } from './event-source-control';
+import { useEventRegister } from './use-event-register';
 
 export function EventGridInspector({
   block,
@@ -18,18 +19,18 @@ export function EventGridInspector({
   onChange: (patch: Partial<EventGridBlock>) => void;
   issues?: NewsletterSaveIssue[];
 }) {
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [newEventSourceId, setNewEventSourceId] = useState('');
+  const eventRegister = useEventRegister();
   const updateItem = (id: string, patch: Partial<EventItem>) =>
     onChange({ items: block.items.map((item) => (item.id === id ? { ...item, ...patch } : item)) });
   const hasItemIssue = (index: number, field: string) =>
     issues.some((issue) => issue.fieldKey === `items.${index}.${field}`);
-  const moveItem = (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= block.items.length) return;
-    const items = [...block.items];
-    [items[index], items[target]] = [items[target], items[index]];
-    onChange({ items });
-  };
+
+  function addEvent() {
+    const registerEvent = eventRegister.events.find((event) => event.id === newEventSourceId);
+    onChange({ items: [...block.items, registerEvent ? eventRecordToItem(registerEvent) : createEventItem()] });
+    setNewEventSourceId('');
+  }
 
   return (
     <div className="space-y-4">
@@ -50,38 +51,30 @@ export function EventGridInspector({
             <strong className="text-sm">
               {t('misc.event')} {index + 1}
             </strong>
-            <div className="flex items-center gap-2">
+            {block.items.length !== 1 ? (
               <button
                 type="button"
-                className="rounded border px-2 py-1 text-sm disabled:opacity-30"
-                disabled={index === 0}
-                aria-label={t('misc.moveEarlier')}
-                title={t('misc.moveEarlier')}
-                onClick={() => moveItem(index, -1)}
+                className="text-sm text-red-700"
+                onClick={() => onChange({ items: block.items.filter((entry) => entry.id !== item.id) })}
               >
-                ↑
+                {t('misc.remove')}
               </button>
-              <button
-                type="button"
-                className="rounded border px-2 py-1 text-sm disabled:opacity-30"
-                disabled={index === block.items.length - 1}
-                aria-label={t('misc.moveLater')}
-                title={t('misc.moveLater')}
-                onClick={() => moveItem(index, 1)}
-              >
-                ↓
-              </button>
-              {block.items.length !== 1 ? (
-                <button
-                  type="button"
-                  className="text-sm text-red-700"
-                  onClick={() => onChange({ items: block.items.filter((entry) => entry.id !== item.id) })}
-                >
-                  {t('misc.remove')}
-                </button>
-              ) : null}
-            </div>
+            ) : null}
           </div>
+          <EventSourceControl
+            sourceEventId={item.sourceEventId}
+            updateKey={JSON.stringify(eventItemToInput(item))}
+            events={eventRegister.events}
+            loading={eventRegister.loading}
+            loadFailed={eventRegister.loadFailed}
+            onSelect={(event) => updateItem(item.id, eventRecordToItem(event, item.id))}
+            onCustom={() => updateItem(item.id, { sourceEventId: undefined })}
+            onUpdate={() =>
+              item.sourceEventId
+                ? eventRegister.updateEvent(item.sourceEventId, eventItemToInput(item))
+                : Promise.resolve(false)
+            }
+          />
           <Field
             label={t('misc.category')}
             value={item.category}
@@ -129,25 +122,29 @@ export function EventGridInspector({
           />
         </div>
       ))}
-      <button
-        className="rounded bg-blue-700 px-3 py-2 text-sm text-white"
-        onClick={() => onChange({ items: [...block.items, createEventItem()] })}
-      >
-        {t('misc.addEvent')}
-      </button>
-      <button
-        type="button"
-        className="ml-2 rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
-        onClick={() => setPickerOpen(true)}
-      >
-        {t('misc.chooseFromRegister')}
-      </button>
-      <p className="text-xs text-slate-500">{t('misc.eventSnapshotHint')}</p>
-      <EventPickerDialog
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelect={(event) => onChange({ items: appendEventRecordToGrid(event, block) })}
-      />
+      <div className="space-y-3 rounded border border-dashed p-3">
+        <h3 className="text-sm font-semibold">{t('misc.addAnotherEvent')}</h3>
+        <label className="block text-sm font-medium">
+          {t('misc.eventSource')}
+          <select
+            className="mt-1 w-full rounded border bg-white p-2"
+            value={newEventSourceId}
+            onChange={(event) => setNewEventSourceId(event.target.value)}
+          >
+            <option value="">{t('misc.customEvent')}</option>
+            {eventRegister.events.map((event) => (
+              <option key={event.id} value={event.id}>
+                {[event.title, event.date].filter(Boolean).join(' · ')}
+              </option>
+            ))}
+          </select>
+        </label>
+        {eventRegister.loading ? <p className="text-xs text-slate-500">{t('misc.loadingEventRegister')}</p> : null}
+        {eventRegister.loadFailed ? <p className="text-xs text-red-700">{t('misc.eventRegisterLoadFailed')}</p> : null}
+        <button type="button" className="rounded bg-blue-700 px-3 py-2 text-sm text-white" onClick={addEvent}>
+          {t('misc.addEvent')}
+        </button>
+      </div>
     </div>
   );
 }

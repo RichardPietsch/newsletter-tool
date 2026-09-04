@@ -6,8 +6,9 @@ import { useState } from 'react';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { FeaturedEventBlock } from '@/lib/newsletter/schema';
 import { AssetPickerDialog } from './asset-picker-dialog';
-import { EventPickerDialog } from './event-picker-dialog';
-import { eventRecordToFeaturedBlock } from '@/lib/events/snapshot';
+import { eventRecordToFeaturedBlock, featuredEventBlockToInput } from '@/lib/events/snapshot';
+import { EventSourceControl } from './event-source-control';
+import { useEventRegister } from './use-event-register';
 
 type Asset = {
   id: string;
@@ -79,7 +80,7 @@ export function FeaturedEventInspector({
   validationIssues?: NewsletterSaveIssue[];
 }) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [eventPickerOpen, setEventPickerOpen] = useState(false);
+  const eventRegister = useEventRegister();
   const hasIssue = (field: string) => validationIssues.some((issue) => issue.fieldKey === field);
 
   function selectAsset(asset: Asset) {
@@ -95,14 +96,20 @@ export function FeaturedEventInspector({
 
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        className="w-full rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
-        onClick={() => setEventPickerOpen(true)}
-      >
-        {t('misc.chooseFromRegister')}
-      </button>
-      <p className="text-xs text-slate-500">{t('misc.eventSnapshotHint')}</p>
+      <EventSourceControl
+        sourceEventId={block.sourceEventId}
+        updateKey={JSON.stringify(featuredEventBlockToInput(block))}
+        events={eventRegister.events}
+        loading={eventRegister.loading}
+        loadFailed={eventRegister.loadFailed}
+        onSelect={(event) => onChange(eventRecordToFeaturedBlock(event, block))}
+        onCustom={() => onChange({ sourceEventId: undefined })}
+        onUpdate={() =>
+          block.sourceEventId
+            ? eventRegister.updateEvent(block.sourceEventId, featuredEventBlockToInput(block))
+            : Promise.resolve(false)
+        }
+      />
       <label className="block text-sm font-medium">
         Hintergrund
         <select
@@ -202,11 +209,6 @@ export function FeaturedEventInspector({
       />
       <Field label="Button-URL" value={block.buttonUrl} onChange={(buttonUrl) => onChange({ buttonUrl })} />
       <AssetPickerDialog open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={selectAsset} />
-      <EventPickerDialog
-        open={eventPickerOpen}
-        onClose={() => setEventPickerOpen(false)}
-        onSelect={(event) => onChange(eventRecordToFeaturedBlock(event, block))}
-      />
     </div>
   );
 }

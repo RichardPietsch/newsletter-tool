@@ -4,9 +4,9 @@ import { t } from '@/lib/i18n';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
 import type { EventBlock } from '@/lib/newsletter/schema';
 import { Area, Field } from './fields';
-import { useState } from 'react';
-import { EventPickerDialog } from './event-picker-dialog';
-import { eventRecordToBlock } from '@/lib/events/snapshot';
+import { eventBlockToInput, eventRecordToBlock } from '@/lib/events/snapshot';
+import { EventSourceControl } from './event-source-control';
+import { useEventRegister } from './use-event-register';
 
 export function EventInspector({
   block,
@@ -18,18 +18,24 @@ export function EventInspector({
   issues?: NewsletterSaveIssue[];
 }) {
   const hasIssue = (field: string) => issues.some((issue) => issue.fieldKey === field);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const eventRegister = useEventRegister();
 
   return (
     <div className="space-y-3">
-      <button
-        type="button"
-        className="w-full rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
-        onClick={() => setPickerOpen(true)}
-      >
-        {t('misc.chooseFromRegister')}
-      </button>
-      <p className="text-xs text-slate-500">{t('misc.eventSnapshotHint')}</p>
+      <EventSourceControl
+        sourceEventId={block.sourceEventId}
+        updateKey={JSON.stringify(eventBlockToInput(block))}
+        events={eventRegister.events}
+        loading={eventRegister.loading}
+        loadFailed={eventRegister.loadFailed}
+        onSelect={(event) => onChange(eventRecordToBlock(event, block))}
+        onCustom={() => onChange({ sourceEventId: undefined })}
+        onUpdate={() =>
+          block.sourceEventId
+            ? eventRegister.updateEvent(block.sourceEventId, eventBlockToInput(block))
+            : Promise.resolve(false)
+        }
+      />
       <Field label={t('misc.category')} value={block.category} onChange={(category) => onChange({ category })} />
       <Field
         label={t('misc.talkTitle')}
@@ -62,11 +68,6 @@ export function EventInspector({
         required={Boolean(block.buttonUrl)}
         invalid={hasIssue('buttonLabel')}
         onChange={(buttonLabel) => onChange({ buttonLabel })}
-      />
-      <EventPickerDialog
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
-        onSelect={(event) => onChange(eventRecordToBlock(event, block))}
       />
     </div>
   );
