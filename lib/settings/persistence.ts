@@ -29,3 +29,10 @@ export function tenantSettingsPersistenceUpgrade(settings: unknown | undefined):
   if (isCurrentPersistedTenantSettings(settings)) return null;
   return serializeTenantSettings(resolvePersistedTenantSettings(settings));
 }
+
+export function describeTenantSettingsPersistenceIssue(settings: unknown | undefined) {
+  if (settings === undefined) return 'settings row missing';
+  const validation = persistedGlobalSettingsSchema.safeParse(settings);
+  if (validation.success) return 'unexpected persistence conflict';
+  return validation.error.issues.map((issue) => `${issue.path.join('.') || 'settings'}: ${issue.message}`).join(', ');
+}

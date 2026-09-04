@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { appSettings, tenants } from '@/lib/db/schema';
 import { createDefaultSettings } from './defaults';
 import {
+  describeTenantSettingsPersistenceIssue,
   isCurrentPersistedTenantSettings,
   resolvePersistedTenantSettings,
   serializeTenantSettings,
@@ -28,7 +29,7 @@ export async function saveTenantSettings(tenantId: string, settings: GlobalSetti
 
 export async function ensureTenantSettingsPersistence() {
   const [tenantRows, settingRows] = await Promise.all([
-    db.select({ id: tenants.id }).from(tenants),
+    db.select({ id: tenants.id, name: tenants.name }).from(tenants),
     db.select().from(appSettings),
   ]);
   const settingsByTenant = new Map(settingRows.map((row) => [row.tenantId, row]));
@@ -54,12 +55,19 @@ export async function ensureTenantSettingsPersistence() {
       continue;
     }
 
-    const persisted = tenantSettingsPersistenceUpgrade(existing.settings);
+    let persisted;
+    try {
+      persisted = tenantSettingsPersistenceUpgrade(existing.settings);
+    } catch {
+      throw new Error(
+        `Tenant design migration failed for ${tenant.id} (${JSON.stringify(tenant.name)}): ${describeTenantSettingsPersistenceIssue(existing.settings)}.`,
+      );
+    }
     if (!persisted) continue;
     const updated = await db
       .update(appSettings)
       .set({ settings: persisted, updatedAt: new Date() })
-      .where(and(eq(appSettings.tenantId, tenant.id), eq(appSettings.updatedAt, existing.updatedAt)))
+      .where(and(eq(appSettings.tenantId, tenant.id), eq(appSettings.settings, existing.settings)))
       .returning({ tenantId: appSettings.tenantId });
     upgraded += updated.length;
   }
@@ -67,12 +75,20 @@ export async function ensureTenantSettingsPersistence() {
   const verifiedRows = await db
     .select({ tenantId: appSettings.tenantId, settings: appSettings.settings })
     .from(appSettings);
-  const verifiedTenantIds = new Set(
-    verifiedRows.filter((row) => isCurrentPersistedTenantSettings(row.settings)).map((row) => row.tenantId),
-  );
-  const incomplete = tenantRows.filter((tenant) => !verifiedTenantIds.has(tenant.id));
+  const verifiedByTenant = new Map(verifiedRows.map((row) => [row.tenantId, row.settings]));
+  const incomplete = tenantRows.filter((tenant) => !isCurrentPersistedTenantSettings(verifiedByTenant.get(tenant.id)));
   if (incomplete.length > 0) {
-    throw new Error(`Tenant design persistence validation failed for ${incomplete.length} tenant(s).`);
+    const details = incomplete
+      .slice(0, 10)
+      .map(
+        (tenant) =>
+          `${tenant.id} (${JSON.stringify(tenant.name)}): ${describeTenantSettingsPersistenceIssue(verifiedByTenant.get(tenant.id))}`,
+      )
+      .join('; ');
+    const remaining = incomplete.length > 10 ? `; ${incomplete.length - 10} more tenant(s)` : '';
+    throw new Error(
+      `Tenant design persistence validation failed for ${incomplete.length} tenant(s): ${details}${remaining}.`,
+    );
   }
 
   return { created, upgraded, total: tenantRows.length };
