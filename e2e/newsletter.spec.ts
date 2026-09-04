@@ -3,7 +3,7 @@ import { and, count, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { AUTH_COOKIE_NAME } from '@/lib/auth/config';
 import { hashToken } from '@/lib/auth/tokens';
 import { db, pool } from '@/lib/db';
-import { appSettings, assets, auditEvents, newsletters, sessions, tenants, users } from '@/lib/db/schema';
+import { appSettings, assets, auditEvents, events, newsletters, sessions, tenants, users } from '@/lib/db/schema';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { insertBlock } from '@/lib/newsletter/operations';
 import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-files';
@@ -19,6 +19,7 @@ const e2eSessionToken = 'e2e-session-token';
 const e2eTenantId = 'e2e-tenant';
 const e2eNewsletterId = 'e2e-demo-newsletter';
 const e2eAssetId = 'e2e-asset';
+const e2eEventId = 'e2e-register-event';
 
 const securityTenantIds = ['e2e-security-tenant-a', 'e2e-security-tenant-b'] as const;
 const securityUsers = {
@@ -61,6 +62,7 @@ async function cleanupE2eData() {
   await db.execute(sql`delete from sessions where user_id = ${e2eUser.id}`);
   await db.delete(auditEvents).where(eq(auditEvents.tenantId, e2eTenantId));
   await db.execute(sql`delete from assets where tenant_id = ${e2eTenantId}`);
+  await db.delete(events).where(eq(events.tenantId, e2eTenantId));
   await db.execute(sql`delete from newsletters where tenant_id = ${e2eTenantId}`);
   await db.execute(sql`delete from app_settings where tenant_id = ${e2eTenantId}`);
   await db.execute(sql`delete from users where id = ${e2eUser.id}`);
@@ -211,6 +213,20 @@ async function prepareE2eData() {
     height: 800,
     sizeBytes: 42_000,
   });
+  await db.insert(events).values({
+    id: e2eEventId,
+    tenantId: e2eTenantId,
+    category: 'Clubabend',
+    title: 'E2E Registerabend',
+    speakerName: 'Ada Beispiel',
+    speakerRole: 'Vorständin',
+    date: '20. September 2026, 19:00 Uhr',
+    location: 'Ballsaal',
+    description: 'Ein zentral gepflegter Testtermin.',
+    buttonLabel: 'Anmelden',
+    buttonUrl: 'https://example.com/register-event',
+    updatedAt: now,
+  });
   await db.insert(appSettings).values({
     id: e2eUser.id,
     tenantId: e2eTenantId,
@@ -301,6 +317,14 @@ test('covers the main authenticated editor flow', async ({ page }) => {
   await page.getByText('E2E Veranstaltungsabend').click();
   const inspector = page.locator('[data-tour="inspector"]');
   await expect(inspector.getByLabel('Vortragstitel')).toHaveValue('E2E Veranstaltungsabend');
+
+  await inspector.getByLabel('Event-Quelle').selectOption(e2eEventId);
+  await expect(inspector.getByLabel('Vortragstitel')).toHaveValue('E2E Registerabend');
+  await inspector.getByLabel('Vortragstitel').fill('E2E Aktualisierter Registerabend');
+  await inspector.getByRole('button', { name: 'Event im Register aktualisieren' }).click();
+  await expect(inspector.getByRole('button', { name: 'Event im Register aktualisiert' })).toBeVisible();
+  const [updatedRegisterEvent] = await db.select({ title: events.title }).from(events).where(eq(events.id, e2eEventId));
+  expect(updatedRegisterEvent?.title).toBe('E2E Aktualisierter Registerabend');
 
   await inspector.getByLabel('Vortragstitel').fill('');
   await expect(page.getByText('Speichern fehlgeschlagen')).toBeVisible({ timeout: 5000 });

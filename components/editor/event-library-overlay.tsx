@@ -26,6 +26,11 @@ const emptyEvent: EventInput = {
   buttonUrl: '',
 };
 
+function eventInputFromRecord(event: EventRecord): EventInput {
+  const { id: _id, tenantId: _tenantId, createdAt: _createdAt, updatedAt: _updatedAt, ...input } = event;
+  return input;
+}
+
 function Input({
   label,
   value,
@@ -73,7 +78,15 @@ export function EventLibraryOverlay({
       setStatus('error');
       return;
     }
-    setEvents(await response.json());
+    const loadedEvents = (await response.json()) as EventRecord[];
+    setEvents(loadedEvents);
+    if (loadedEvents[0]) {
+      setEditingId(loadedEvents[0].id);
+      setDraft(eventInputFromRecord(loadedEvents[0]));
+    } else {
+      setEditingId(undefined);
+      setDraft(emptyEvent);
+    }
     setStatus('idle');
   }, []);
 
@@ -87,9 +100,8 @@ export function EventLibraryOverlay({
   }
 
   function startEdit(event: EventRecord) {
-    const { id: _id, tenantId: _tenantId, createdAt: _createdAt, updatedAt: _updatedAt, ...input } = event;
     setEditingId(event.id);
-    setDraft(input);
+    setDraft(eventInputFromRecord(event));
   }
 
   async function save() {
@@ -109,8 +121,7 @@ export function EventLibraryOverlay({
       editingId ? current.map((event) => (event.id === saved.id ? saved : event)) : [saved, ...current],
     );
     setEditingId(saved.id);
-    const { id: _id, tenantId: _tenantId, createdAt: _createdAt, updatedAt: _updatedAt, ...savedInput } = saved;
-    setDraft(savedInput);
+    setDraft(eventInputFromRecord(saved));
     setStatus('idle');
   }
 
@@ -147,26 +158,23 @@ export function EventLibraryOverlay({
     <Overlay title={t('misc.eventsTitle')} onClose={onClose}>
       <div className="grid min-h-full lg:grid-cols-[minmax(18rem,0.8fr)_minmax(24rem,1.2fr)]">
         <section className="border-r bg-white p-6">
-          <div className="flex items-start justify-between gap-3">
-            <p className="text-sm text-slate-600">{t('misc.eventLibraryIntro')}</p>
-            {!readOnly ? (
-              <button
-                type="button"
-                className="shrink-0 rounded bg-blue-700 px-3 py-2 text-sm text-white"
-                onClick={startNew}
-              >
-                {t('misc.newEvent')}
-              </button>
-            ) : null}
-          </div>
-          {status === 'loading' ? <p className="mt-4 text-sm text-slate-500">{t('save.saving')}</p> : null}
+          <h3 className="font-semibold">{t('misc.registeredEvents')}</h3>
+          <p className="mt-1 text-sm text-slate-600">{t('misc.eventLibraryIntro')}</p>
+          {status === 'loading' ? (
+            <p className="mt-4 text-sm text-slate-500">{t('misc.loadingEventRegister')}</p>
+          ) : null}
           <div className="mt-5 space-y-2">
             {events.map((event) => (
               <article
                 key={event.id}
                 className={`rounded border p-3 ${editingId === event.id ? 'border-blue-600 bg-blue-50' : ''}`}
               >
-                <button type="button" className="w-full text-left" onClick={() => startEdit(event)}>
+                <button
+                  type="button"
+                  className="w-full text-left"
+                  aria-pressed={editingId === event.id}
+                  onClick={() => startEdit(event)}
+                >
                   <span className="block text-xs font-bold uppercase tracking-wider text-red-700">
                     {event.category}
                   </span>
@@ -189,7 +197,23 @@ export function EventLibraryOverlay({
         </section>
 
         <section className="space-y-4 p-6">
-          <h3 className="text-lg font-semibold">{editingId ? t('misc.editEvent') : t('misc.newEvent')}</h3>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold">{editingId ? t('misc.editEvent') : t('misc.newEvent')}</h3>
+              <p className="mt-1 text-sm text-slate-600">
+                {editingId ? t('misc.editRegisterEventHint') : t('misc.createRegisterEventHint')}
+              </p>
+            </div>
+            {!readOnly && editingId ? (
+              <button
+                type="button"
+                className="rounded border border-blue-600 px-3 py-2 text-sm text-blue-700"
+                onClick={startNew}
+              >
+                {t('misc.createNewEvent')}
+              </button>
+            ) : null}
+          </div>
           <fieldset disabled={readOnly} className="grid gap-4 md:grid-cols-2">
             <Input
               label={t('misc.category')}
@@ -268,7 +292,7 @@ export function EventLibraryOverlay({
               disabled={!draft.title.trim() || status === 'saving'}
               onClick={() => void save()}
             >
-              {status === 'saving' ? t('save.saving') : t('misc.saveEvent')}
+              {status === 'saving' ? t('save.saving') : editingId ? t('misc.saveEvent') : t('misc.createEvent')}
             </button>
           ) : null}
         </section>

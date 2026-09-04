@@ -57,7 +57,15 @@ export async function PUT(request: Request) {
     .set({ ...patch, updatedAt: new Date() })
     .where(and(eq(events.id, id), eq(events.tenantId, auth.context.tenant.id)))
     .returning();
-  return updated ? NextResponse.json(updated) : notFound();
+  if (!updated) return notFound();
+  await recordAuditEvent({
+    actorUserId: auth.context.user.id,
+    tenantId: auth.context.tenant.id,
+    eventType: 'event.updated',
+    entityType: 'event',
+    entityId: updated.id,
+  });
+  return NextResponse.json(updated);
 }
 
 export async function DELETE(request: Request) {

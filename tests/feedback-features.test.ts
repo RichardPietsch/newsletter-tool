@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { renderNewsletter } from '@/email/render-newsletter';
 import { assetListFromPayload } from '@/lib/assets/list';
-import { eventRecordToBlock, eventRecordToItem } from '@/lib/events/snapshot';
+import {
+  eventBlockToInput,
+  eventItemToInput,
+  eventRecordToBlock,
+  eventRecordToItem,
+  featuredEventBlockToInput,
+} from '@/lib/events/snapshot';
 import type { EventRecord } from '@/lib/events/schema';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import {
@@ -14,6 +20,7 @@ import {
   newsletterDocumentSchema,
   tiptapDocSchema,
   type EventBlock,
+  type FeaturedEventBlock,
   type NewsletterContentBlock,
 } from '@/lib/newsletter/schema';
 
@@ -52,6 +59,40 @@ describe('user-testing feedback features', () => {
     expect(patch).toMatchObject({ sourceEventId: source.id, speakerRole: source.speakerRole });
     source.title = 'Später geänderter Registertitel';
     expect(item.title).toBe('Die Zukunft des Handels');
+  });
+
+  it('maps edited newsletter snapshots back to safe register inputs', () => {
+    const source = registerEvent();
+    const eventBlock = {
+      ...(createBlock('event') as EventBlock),
+      ...eventRecordToBlock(source, createBlock('event') as EventBlock),
+      title: 'Im Newsletter überarbeitet',
+      image: {
+        src: 'https://example.com/event.jpg',
+        href: 'https://example.com/not-part-of-the-register-image',
+        alt: 'Eventmotiv',
+        decorative: false,
+      },
+    };
+    const featuredBlock = {
+      ...(createBlock('featuredEvent') as FeaturedEventBlock),
+      overline: 'Clubabend',
+      title: 'Hervorgehobenes Event',
+    };
+    const item = eventRecordToItem(source, 'item-1');
+
+    const eventInput = eventBlockToInput(eventBlock);
+    expect(eventInput).toMatchObject({ title: 'Im Newsletter überarbeitet', category: source.category });
+    expect(eventInput).not.toHaveProperty('sourceEventId');
+    expect(eventInput.image).not.toHaveProperty('href');
+    expect(featuredEventBlockToInput(featuredBlock)).toMatchObject({
+      title: 'Hervorgehobenes Event',
+      category: 'Clubabend',
+    });
+    expect(eventItemToInput({ ...item, title: 'Grid-Anpassung' })).toMatchObject({
+      title: 'Grid-Anpassung',
+      category: source.category,
+    });
   });
 
   it('supports blockquotes in restricted rich text', () => {
