@@ -4,7 +4,7 @@ import type { GlobalSettings, GlobalSettingsInput } from '@/lib/settings/schema'
 type SettingsRow = {
   id: string;
   tenantId: string;
-  settings: GlobalSettingsInput;
+  settings: unknown;
   updatedAt: Date;
 };
 
@@ -93,6 +93,7 @@ describe('settings API route', () => {
     expect(response.status).toBe(200);
     expect(payload.headerVariants.length).toBeGreaterThan(0);
     expect(payload.footerRichText.type).toBe('doc');
+    expect(mocks.rows).toEqual([]);
   });
 
   it('applies settings fallbacks for previous default footer content', async () => {
@@ -124,6 +125,7 @@ describe('settings API route', () => {
     expect(response.status).toBe(200);
     expect(payload.headerVariants.length).toBeGreaterThan(0);
     expect(JSON.stringify(payload.footerRichText)).toContain('office@anglogermanclub.de');
+    expect(mocks.rows[0].settings).toEqual(previousSettings);
   });
 
   it('validates and stores settings with PUT', async () => {
@@ -134,7 +136,7 @@ describe('settings API route', () => {
 
     expect(response.status).toBe(200);
     expect(payload.headerVariants).toHaveLength(settings.headerVariants.length);
-    expect(mocks.rows[0].settings).toEqual(settings);
+    expect(mocks.rows[0].settings).toEqual({ schemaVersion: 1, ...settings });
     expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
       expect.objectContaining({ actorUserId: 'user-1', tenantId: 'tenant-1', eventType: 'settings.updated' }),
     );

@@ -8,6 +8,7 @@ import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { insertBlock } from '@/lib/newsletter/operations';
 import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-files';
 import { createDefaultSettings } from '@/lib/settings/defaults';
+import { serializeTenantSettings } from '@/lib/settings/persistence';
 import type { EventBlock, ImageBlock, NewsletterDocument } from '@/lib/newsletter/schema';
 
 const e2eUser = {
@@ -213,7 +214,7 @@ async function prepareE2eData() {
   await db.insert(appSettings).values({
     id: e2eUser.id,
     tenantId: e2eTenantId,
-    settings: createDefaultSettings(),
+    settings: serializeTenantSettings(createDefaultSettings()),
     updatedAt: now,
   });
 }

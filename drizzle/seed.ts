@@ -1,9 +1,11 @@
 import { eq } from 'drizzle-orm';
 import { db, DEFAULT_USER_ID, pool } from '@/lib/db';
-import { tenants, users } from '@/lib/db/schema';
+import { appSettings, tenants, users } from '@/lib/db/schema';
 import { serverEnv } from '@/lib/env';
 import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-files';
 import { normalizeEmail } from '@/lib/auth/config';
+import { createDefaultSettings } from '@/lib/settings/defaults';
+import { serializeTenantSettings } from '@/lib/settings/persistence';
 
 const DEVELOPMENT_TENANT_ID = 'development-tenant';
 const DEVELOPMENT_ADMIN_ID = 'development-platform-admin';
@@ -24,6 +26,14 @@ async function main() {
     .insert(tenants)
     .values({ id: DEVELOPMENT_TENANT_ID, name: 'Entwicklungsmandant', status: 'active' })
     .onConflictDoNothing();
+  await db
+    .insert(appSettings)
+    .values({
+      id: DEVELOPMENT_TENANT_ID,
+      tenantId: DEVELOPMENT_TENANT_ID,
+      settings: serializeTenantSettings(createDefaultSettings()),
+    })
+    .onConflictDoNothing({ target: appSettings.tenantId });
   await db
     .insert(users)
     .values({

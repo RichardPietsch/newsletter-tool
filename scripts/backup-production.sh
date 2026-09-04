@@ -46,6 +46,7 @@ validate_compose_files
 ensure_infrastructure_healthy
 prepare_backup_root "$backup_root"
 require_command tar
+require_command awk
 
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 final_directory="$BACKUP_ROOT/$timestamp"
@@ -67,8 +68,31 @@ info 'Creating a consistent PostgreSQL archive'
   > "$staging_directory/database.dump"
 
 info 'Validating the PostgreSQL archive'
+database_listing="$staging_directory/database-contents.txt"
 "${INFRA_COMPOSE[@]}" exec -T db pg_restore --list \
-  < "$staging_directory/database.dump" >/dev/null
+  < "$staging_directory/database.dump" > "$database_listing"
+
+tenant_design_rows=0
+tenant_design_complete_rows=0
+if grep -Eq '[[:space:]]TABLE[[:space:]]+public[[:space:]]+app_settings[[:space:]]' "$database_listing"; then
+  grep -Eq '[[:space:]]TABLE DATA[[:space:]]+public[[:space:]]+app_settings[[:space:]]' "$database_listing" \
+    || die 'PostgreSQL archive is missing tenant design data.'
+  tenant_design_data="$staging_directory/tenant-design-data.sql"
+  "${INFRA_COMPOSE[@]}" exec -T db pg_restore --data-only --table=public.app_settings --file=- \
+    < "$staging_directory/database.dump" > "$tenant_design_data"
+  design_counts="$(awk '
+    /^COPY public\.app_settings / { in_copy = 1; next }
+    in_copy && /^\\\.$/ { in_copy = 0; next }
+    in_copy {
+      total += 1
+      if (index($0, "headerVariants") && index($0, "footerRichText") && index($0, "colors")) complete += 1
+    }
+    END { printf "%d|%d", total, complete }
+  ' "$tenant_design_data")"
+  IFS='|' read -r tenant_design_rows tenant_design_complete_rows <<< "$design_counts"
+  rm -f -- "$tenant_design_data"
+fi
+rm -f -- "$database_listing"
 
 info 'Mirroring MinIO assets into the backup'
 "${APP_COMPOSE[@]}" run --rm --no-deps \
@@ -87,6 +111,8 @@ created_at_utc=$timestamp
 git_revision=$git_revision
 postgres_volume=$POSTGRES_VOLUME
 minio_volume=$MINIO_VOLUME
+tenant_design_rows=$tenant_design_rows
+tenant_design_complete_rows=$tenant_design_complete_rows
 EOF
 
 checksum_create "$staging_directory" database.dump assets.tar.gz MANIFEST.txt \

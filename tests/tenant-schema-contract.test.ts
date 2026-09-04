@@ -13,6 +13,8 @@ describe('tenant schema contract', () => {
   const settingsDefaults = readFileSync(path.join(process.cwd(), 'lib/settings/defaults.ts'), 'utf8');
   const productionCompose = readFileSync(path.join(process.cwd(), 'docker-compose.prod.yml'), 'utf8');
   const deploymentScript = readFileSync(path.join(process.cwd(), 'scripts/deploy-production.sh'), 'utf8');
+  const migrationScript = readFileSync(path.join(process.cwd(), 'scripts/migrate.ts'), 'utf8');
+  const settingsStore = readFileSync(path.join(process.cwd(), 'lib/settings/store.ts'), 'utf8');
 
   it('requires tenant IDs on every business-data table', () => {
     for (const table of ['newsletters', 'assets', 'events', 'appSettings']) {
@@ -37,11 +39,25 @@ describe('tenant schema contract', () => {
   });
 
   it('persists complete design defaults when a tenant is created', () => {
-    expect(adminOperations).toContain('tx.insert(appSettings)');
+    expect(adminOperations).toMatch(/tx\s*\.insert\(appSettings\)/);
     expect(adminOperations).toContain('createDefaultSettings()');
+    expect(adminOperations).toContain('serializeTenantSettings(createDefaultSettings())');
     expect(settingsDefaults).toContain('colors:');
     expect(settingsDefaults).toContain('headerVariants: createDefaultHeaderVariants()');
     expect(settingsDefaults).toContain('footerRichText: defaultFooterRichText');
+  });
+
+  it('keeps tenant design reads side-effect free and backfills only missing or legacy rows', () => {
+    const settingsRead = settingsStore.slice(
+      settingsStore.indexOf('export async function getTenantSettings'),
+      settingsStore.indexOf('export async function saveTenantSettings'),
+    );
+    expect(settingsRead).not.toContain('saveTenantSettings');
+    expect(settingsStore).toContain('.onConflictDoNothing({ target: appSettings.tenantId })');
+    expect(settingsStore).toContain('tenantSettingsPersistenceUpgrade(existing.settings)');
+    expect(settingsStore).toContain('eq(appSettings.updatedAt, existing.updatedAt)');
+    expect(settingsStore).toContain('Tenant design persistence validation failed');
+    expect(migrationScript).toContain('ensureTenantSettingsPersistence()');
   });
 
   it('account status changes never delete newsletters', () => {

@@ -14,6 +14,7 @@ import {
 import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-files';
 import { normalizeEmail } from '@/lib/auth/config';
 import { createDefaultSettings } from '@/lib/settings/defaults';
+import { serializeTenantSettings } from '@/lib/settings/persistence';
 
 type Actor = { id: string };
 
@@ -40,7 +41,9 @@ export async function createTenant(
       lastActivityAt: event.createdAt,
     });
     await tx.insert(auditEvents).values(event);
-    await tx.insert(appSettings).values({ id, tenantId: id, settings: createDefaultSettings() });
+    await tx
+      .insert(appSettings)
+      .values({ id, tenantId: id, settings: serializeTenantSettings(createDefaultSettings()) });
   });
   await seedNewsletterTemplatesForTenant(id);
   return id;
