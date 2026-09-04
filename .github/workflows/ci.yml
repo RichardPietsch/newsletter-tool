@@ -70,6 +70,13 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
+      - name: Validate production operations
+        run: |
+          bash -n scripts/_production-common.sh scripts/init-production-infrastructure.sh scripts/backup-production.sh scripts/deploy-production.sh scripts/restore-production.sh scripts/stop-production.sh scripts/start-production.sh
+          sh -n scripts/run-audit-cleanup.sh
+          docker compose --env-file .env.production.example --project-name newsletter-alpha-infra --file docker-compose.infra.yml config --quiet
+          docker compose --env-file .env.production.example --project-name newsletter-alpha-app --file docker-compose.prod.yml config --quiet
+
       - name: Restore Next.js build cache
         uses: actions/cache@v4
         with:

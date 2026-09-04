@@ -68,23 +68,32 @@ docker compose up --build
 
 Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit ist nur für lokale Login-Mails gedacht und darf nicht als produktiver SMTP-Dienst verwendet werden.
 
-### Production-/Portainer-Stack
+### Production-/Portainer-Betrieb
 
 1. DNS vorbereiten, z. B. `newsletter.example.com` für die App und `assets.example.com` für öffentlich erreichbare Newsletter-Bilder.
 2. `.env.production.example` als Vorlage verwenden und die Werte in Portainer als Stack-Environment-Variablen oder lokal in einer nicht committeten `.env.production` pflegen. Die Production-Compose-Datei nutzt keine Beispiel-Env-Datei als Fallback mehr.
-3. Zwingend setzen: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Für die komfortable Erstinstallation zusätzlich `BOOTSTRAP_ADMIN_EMAIL` und `BOOTSTRAP_ADMIN_NAME` setzen. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
-4. Stack mit Production-Compose starten:
+3. Zwingend setzen: die festen Namen für Infrastrukturprojekt, internes Netzwerk und externe Daten-Volumes sowie `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Für die komfortable Erstinstallation zusätzlich `BOOTSTRAP_ADMIN_EMAIL` und `BOOTSTRAP_ADMIN_NAME` setzen. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
+4. Die leere Infrastruktur ausschließlich bei einer echten Erstinstallation bewusst initialisieren:
 
 ```bash
-docker compose --env-file .env.production -f docker-compose.prod.yml up --build -d
+./scripts/init-production-infrastructure.sh \
+  --env-file .env.production \
+  --create-empty-data-volumes
+
+./scripts/deploy-production.sh \
+  --env-file .env.production \
+  --backup-dir /mnt/offsite-backups/newsletter-alpha
 ```
 
-5. Reverse Proxy / Portainer so konfigurieren, dass HTTPS auf den internen Web-Service `web:3000` zeigt. PostgreSQL und die MinIO-Admin-Konsole sollen nicht öffentlich exposed werden.
+   Bei einer bestehenden Installation müssen stattdessen zuerst die bisherigen Volume-Namen übernommen werden. Das Initialisierungsskript erzeugt ohne die ausdrückliche Option niemals leere Daten-Volumes.
+5. Reverse Proxy / Portainer so konfigurieren, dass HTTPS auf den internen Web-Service `web:3000` zeigt. PostgreSQL und die MinIO-Admin-Konsole sollen nicht öffentlich exposed werden. In Portainer werden Infrastruktur und Anwendung als getrennte Stacks betrieben; beide verwenden das konfigurierte externe Netzwerk.
 6. MinIO/Asset-Auslieferung so konfigurieren, dass `PUBLIC_ASSET_BASE_URL` von externen Mailclients erreichbar ist. Lokale oder private URLs funktionieren in exportierten Newslettern außerhalb des Servers nicht zuverlässig.
-7. Der einmalige `bootstrap-admin`-Service führt die Migrationen aus und legt ausschließlich bei einer noch nicht initialisierten Installation den konfigurierten Plattform-Admin an. Danach den Magic-Link für `BOOTSTRAP_ADMIN_EMAIL` anfordern.
+7. Das Deployment-Skript erstellt zwingend ein validiertes PostgreSQL-/MinIO-Backup, führt Migration und Bootstrap als einmalige Jobs aus und ersetzt ausschließlich die kurzlebigen Anwendungscontainer. Danach den Magic-Link für `BOOTSTRAP_ADMIN_EMAIL` anfordern.
 8. Smoke-Test durchführen: Magic-Link anfordern, Newsletter erstellen, Bild hochladen, Export herunterladen und prüfen, ob alle Bild-URLs per HTTPS erreichbar sind.
 
 Der Export blockiert in Production lokale/private Bild-URLs sowie nicht per HTTPS erreichbare Bildquellen.
+
+Die vollständige Anleitung für die Übernahme bestehender Volumes, tägliche Backups, reguläre Deployments, geordnetes Stoppen/Starten und eine geprüfte Wiederherstellung steht in [`docs/production-deployment.md`](docs/production-deployment.md). Auf Alpha- und Production-Systemen dürfen insbesondere `docker compose down -v` und `docker volume prune -a` nicht verwendet werden.
 
 ## Datenbank
 

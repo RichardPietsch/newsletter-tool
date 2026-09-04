@@ -36,4 +36,4 @@ COPY --from=builder /app/lib ./lib
 COPY --from=builder /app/drizzle ./drizzle
 COPY --from=builder /app/public ./public
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["./node_modules/.bin/next", "start"]
