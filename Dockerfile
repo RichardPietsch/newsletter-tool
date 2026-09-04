@@ -16,7 +16,9 @@ EXPOSE 3000
 CMD ["pnpm", "dev"]
 
 FROM base AS builder
+ARG APP_BUILD_SHA=unknown
 ENV NODE_ENV=production
+ENV APP_BUILD_SHA=$APP_BUILD_SHA
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
@@ -25,7 +27,10 @@ FROM deps AS prod-deps
 RUN pnpm prune --prod
 
 FROM base AS production
+ARG APP_BUILD_SHA=unknown
 ENV NODE_ENV=production
+ENV APP_BUILD_SHA=$APP_BUILD_SHA
+LABEL org.opencontainers.image.revision=$APP_BUILD_SHA
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./package.json

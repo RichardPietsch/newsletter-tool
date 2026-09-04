@@ -90,9 +90,9 @@ if [[ "$use_prebuilt_image" == true ]]; then
 else
   info "Building application image $app_image"
   if [[ "$use_local_base_image" == true ]]; then
-    "${APP_COMPOSE[@]}" build web
+    "${APP_COMPOSE[@]}" build --build-arg "APP_BUILD_SHA=$git_revision" web
   else
-    "${APP_COMPOSE[@]}" build --pull web
+    "${APP_COMPOSE[@]}" build --pull --build-arg "APP_BUILD_SHA=$git_revision" web
   fi
 fi
 

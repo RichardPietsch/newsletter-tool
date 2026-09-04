@@ -167,6 +167,17 @@ Der Ablauf ist fest vorgegeben:
 7. Auf den Healthcheck der Loginseite warten.
 8. Bei einem fehlgeschlagenen Healthcheck automatisch das vorherige Anwendungs-Image wieder einsetzen.
 
+Das Deployment-Skript schreibt den aktuellen Git-Commit als Build-ID in das lokal erzeugte Image. In der Plattform-Administration erscheint dadurch im Footer die Anwendungs-Version zusammen mit einem Link zum exakten Commit und einem direkten Vergleich mit dem aktuellen Stand des `main`-Branches auf GitHub. Die fachliche Versionsnummer wird vor einem Release im Feld `version` der `package.json` erhöht.
+
+Extern erzeugte Images müssen dieselbe Build-Angabe beim Erstellen erhalten, damit der Footer auch bei `--use-prebuilt-image` den korrekten Commit anzeigt:
+
+```bash
+docker build \
+  --target production \
+  --build-arg APP_BUILD_SHA="$(git rev-parse --short=12 HEAD)" \
+  --tag registry.example.com/newsletter-tool:0.1.0 .
+```
+
 Migrationen müssen deshalb nach dem Expand-/Contract-Prinzip mindestens ein Release rückwärtskompatibel bleiben. Ein Image-Rollback macht eine bereits erfolgreich ausgeführte Datenbankmigration nicht rückgängig.
 
 ## Backups

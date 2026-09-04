@@ -10,6 +10,7 @@ const read = (file: string) => readFileSync(path.join(root, file), 'utf8');
 describe('production deployment safety contract', () => {
   const infrastructureCompose = read('docker-compose.infra.yml');
   const applicationCompose = read('docker-compose.prod.yml');
+  const dockerfile = read('Dockerfile');
   const productionCommon = read('scripts/_production-common.sh');
   const initScript = read('scripts/init-production-infrastructure.sh');
   const backupScript = read('scripts/backup-production.sh');
@@ -65,6 +66,13 @@ describe('production deployment safety contract', () => {
     expect(imageValidationPosition).toBeGreaterThan(backupPosition);
     expect(migrationPosition).toBeGreaterThan(imageValidationPosition);
     expect(rolloutPosition).toBeGreaterThan(migrationPosition);
+  });
+
+  it('embeds the deployed Git revision in locally built production images', () => {
+    expect(applicationCompose).toContain("APP_BUILD_SHA: '${APP_BUILD_SHA:-unknown}'");
+    expect(dockerfile).toContain('ARG APP_BUILD_SHA=unknown');
+    expect(dockerfile).toContain('org.opencontainers.image.revision=$APP_BUILD_SHA');
+    expect(deployScript).toContain('--build-arg "APP_BUILD_SHA=$git_revision"');
   });
 
   it('stops services without deleting containers or volumes', () => {
