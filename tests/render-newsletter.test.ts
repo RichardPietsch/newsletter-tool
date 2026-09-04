@@ -153,6 +153,18 @@ describe('MJML newsletter rendering', () => {
     expect(html).toContain('Harvestehuder Weg 44');
   });
 
+  it('renders the optional rounded corners of each header image in email HTML', () => {
+    const settings = createDefaultSettings();
+    settings.headerVariants[0].roundedCorners = true;
+
+    const roundedHtml = renderNewsletter(documentWithBlocks([richTextBlock()]), settings);
+    settings.headerVariants[0].roundedCorners = false;
+    const squareHtml = renderNewsletter(documentWithBlocks([richTextBlock()]), settings);
+
+    expect(roundedHtml).toContain('border-radius:8px');
+    expect(squareHtml).not.toContain('border-radius:8px');
+  });
+
   it('keeps module gaps while preserving the seamless header-to-text transition', () => {
     const html = renderNewsletter(documentWithBlocks([richTextBlock(), imageBlock()]));
 

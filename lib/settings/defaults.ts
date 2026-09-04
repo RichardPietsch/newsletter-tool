@@ -14,18 +14,21 @@ export function createDefaultHeaderVariants(): GlobalSettings['headerVariants'] 
       name: 'AGC',
       imageUrl: appAssetUrl('/assets/headers/header-agc.jpg'),
       alt: 'AGC Newsletter Header',
+      roundedCorners: false,
     },
     {
       id: 'agc-junioren',
       name: 'AGC Junioren',
       imageUrl: appAssetUrl('/assets/headers/header-agc-junioren.jpg'),
       alt: 'AGC Junioren Newsletter Header',
+      roundedCorners: false,
     },
     {
       id: 'agc-gastro',
       name: 'AGC Gastro',
       imageUrl: appAssetUrl('/assets/headers/header-agc-gastronomie.jpg'),
       alt: 'AGC Gastro Newsletter Header',
+      roundedCorners: false,
     },
   ];
 }

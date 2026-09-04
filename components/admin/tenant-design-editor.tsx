@@ -18,7 +18,7 @@ import {
   type NewsletterPreviewMode,
   type NewsletterThemeColorToken,
 } from '@/lib/newsletter/module-styles';
-import type { GlobalSettings } from '@/lib/settings/schema';
+import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
 import { parseThemeYaml, serializeThemeYaml, THEME_YAML_MAX_BYTES } from '@/lib/settings/theme-yaml';
 
 type UploadedAsset = {
@@ -285,6 +285,7 @@ export function TenantDesignEditor({
           name: asset.originalFilename.replace(/\.[^.]+$/, '') || 'Header',
           imageUrl: asset.publicUrl,
           alt: 'Newsletter Header',
+          roundedCorners: false,
         },
       ],
     }));
@@ -419,7 +420,12 @@ export function TenantDesignEditor({
             const used = usedHeaderVariantIds.includes(variant.id);
             return (
               <article key={variant.id} className="rounded-lg border p-4">
-                <img src={variant.imageUrl} alt={variant.alt} className="h-28 w-full rounded object-contain" />
+                <img
+                  src={variant.imageUrl}
+                  alt={variant.alt}
+                  className="h-28 w-full object-contain"
+                  style={{ borderRadius: variant.roundedCorners ? ROUNDED_HEADER_IMAGE_RADIUS_PX : 0 }}
+                />
                 <label className="mt-3 block text-sm font-medium">
                   {t('misc.name')}
                   <input
@@ -451,6 +457,23 @@ export function TenantDesignEditor({
                       setStatus('idle');
                     }}
                   />
+                </label>
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300"
+                    checked={variant.roundedCorners}
+                    onChange={(event) => {
+                      setSettings((current) => ({
+                        ...current,
+                        headerVariants: current.headerVariants.map((item) =>
+                          item.id === variant.id ? { ...item, roundedCorners: event.target.checked } : item,
+                        ),
+                      }));
+                      setStatus('idle');
+                    }}
+                  />
+                  {t('misc.roundHeaderImage')}
                 </label>
                 <button
                   type="button"
