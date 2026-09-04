@@ -1,10 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { renderNewsletter } from '@/email/render-newsletter';
+import { renderEvent } from '@/email/modules/event';
+import { renderEventGrid } from '@/email/modules/event-grid';
+import { renderFeaturedEvent } from '@/email/modules/featured-event';
+import { renderHeader } from '@/email/modules/header';
+import { renderText } from '@/email/modules/text';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
 import { insertBlock } from '@/lib/newsletter/operations';
 import { createDefaultSettings } from '@/lib/settings/defaults';
-import type { ImageBlock, NewsletterDocument, TextBlock } from '@/lib/newsletter/schema';
+import type {
+  EventBlock,
+  EventGridBlock,
+  FeaturedEventBlock,
+  ImageBlock,
+  NewsletterDocument,
+  TextBlock,
+} from '@/lib/newsletter/schema';
 import {
   newsletterColorPalettes,
   newsletterEmailClasses,
@@ -163,6 +175,41 @@ describe('MJML newsletter rendering', () => {
 
     expect(roundedHtml).toContain('border-radius:8px');
     expect(squareHtml).not.toContain('border-radius:8px');
+  });
+
+  it('keeps every rounded module clipped to its radius when dark-mode colors are applied', () => {
+    const roundedClass = `${newsletterEmailClasses.surface} ${newsletterEmailClasses.rounded}`;
+
+    expect(renderHeader('Brand')).toContain(
+      `css-class="${newsletterEmailClasses.surface} ${newsletterEmailClasses.rounded}"`,
+    );
+    expect(renderHeader('Brand', undefined, undefined, { squareBottom: true })).toContain(
+      `css-class="${newsletterEmailClasses.surface} ${newsletterEmailClasses.roundedTop}"`,
+    );
+    expect(renderText(richTextBlock())).toContain(
+      `css-class="${newsletterEmailClasses.surface} ${newsletterEmailClasses.rounded}"`,
+    );
+    expect(renderText(richTextBlock(), { squareTop: true })).toContain(
+      `css-class="${newsletterEmailClasses.surface} ${newsletterEmailClasses.roundedBottom}"`,
+    );
+    expect(renderEvent(createBlock('event') as EventBlock)).toContain(`css-class="${roundedClass}"`);
+    expect(renderFeaturedEvent(createBlock('featuredEvent') as FeaturedEventBlock)).toContain(
+      newsletterEmailClasses.rounded,
+    );
+    expect(renderEventGrid(createBlock('eventGrid') as EventGridBlock)).toContain(
+      `css-class="${newsletterEmailClasses.teaser} ${newsletterEmailClasses.rounded}"`,
+    );
+
+    const html = renderNewsletter(documentWithBlocks([richTextBlock()]));
+    expect(html).toContain(
+      `.${newsletterEmailClasses.rounded}, .${newsletterEmailClasses.rounded} > table { border-radius:4px !important; overflow:hidden !important; }`,
+    );
+    expect(html).toContain(
+      `.${newsletterEmailClasses.roundedTop}, .${newsletterEmailClasses.roundedTop} > table { border-radius:4px 4px 0 0 !important; overflow:hidden !important; }`,
+    );
+    expect(html).toContain(
+      `.${newsletterEmailClasses.roundedBottom}, .${newsletterEmailClasses.roundedBottom} > table { border-radius:0 0 4px 4px !important; overflow:hidden !important; }`,
+    );
   });
 
   it('keeps module gaps while preserving the seamless header-to-text transition', () => {
