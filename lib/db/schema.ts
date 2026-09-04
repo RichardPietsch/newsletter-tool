@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import type { PersistedGlobalSettings } from '@/lib/settings/schema';
 
 export type TenantStatus = 'active' | 'inactive';
 export type UserRole = 'platform_admin' | 'tenant_member';
@@ -167,7 +168,7 @@ export const appSettings = pgTable(
     tenantId: text('tenant_id')
       .references(() => tenants.id)
       .notNull(),
-    settings: jsonb('settings').notNull(),
+    settings: jsonb('settings').$type<PersistedGlobalSettings>().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({ tenantIdx: uniqueIndex('app_settings_tenant_idx').on(table.tenantId) }),

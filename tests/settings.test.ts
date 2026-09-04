@@ -4,6 +4,12 @@ import { serverEnv } from '@/lib/env';
 import type { TiptapNode } from '@/lib/newsletter/schema';
 import { newsletterThemePalettes } from '@/lib/newsletter/module-styles';
 import { applyDefaultSettingsFallbacks, createDefaultSettings } from '@/lib/settings/defaults';
+import {
+  isCurrentPersistedTenantSettings,
+  resolvePersistedTenantSettings,
+  serializeTenantSettings,
+  tenantSettingsPersistenceUpgrade,
+} from '@/lib/settings/persistence';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 
 function textFromNode(node: TiptapNode): string {
@@ -74,6 +80,70 @@ describe('settings defaults', () => {
     settings.colors.light.brand = 'blue';
 
     expect(globalSettingsSchema.safeParse(settings).success).toBe(false);
+  });
+
+  it('stores and restores the complete customized tenant design as a versioned document', () => {
+    const settings = createDefaultSettings();
+    settings.colors.light.brand = '#123456';
+    settings.colors.dark.featureBackground = '#654321';
+    settings.headerVariants = [
+      { id: 'custom', name: 'Custom header', imageUrl: 'https://cdn.example.com/header.jpg', alt: 'Header' },
+    ];
+    settings.footerRichText = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Individueller Footer' }] }],
+    };
+
+    const persisted = serializeTenantSettings(settings);
+
+    expect(persisted.schemaVersion).toBe(1);
+    expect(isCurrentPersistedTenantSettings(persisted)).toBe(true);
+    expect(resolvePersistedTenantSettings(persisted)).toEqual(settings);
+    expect(tenantSettingsPersistenceUpgrade(persisted)).toBeNull();
+  });
+
+  it('upgrades legacy design settings without changing their customized headers or footer', () => {
+    const customHeader = {
+      id: 'legacy-custom',
+      name: 'Legacy custom header',
+      imageUrl: 'https://cdn.example.com/legacy-header.jpg',
+      alt: 'Legacy header',
+    };
+    const customFooter = {
+      type: 'doc' as const,
+      content: [{ type: 'paragraph' as const, content: [{ type: 'text' as const, text: 'Eigener Footer' }] }],
+    };
+
+    const upgraded = tenantSettingsPersistenceUpgrade({
+      headerVariants: [customHeader],
+      footerRichText: customFooter,
+    });
+
+    expect(upgraded).not.toBeNull();
+    expect(upgraded?.headerVariants).toContainEqual(customHeader);
+    expect(upgraded?.footerRichText).toEqual(customFooter);
+    expect(upgraded?.colors).toEqual(newsletterThemePalettes);
+    expect(upgraded?.schemaVersion).toBe(1);
+  });
+
+  it('adds only the schema version to a complete unversioned custom design', () => {
+    const custom = createDefaultSettings();
+    custom.colors.light.background = '#102030';
+    custom.colors.light.brand = '#405060';
+    custom.colors.dark.background = '#010203';
+    custom.colors.dark.brand = '#a0b0c0';
+    custom.headerVariants[0] = {
+      ...custom.headerVariants[0],
+      name: 'Individueller Standard-Header',
+    };
+    custom.footerRichText = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Dauerhaft gespeicherter Footer' }] }],
+    };
+
+    const upgraded = tenantSettingsPersistenceUpgrade(custom);
+
+    expect(upgraded).toEqual({ schemaVersion: 1, ...custom });
   });
 
   it('accepts and reduces previously stored full color palettes', () => {

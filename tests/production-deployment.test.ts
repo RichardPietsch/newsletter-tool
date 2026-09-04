@@ -54,6 +54,8 @@ describe('production deployment safety contract', () => {
   it('requires a validated database and asset backup before deployment', () => {
     expect(backupScript).toContain('pg_dump --format=custom');
     expect(backupScript).toContain('pg_restore --list');
+    expect(backupScript).toContain('PostgreSQL archive is missing tenant design data.');
+    expect(backupScript).toContain('tenant_design_complete_rows=');
     expect(backupScript).toContain('mc mirror --overwrite');
     expect(backupScript).toContain('checksum_verify');
 
@@ -73,6 +75,11 @@ describe('production deployment safety contract', () => {
     expect(dockerfile).toContain('ARG APP_BUILD_SHA=unknown');
     expect(dockerfile).toContain('org.opencontainers.image.revision=$APP_BUILD_SHA');
     expect(deployScript).toContain('--build-arg "APP_BUILD_SHA=$git_revision"');
+  });
+
+  it('never runs the development seed during production deployment', () => {
+    expect(deployScript).not.toMatch(/db:seed|drizzle\/seed/);
+    expect(applicationCompose).not.toMatch(/db:seed|drizzle\/seed/);
   });
 
   it('stops services without deleting containers or volumes', () => {
