@@ -11,7 +11,7 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
       {item.image?.src && (
         <img
           src={item.image.src}
-          alt={item.image.decorative ? '' : item.image.alt || ''}
+          alt={item.image.alt || ''}
           style={{ height: styles.eventGrid.imageHeight }}
           className="w-full object-cover"
         />

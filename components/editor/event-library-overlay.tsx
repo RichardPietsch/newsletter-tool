@@ -147,7 +147,6 @@ export function EventLibraryOverlay({
         assetId: asset.id,
         src: asset.publicUrl,
         alt: current.image?.alt || asset.altText || asset.title || asset.originalFilename.replace(/\.[^.]+$/, ''),
-        decorative: false,
       },
     }));
   }
@@ -276,11 +275,19 @@ export function EventLibraryOverlay({
               ) : null}
             </div>
             {draft.image?.src ? (
-              <img
-                src={draft.image.src}
-                alt={draft.image.alt ?? ''}
-                className="mt-3 max-h-48 w-full rounded object-contain"
-              />
+              <div className="mt-3 space-y-3">
+                <img
+                  src={draft.image.src}
+                  alt={draft.image.alt ?? ''}
+                  className="max-h-48 w-full rounded object-contain"
+                />
+                <Input
+                  label={t('image.alt')}
+                  value={draft.image.alt}
+                  required
+                  onChange={(alt) => setDraft({ ...draft, image: { ...draft.image!, alt } })}
+                />
+              </div>
             ) : null}
           </div>
 
@@ -289,7 +296,9 @@ export function EventLibraryOverlay({
             <button
               type="button"
               className="rounded bg-blue-700 px-4 py-2 text-white disabled:opacity-50"
-              disabled={!draft.title.trim() || status === 'saving'}
+              disabled={
+                !draft.title.trim() || Boolean(draft.image?.src && !draft.image.alt?.trim()) || status === 'saving'
+              }
               onClick={() => void save()}
             >
               {status === 'saving' ? t('save.saving') : editingId ? t('misc.saveEvent') : t('misc.createEvent')}

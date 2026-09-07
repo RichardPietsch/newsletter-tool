@@ -1,5 +1,5 @@
 import { allowedTextColors, type TiptapMark, type TiptapNode } from './schema';
-import { newsletterModuleStyles as styles } from './module-styles';
+import { newsletterModuleStyles as styles, newsletterTextColorRole } from './module-styles';
 
 function escapeHtml(value: string) {
   return value.replace(
@@ -16,8 +16,8 @@ function renderMarks(text: string, marks: TiptapMark[] = []) {
     if (mark.type === 'textStyle') {
       const rawColor = mark.attrs?.color;
       if (rawColor && allowedTextColors.includes(rawColor)) {
-        const color =
-          rawColor === '#dc2626' ? styles.colors.accent : rawColor === '#111827' ? styles.colors.text : rawColor;
+        const role = newsletterTextColorRole(rawColor) ?? 'text';
+        const color = styles.colors[role];
         return `<span style="color:${color}">${current}</span>`;
       }
     }

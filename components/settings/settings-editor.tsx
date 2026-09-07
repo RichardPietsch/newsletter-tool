@@ -12,6 +12,7 @@ import { nanoid } from 'nanoid';
 import NextLink from 'next/link';
 import { useEffect, useState } from 'react';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
+import { createNewsletterPreviewCssVariables, deriveNewsletterColorPalette } from '@/lib/newsletter/module-styles';
 import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
 
 function FooterRichTextEditor({
@@ -139,7 +140,10 @@ export function SettingsEditor({
   }
 
   return (
-    <div className={embedded ? 'p-6' : 'mx-auto max-w-5xl p-8'}>
+    <div
+      className={embedded ? 'p-6' : 'mx-auto max-w-5xl p-8'}
+      style={createNewsletterPreviewCssVariables(deriveNewsletterColorPalette(settings.colors.light))}
+    >
       <div className="mb-8 flex items-center justify-between">
         <div>
           {!embedded ? (

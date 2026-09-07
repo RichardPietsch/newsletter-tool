@@ -53,7 +53,6 @@ function createE2eDocument(): NewsletterDocument {
     id: 'e2e-image-block',
     src: 'http://192.168.1.10/e2e-hero.jpg',
     alt: 'E2E Hero Bild',
-    decorative: false,
   });
   return document;
 }

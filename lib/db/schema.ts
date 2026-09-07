@@ -144,7 +144,6 @@ export const events = pgTable(
       assetId?: string;
       src?: string;
       alt?: string;
-      decorative?: boolean;
     }>(),
     externalSource: text('external_source'),
     externalId: text('external_id'),

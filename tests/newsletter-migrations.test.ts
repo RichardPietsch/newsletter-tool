@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { createDefaultDocument } from '@/lib/newsletter/defaults';
+import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
+import { insertBlock } from '@/lib/newsletter/operations';
+import { newsletterColorVariables } from '@/lib/newsletter/module-styles';
 import {
   CURRENT_NEWSLETTER_SCHEMA_VERSION,
   migrateNewsletterDocument,
@@ -29,6 +31,69 @@ describe('newsletter document migrations', () => {
     const legacy = { ...current, schemaVersion: 0 };
 
     expect(migrateNewsletterDocument(legacy)).toEqual(current);
+  });
+
+  it('upgrades legacy image options, alt text and fixed text colors', () => {
+    let current = createDefaultDocument('Alte Bilder');
+    current = insertBlock(current, 1, createBlock('backgroundSection'));
+    const legacy = {
+      ...current,
+      schemaVersion: 2,
+      blocks: current.blocks.map((block) =>
+        block.type === 'backgroundSection'
+          ? {
+              ...block,
+              blocks: [
+                {
+                  id: 'legacy-image',
+                  type: 'image',
+                  src: 'https://assets.example.com/sommer-fest.jpg',
+                  alt: '',
+                  decorative: true,
+                  href: 'https://example.com',
+                },
+                {
+                  id: 'legacy-text',
+                  type: 'text',
+                  background: 'white',
+                  content: {
+                    type: 'doc',
+                    content: [
+                      {
+                        type: 'paragraph',
+                        content: [
+                          {
+                            type: 'text',
+                            text: 'Akzent',
+                            marks: [{ type: 'textStyle', attrs: { color: '#a63a3a' } }],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                },
+              ],
+            }
+          : block,
+      ),
+    };
+
+    const migrated = migrateNewsletterDocument(legacy);
+    const section = migrated.blocks.find((block) => block.type === 'backgroundSection');
+    const image = section?.type === 'backgroundSection' ? section.blocks[0] : undefined;
+    const text = section?.type === 'backgroundSection' ? section.blocks[1] : undefined;
+
+    expect(migrated.schemaVersion).toBe(CURRENT_NEWSLETTER_SCHEMA_VERSION);
+    expect(image).toMatchObject({ type: 'image', alt: 'sommer fest' });
+    expect(image).not.toHaveProperty('decorative');
+    expect(image).not.toHaveProperty('href');
+    expect(text?.type === 'text' ? text.content.content?.[0] : undefined).toMatchObject({
+      content: [
+        {
+          marks: [{ attrs: { color: newsletterColorVariables.accent } }],
+        },
+      ],
+    });
   });
 
   it('returns a controlled error for an invalid document', () => {

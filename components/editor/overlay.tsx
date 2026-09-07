@@ -4,8 +4,19 @@ import { t } from '@/lib/i18n';
 
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
-export function Overlay({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Overlay({
+  title,
+  onClose,
+  children,
+  level = 'default',
+}: {
+  title: string;
+  onClose: () => void;
+  children: ReactNode;
+  level?: 'default' | 'nested';
+}) {
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -14,9 +25,11 @@ export function Overlay({ title, onClose, children }: { title: string; onClose: 
     };
   }, []);
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] bg-slate-950/40 p-6"
+      className={`fixed inset-0 bg-slate-950/40 p-6 ${level === 'nested' ? 'z-[300]' : 'z-[200]'}`}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -38,6 +51,7 @@ export function Overlay({ title, onClose, children }: { title: string; onClose: 
         </header>
         <div className="flex-1 overflow-auto">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
