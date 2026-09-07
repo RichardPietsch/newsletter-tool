@@ -1,11 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { t } from '@/lib/i18n';
 
-export default async function ConfirmMagicLinkPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
+export default async function ConfirmMagicLinkPage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const { token } = await searchParams;
   const validShape = typeof token === 'string' && token.length >= 32 && token.length <= 256;
   return (
@@ -21,9 +17,7 @@ export default async function ConfirmMagicLinkPage({
           </form>
         </>
       ) : (
-        <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-700">
-          {t('admin.invalidLoginLink')}
-        </p>
+        <p className="mt-4 rounded border border-red-200 bg-red-50 p-3 text-red-700">{t('admin.invalidLoginLink')}</p>
       )}
     </main>
   );

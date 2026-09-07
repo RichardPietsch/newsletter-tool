@@ -31,7 +31,7 @@ export function Overlay({ title, onClose, children }: { title: string; onClose: 
             type="button"
             onClick={onClose}
             className="rounded border px-3 py-1 text-sm hover:bg-slate-50"
-            aria-label={`${title} schließen`}
+            aria-label={t('misc.closeNamed').replace('{title}', title)}
           >
             {t('shared.close')}
           </button>

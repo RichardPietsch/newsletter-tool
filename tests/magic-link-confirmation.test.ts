@@ -28,9 +28,9 @@ describe('magic-link confirmation proof', () => {
   it('allows the proof fallback only for absent or opaque origins', () => {
     expect(mayUseMagicLinkConfirmationProof(verificationRequest({ origin: 'null' }))).toBe(true);
     expect(mayUseMagicLinkConfirmationProof(verificationRequest())).toBe(true);
-    expect(
-      mayUseMagicLinkConfirmationProof(verificationRequest({ origin: 'https://newsletter.example.com' })),
-    ).toBe(false);
+    expect(mayUseMagicLinkConfirmationProof(verificationRequest({ origin: 'https://newsletter.example.com' }))).toBe(
+      false,
+    );
     expect(mayUseMagicLinkConfirmationProof(verificationRequest({ origin: 'https://evil.example' }))).toBe(false);
   });
 });

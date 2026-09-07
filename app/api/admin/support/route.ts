@@ -8,6 +8,7 @@ import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { createAuditEventRecord } from '@/lib/db/audit-events';
 import { auditEvents, sessions, tenants } from '@/lib/db/schema';
+import { t } from '@/lib/i18n';
 import { requestIdFrom } from '@/lib/logging/logger';
 
 export async function POST(request: Request) {
@@ -17,14 +18,14 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const form = await request.formData();
   const tenantId = form.get('tenantId');
-  if (typeof tenantId !== 'string' || !tenantId) return badRequest('Mandant fehlt.');
+  if (typeof tenantId !== 'string' || !tenantId) return badRequest(t('api.missingTenant'));
   const [tenant] = await db.select().from(tenants).where(eq(tenants.id, tenantId));
   if (!tenant) return notFound();
   const event = createAuditEventRecord({
     eventType: 'support.started',
     tenantId,
     actorUserId: auth.context.user.id,
-    summary: 'Lesender Supportmodus gestartet.',
+    summary: t('audit.supportStarted'),
     correlationId: requestIdFrom(request),
     entityType: 'tenant',
     entityId: tenantId,

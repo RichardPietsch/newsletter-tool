@@ -17,12 +17,7 @@ export function clientIpFrom(request: Request) {
   return (closest || request.headers.get('x-real-ip') || 'unknown').slice(0, 64);
 }
 
-export async function takeRateLimit(
-  scope: RateLimitScope,
-  key: string,
-  maximum: number,
-  windowMs = 15 * 60 * 1000,
-) {
+export async function takeRateLimit(scope: RateLimitScope, key: string, maximum: number, windowMs = 15 * 60 * 1000) {
   const now = Date.now();
   const windowStartedAt = new Date(Math.floor(now / windowMs) * windowMs);
   const expiresAt = new Date(windowStartedAt.getTime() + windowMs * 2);

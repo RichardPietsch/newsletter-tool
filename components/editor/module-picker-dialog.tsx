@@ -29,13 +29,13 @@ export function ModulePickerDialog({
   }, [open]);
 
   const cards = [
-    ['text', 'Text', 'Rich-Text mit Überschriften und Listen'],
-    ['featuredEvent', 'Featured Event', 'Prominente Veranstaltung mit optionalem Bild und CTA'],
-    ['quote', 'Zitat', 'Editoriales Zitat mit roter Akzentlinie'],
-    ['sectionHeading', 'Abschnitt', 'Kleine rote Abschnittsüberschrift'],
-    ['eventGrid', 'Event-Raster', 'Mehrere Events im flexiblen Kartenraster'],
-    ['backgroundSection', 'Hintergrundbereich', 'Vollflächiger Hintergrund mit enthaltenen Modulen'],
-    ['image', 'Bild', 'Inhaltliches oder dekoratives Bild'],
+    ['text', t('modulePicker.textTitle'), t('modulePicker.textDescription')],
+    ['featuredEvent', t('modulePicker.featuredEventTitle'), t('modulePicker.featuredEventDescription')],
+    ['quote', t('modulePicker.quoteTitle'), t('modulePicker.quoteDescription')],
+    ['sectionHeading', t('modulePicker.sectionHeadingTitle'), t('modulePicker.sectionHeadingDescription')],
+    ['eventGrid', t('modulePicker.eventGridTitle'), t('modulePicker.eventGridDescription')],
+    ['backgroundSection', t('modulePicker.backgroundSectionTitle'), t('modulePicker.backgroundSectionDescription')],
+    ['image', t('modulePicker.imageTitle'), t('modulePicker.imageDescription')],
   ] as const;
 
   return (

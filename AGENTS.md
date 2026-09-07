@@ -11,6 +11,8 @@
 - TypeScript strikt halten; keine `try/catch` Blöcke um Imports.
 - Keine frei editierbaren Farben, CSS-Regeln oder HTML-Eingaben im Editor zulassen.
 - Header/Footer sind gesperrt und dürfen nicht gelöscht oder verschoben werden.
+- Sämtliche statische Interface-Texte, nutzerseitige Validierungs- und API-Fehler, E-Mail-Copy sowie Audit-Zusammenfassungen in `lib/i18n/locales/de.ts` und `lib/i18n/locales/en.ts` pflegen und per `t(...)` referenzieren.
+- `pnpm lint` enthält den AST-basierten Copy-Check; neue Ausnahmen nur für nachweislich technische Literale oder redaktionelle Newsletter-Inhalte ergänzen.
 
 ## Tests
 

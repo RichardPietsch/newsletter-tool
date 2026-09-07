@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { t } from '@/lib/i18n';
 
 const optionalUrl = z
   .string()
@@ -13,7 +14,7 @@ const optionalUrl = z
         return false;
       }
     },
-    { message: 'Nur http, https oder mailto erlaubt' },
+    { message: t('validation.invalidUrl') },
   )
   .optional()
   .or(z.literal(''));
@@ -42,10 +43,10 @@ export const eventInputSchema = z
   })
   .superRefine((value, context) => {
     if (value.buttonUrl && !value.buttonLabel) {
-      context.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+      context.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
     }
     if (value.image?.src && !value.image.decorative && !value.image.alt?.trim()) {
-      context.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+      context.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
     }
   });
 

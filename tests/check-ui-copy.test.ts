@@ -32,8 +32,8 @@ describe('UI copy checker', () => {
     const result = spawnSync(process.execPath, [checker, fixture], { encoding: 'utf8' });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain('first.tsx: Editor wird geladen …');
-    expect(result.stderr).toContain('second.tsx: Zweiter Fehler');
+    expect(result.stderr).toMatch(/first\.tsx:\d+:\d+: Editor wird geladen …/);
+    expect(result.stderr).toMatch(/second\.tsx:\d+:\d+: Zweiter Fehler/);
   });
 
   it('accepts UI copy referenced through the dictionary', () => {
@@ -53,7 +53,54 @@ describe('UI copy checker', () => {
     const result = spawnSync(process.execPath, [checker, fixture], { encoding: 'utf8' });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain('Uncodierte API-Texte gefunden');
-    expect(result.stderr).toContain('route.ts: Newsletter nicht gefunden');
+    expect(result.stderr).toContain('Dezentral gepflegte Interface-Texte gefunden');
+    expect(result.stderr).toMatch(/route\.ts:\d+:\d+: Newsletter nicht gefunden/);
+  });
+
+  it('catches single-word JSX labels and copy in conditional expressions', () => {
+    const fixture = createFixture({
+      'filters.tsx':
+        "export const Filters = ({ loading }: { loading: boolean }) => <><button>{loading ? 'Laden' : 'Filtern'}</button><option>info</option><p>Event-Register wird geladen</p></>;",
+    });
+
+    const result = spawnSync(process.execPath, [checker, fixture], { encoding: 'utf8' });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('Laden');
+    expect(result.stderr).toContain('Filtern');
+    expect(result.stderr).toContain('info');
+    expect(result.stderr).toContain('Event-Register wird geladen');
+  });
+
+  it('catches copy stored indirectly in arrays', () => {
+    const fixture = createFixture({
+      'module-picker.tsx':
+        "const cards = [['image', 'Bild', 'Inhaltliches Bild']]; export const Picker = () => cards.map(String);",
+    });
+
+    const result = spawnSync(process.execPath, [checker, fixture], { encoding: 'utf8' });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('Bild');
+    expect(result.stderr).toContain('Inhaltliches Bild');
+  });
+
+  it('allows technical identifiers, routes, styles and keyboard values', () => {
+    const fixture = createFixture({
+      'technical.tsx': `
+        const route = '/api/newsletters';
+        const storageKey = \`newsletter:onboarding:completed:\${route}\`;
+        function fieldStateClass(invalid: boolean) {
+          return invalid ? 'border-red-500 outline outline-2 outline-red-500' : '';
+        }
+        export const Button = () => (
+          <button className="rounded-md px-2" data-testid="save" onKeyDown={(event) => event.key === 'Escape'}>
+            {t('admin.save')}
+          </button>
+        );
+      `,
+    });
+
+    expect(() => execFileSync(process.execPath, [checker, fixture])).not.toThrow();
   });
 });

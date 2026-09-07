@@ -15,7 +15,7 @@ type Asset = {
 };
 
 const emptyEvent: EventInput = {
-  category: 'Veranstaltung',
+  category: t('misc.defaultEventCategory'),
   title: '',
   speakerName: '',
   speakerRole: '',

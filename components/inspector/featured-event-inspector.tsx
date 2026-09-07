@@ -111,7 +111,7 @@ export function FeaturedEventInspector({
         }
       />
       <label className="block text-sm font-medium">
-        Hintergrund
+        {t('misc.background')}
         <select
           className="mt-1 w-full rounded border p-2"
           value={block.background ?? 'blue'}
@@ -142,7 +142,8 @@ export function FeaturedEventInspector({
           <p className="rounded border border-dashed p-4 text-sm text-slate-600">{t('image.none')}</p>
         )}
         <label className="block text-sm font-medium">
-          Alternativtext{block.image?.decorative ? '' : ' *'}
+          {t('image.alt')}
+          {block.image?.decorative ? '' : ' *'}
           <input
             className={`mt-1 w-full rounded border p-2 ${hasIssue('image.alt') ? 'border-red-500 outline outline-2 outline-red-500' : ''}`}
             value={block.image?.alt || ''}
@@ -179,7 +180,7 @@ export function FeaturedEventInspector({
           />
         </details>
       </div>
-      <Field label="Overline" value={block.overline} onChange={(overline) => onChange({ overline })} />
+      <Field label={t('misc.overline')} value={block.overline} onChange={(overline) => onChange({ overline })} />
       <Field
         label={t('misc.talkTitle')}
         value={block.title}
@@ -197,17 +198,21 @@ export function FeaturedEventInspector({
         value={block.speakerRole}
         onChange={(speakerRole) => onChange({ speakerRole })}
       />
-      <Field label="Datum / Uhrzeit" value={block.date} onChange={(date) => onChange({ date })} />
+      <Field label={t('misc.dateTime')} value={block.date} onChange={(date) => onChange({ date })} />
       <Field label={t('misc.place')} value={block.location} onChange={(location) => onChange({ location })} />
-      <Area label="Beschreibung" value={block.description} onChange={(description) => onChange({ description })} />
+      <Area
+        label={t('misc.description')}
+        value={block.description}
+        onChange={(description) => onChange({ description })}
+      />
       <Field
-        label="Button-Label"
+        label={t('misc.buttonLabel')}
         value={block.buttonLabel}
         required={Boolean(block.buttonUrl)}
         invalid={hasIssue('buttonLabel')}
         onChange={(buttonLabel) => onChange({ buttonLabel })}
       />
-      <Field label="Button-URL" value={block.buttonUrl} onChange={(buttonUrl) => onChange({ buttonUrl })} />
+      <Field label={t('misc.buttonUrl')} value={block.buttonUrl} onChange={(buttonUrl) => onChange({ buttonUrl })} />
       <AssetPickerDialog open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={selectAsset} />
     </div>
   );

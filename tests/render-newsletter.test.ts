@@ -4,6 +4,7 @@ import { renderEvent } from '@/email/modules/event';
 import { renderEventGrid } from '@/email/modules/event-grid';
 import { renderFeaturedEvent } from '@/email/modules/featured-event';
 import { renderHeader } from '@/email/modules/header';
+import { renderImage } from '@/email/modules/image';
 import { renderText } from '@/email/modules/text';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { validateNewsletterForExport } from '@/lib/newsletter/export-validation';
@@ -20,6 +21,7 @@ import type {
 import {
   newsletterColorPalettes,
   newsletterEmailClasses,
+  newsletterModuleStyles,
   newsletterPreviewCssVariables,
 } from '@/lib/newsletter/module-styles';
 
@@ -225,6 +227,27 @@ describe('MJML newsletter rendering', () => {
 
     expect(html).toContain('src="https://assets.example.com/newsletter/hero.jpg"');
     expect(html).toContain('alt="Clubabend im Ballsaal"');
+  });
+
+  it('renders image modules full-width without a surface card and with rounded corners', () => {
+    const html = renderNewsletter(documentWithBlocks([{ ...imageBlock(), href: 'https://example.com/gallery' }]));
+    const mjml = renderImage(imageBlock());
+
+    expect(mjml).toContain(`css-class="${newsletterEmailClasses.background}"`);
+    expect(mjml).not.toContain(`css-class="${newsletterEmailClasses.surface}"`);
+    expect(mjml).toContain('padding="0" border-radius="4px"');
+    expect(html).toContain('width="600"');
+    expect(html).toContain('border-radius:4px;');
+    expect(html).toContain('href="https://example.com/gallery"');
+  });
+
+  it('keeps the configured gap between two exported event-grid cards', () => {
+    const block = createBlock('eventGrid') as EventGridBlock;
+    const mjml = renderEventGrid(block);
+
+    expect(mjml).toContain(
+      `<mj-column width="${newsletterModuleStyles.eventGrid.gap}px"><mj-spacer height="${newsletterModuleStyles.eventGrid.gap}px" padding="0" /></mj-column>`,
+    );
   });
 
   it('blocks invalid, private and non-HTTPS images before export', () => {

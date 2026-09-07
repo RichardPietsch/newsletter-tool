@@ -16,7 +16,7 @@ export function useEventRegister() {
       setLoadFailed(false);
       try {
         const response = await fetch('/api/events', { signal: controller.signal });
-        if (!response.ok) throw new Error('Event register could not be loaded');
+        if (!response.ok) throw new Error('EVENT_REGISTER_LOAD_FAILED');
         setEvents((await response.json()) as EventRecord[]);
       } catch (error) {
         if (!(error instanceof DOMException && error.name === 'AbortError')) setLoadFailed(true);

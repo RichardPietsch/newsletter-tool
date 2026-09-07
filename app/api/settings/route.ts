@@ -6,6 +6,7 @@ import { requireTenantApiContext } from '@/lib/auth/current-user';
 import { getTenantSettings, saveTenantSettings } from '@/lib/settings/store';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 import { recordAuditEvent } from '@/lib/db/audit-events';
+import { t } from '@/lib/i18n';
 
 export async function GET() {
   const auth = await requireTenantApiContext();
@@ -25,7 +26,7 @@ export async function PUT(request: Request) {
     actorUserId: auth.context.user.id,
     tenantId: auth.context.tenant.id,
     eventType: 'settings.updated',
-    summary: 'Mandanteneinstellungen aktualisiert.',
+    summary: t('audit.tenantSettingsUpdated'),
   });
   return NextResponse.json(settings);
 }

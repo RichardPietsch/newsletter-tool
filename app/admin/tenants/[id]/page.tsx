@@ -44,11 +44,11 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       </div>
 
       <section className="rounded-xl bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-semibold">Stammdaten</h2>
+        <h2 className="text-xl font-semibold">{t('admin.masterData')}</h2>
         <form action={`/api/admin/tenants/${id}`} method="post" className="mt-4 space-y-3">
           <input type="hidden" name="operation" value="update" />
           <label className="block text-sm font-medium">
-            Name
+            {t('misc.name')}
             <input
               className="mt-1 w-full rounded border p-2"
               name="name"
@@ -66,7 +66,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
               maxLength={2000}
             />
           </label>
-          <button className="rounded bg-blue-700 px-4 py-2 text-white">Speichern</button>
+          <button className="rounded bg-blue-700 px-4 py-2 text-white">{t('admin.save')}</button>
         </form>
         <div className="mt-5 flex flex-wrap gap-3 border-t pt-5">
           <form action={`/api/admin/tenants/${id}`} method="post">
@@ -74,9 +74,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
             <input type="hidden" name="confirmation" value={id} />
             <ConfirmSubmitButton
               message={
-                tenant.status === 'active'
-                  ? 'Mandant und alle Accounts wirklich deaktivieren?'
-                  : 'Mandant wirklich reaktivieren?'
+                tenant.status === 'active' ? t('admin.confirmDeactivateTenant') : t('admin.confirmReactivateTenant')
               }
               className={
                 tenant.status === 'active'
@@ -84,7 +82,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                   : 'rounded bg-green-700 px-4 py-2 text-white'
               }
             >
-              {tenant.status === 'active' ? 'Mandant deaktivieren' : 'Mandant reaktivieren'}
+              {tenant.status === 'active' ? t('admin.deactivateTenant') : t('admin.reactivateTenant')}
             </ConfirmSubmitButton>
           </form>
           <form action="/api/admin/support" method="post">
@@ -103,19 +101,19 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
       />
 
       <section className="rounded-xl bg-white p-5 shadow-sm">
-        <h2 className="text-xl font-semibold">Mitarbeiter-Accounts</h2>
+        <h2 className="text-xl font-semibold">{t('admin.accountsTitle')}</h2>
         <form
           action={`/api/admin/tenants/${id}/accounts`}
           method="post"
           className="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]"
         >
-          <input name="name" required maxLength={160} placeholder="Name" className="rounded border p-2" />
+          <input name="name" required maxLength={160} placeholder={t('misc.name')} className="rounded border p-2" />
           <input
             name="email"
             type="email"
             required
             maxLength={320}
-            placeholder="E-Mail"
+            placeholder={t('account.email')}
             className="rounded border p-2"
           />
           <button className="rounded bg-blue-700 px-4 py-2 text-white">{t('admin.createAccount')}</button>
@@ -124,10 +122,12 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
           {accounts.map((account) => (
             <article key={account.id} className="flex flex-wrap items-center gap-3 py-3">
               <div className="min-w-64 flex-1">
-                <p className="font-medium">{account.name || 'Ohne Namen'}</p>
+                <p className="font-medium">{account.name || t('admin.unnamedAccount')}</p>
                 <p className="text-sm text-slate-600">{account.email}</p>
               </div>
-              <p className="text-sm">Letzter Login: {account.lastLoginAt?.toLocaleString('de-DE') ?? '—'}</p>
+              <p className="text-sm">
+                {t('admin.lastLoginPrefix')} {account.lastLoginAt?.toLocaleString('de-DE') ?? '—'}
+              </p>
               <span className="rounded bg-slate-100 px-2 py-1 text-sm">{account.status}</span>
               <form action={`/api/admin/tenants/${id}/accounts/${account.id}`} method="post">
                 <input
@@ -138,11 +138,13 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
                 <input type="hidden" name="confirmation" value={account.id} />
                 <ConfirmSubmitButton
                   message={
-                    account.status === 'active' ? 'Account wirklich deaktivieren?' : 'Account wirklich reaktivieren?'
+                    account.status === 'active'
+                      ? t('admin.confirmDeactivateAccount')
+                      : t('admin.confirmReactivateAccount')
                   }
                   className="rounded border px-3 py-2 text-sm"
                 >
-                  {account.status === 'active' ? 'Deaktivieren' : 'Reaktivieren'}
+                  {account.status === 'active' ? t('admin.deactivate') : t('admin.reactivate')}
                 </ConfirmSubmitButton>
               </form>
             </article>

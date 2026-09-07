@@ -28,14 +28,14 @@ type UploadedAsset = {
 };
 
 const colorLabels: Record<NewsletterThemeColorToken, string> = {
-  background: 'Seitenhintergrund',
-  surface: 'Modulfläche',
-  teaser: 'Teaserfläche',
-  text: 'Text',
-  muted: 'Sekundärtext',
-  accent: 'Akzent',
-  brand: 'Markenfarbe',
-  featureBackground: 'Hervorgehobener Hintergrund',
+  background: t('admin.colorBackground'),
+  surface: t('admin.colorSurface'),
+  teaser: t('admin.colorTeaser'),
+  text: t('admin.colorText'),
+  muted: t('admin.colorMuted'),
+  accent: t('admin.colorAccent'),
+  brand: t('admin.colorBrand'),
+  featureBackground: t('admin.colorFeatureBackground'),
 };
 
 const validHexColor = (color: string) => /^#[0-9a-fA-F]{6}$/.test(color);
@@ -239,7 +239,7 @@ export function TenantDesignEditor({
   async function importTheme(file: File) {
     setImportStatus('idle');
     try {
-      if (file.size > THEME_YAML_MAX_BYTES) throw new Error('Theme-Datei ist zu groß.');
+      if (file.size > THEME_YAML_MAX_BYTES) throw new Error('THEME_FILE_TOO_LARGE');
       const colors = parseThemeYaml(await file.text());
       setSettings((current) => ({ ...current, colors }));
       setStatus('idle');
@@ -282,9 +282,9 @@ export function TenantDesignEditor({
         ...current.headerVariants,
         {
           id: nanoid(),
-          name: asset.originalFilename.replace(/\.[^.]+$/, '') || 'Header',
+          name: asset.originalFilename.replace(/\.[^.]+$/, '') || t('admin.defaultHeaderName'),
           imageUrl: asset.publicUrl,
-          alt: 'Newsletter Header',
+          alt: t('admin.defaultHeaderAlt'),
           roundedCorners: false,
         },
       ],

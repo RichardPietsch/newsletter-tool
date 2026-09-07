@@ -27,7 +27,7 @@ export function HeaderInspector({
         <p className="text-sm text-slate-600">{t('misc.headerInspectorIntro')}</p>
       </div>
       <label className="block text-sm font-medium">
-        Header-Variante
+        {t('misc.headerVariant')}
         <select
           className="mt-2 w-full rounded border p-2"
           value={selectedVariantId}

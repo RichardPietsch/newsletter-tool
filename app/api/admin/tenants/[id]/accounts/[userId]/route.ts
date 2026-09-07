@@ -6,6 +6,7 @@ import { validateMutationOrigin } from '@/lib/api/origin';
 import { setAccountStatus } from '@/lib/admin/operations';
 import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 
 type Context = { params: Promise<{ id: string; userId: string }> };
 
@@ -17,8 +18,8 @@ export async function POST(request: Request, { params }: Context) {
   const { id, userId } = await params;
   const form = await request.formData();
   const operation = form.get('operation');
-  if (operation !== 'deactivate' && operation !== 'reactivate') return badRequest('Unbekannte Accountoperation.');
-  if (form.get('confirmation') !== userId) return badRequest('Bestätigung für Statuswechsel fehlt.');
+  if (operation !== 'deactivate' && operation !== 'reactivate') return badRequest(t('api.unknownAccountOperation'));
+  if (form.get('confirmation') !== userId) return badRequest(t('api.missingStatusConfirmation'));
   const user = await setAccountStatus(
     id,
     userId,

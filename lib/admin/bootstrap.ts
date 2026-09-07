@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { db } from '@/lib/db';
 import { createAuditEventRecord } from '@/lib/db/audit-events';
 import { auditEvents, installationState, sessions, users, type BootstrapSource } from '@/lib/db/schema';
+import { t } from '@/lib/i18n';
 
 const INSTALLATION_STATE_ID = 'primary';
 const BOOTSTRAP_LOCK_KEY = 'newsletter-tool:initial-admin';
@@ -97,10 +98,7 @@ export async function bootstrapInitialAdmin(input: { email: string; name: string
       createAuditEventRecord({
         eventType: 'system.bootstrap_admin_initialized',
         actorUserId: adminId,
-        summary:
-          decision.kind === 'create'
-            ? 'Initialer Plattform-Admin angelegt.'
-            : 'Bestehender Plattform-Admin als Installationseigentümer registriert.',
+        summary: decision.kind === 'create' ? t('audit.adminInitialized') : t('audit.adminRegistered'),
         entityType: 'user',
         entityId: adminId,
         metadata: { source: input.source, existingAccount: decision.kind === 'register' },
@@ -154,7 +152,7 @@ export async function recoverPlatformAdmin(input: { currentEmail: string; email:
         eventType: 'system.admin_recovered',
         actorUserId: admin.id,
         severity: 'warning',
-        summary: 'Plattform-Admin über lokalen Operatorzugriff wiederhergestellt.',
+        summary: t('audit.adminRecovered'),
         entityType: 'user',
         entityId: admin.id,
         metadata: { source: 'cli', identityChanged, sessionsRevoked: true },

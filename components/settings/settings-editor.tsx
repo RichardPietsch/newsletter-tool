@@ -40,7 +40,7 @@ function FooterRichTextEditor({
       attributes: {
         class:
           'min-h-48 rounded border bg-white p-3 text-slate-800 focus:outline-none [&_a]:text-blue-700 [&_a]:underline [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_blockquote]:my-4 [&_blockquote]:border-l-4 [&_blockquote]:pl-5 [&_blockquote]:italic [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
-        'aria-label': 'Globalen Footer als RichText bearbeiten',
+        'aria-label': t('misc.footerEditorAria'),
       },
     },
     onUpdate: ({ editor }) => onChange(editor.getJSON() as GlobalSettings['footerRichText']),
@@ -115,9 +115,9 @@ export function SettingsEditor({
     const asset = await response.json();
     const variant = {
       id: nanoid(),
-      name: asset.originalFilename.replace(/\.[^.]+$/, '') || 'Header-Variante',
+      name: asset.originalFilename.replace(/\.[^.]+$/, '') || t('misc.headerVariant'),
       imageUrl: asset.publicUrl,
-      alt: 'Newsletter Header',
+      alt: t('admin.defaultHeaderAlt'),
       roundedCorners: false,
     };
     const next = {
@@ -165,7 +165,7 @@ export function SettingsEditor({
           <h2 className="text-xl font-semibold">{t('misc.headerVariants')}</h2>
           <p className="mt-1 text-sm text-slate-600">{t('misc.headerVariantsDescription')}</p>
           <label className="mt-4 inline-flex cursor-pointer rounded bg-blue-700 px-4 py-2 text-white">
-            {uploading ? 'Upload läuft …' : 'Header-Bild hochladen'}
+            {uploading ? t('misc.uploadInProgress') : t('admin.uploadHeader')}
             <input
               className="sr-only"
               type="file"
@@ -187,7 +187,7 @@ export function SettingsEditor({
                   style={{ borderRadius: variant.roundedCorners ? ROUNDED_HEADER_IMAGE_RADIUS_PX : 0 }}
                 />
                 <label className="mt-3 block text-sm font-medium">
-                  Name
+                  {t('misc.name')}
                   <input
                     className="mt-1 w-full rounded border p-2"
                     value={variant.name}
@@ -244,8 +244,8 @@ export function SettingsEditor({
                   disabled={usedHeaderVariantIds.includes(variant.id)}
                   title={
                     usedHeaderVariantIds.includes(variant.id)
-                      ? 'Diese Variante wird in mindestens einem Newsletter verwendet.'
-                      : 'Header-Variante löschen'
+                      ? t('misc.headerVariantInUse')
+                      : t('misc.deleteHeaderVariant')
                   }
                   onClick={() => {
                     const next = {
@@ -256,7 +256,7 @@ export function SettingsEditor({
                     void save(next);
                   }}
                 >
-                  {usedHeaderVariantIds.includes(variant.id) ? 'Wird verwendet' : 'Variante löschen'}
+                  {usedHeaderVariantIds.includes(variant.id) ? t('misc.inUse') : t('misc.deleteVariant')}
                 </button>
               </article>
             ))}

@@ -11,6 +11,7 @@ import { db } from '@/lib/db';
 import { tenants } from '@/lib/db/schema';
 import { globalSettingsSchema } from '@/lib/settings/schema';
 import { saveTenantSettings } from '@/lib/settings/store';
+import { t } from '@/lib/i18n';
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -30,7 +31,7 @@ export async function PUT(request: Request, { params }: Context) {
     actorUserId: auth.context.user.id,
     tenantId: id,
     eventType: 'settings.updated',
-    summary: 'Mandanten-Design durch Plattform-Administration aktualisiert.',
+    summary: t('audit.tenantDesignUpdated'),
     entityType: 'tenant',
     entityId: id,
   });

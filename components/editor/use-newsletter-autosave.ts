@@ -14,7 +14,7 @@ function serverIssue(kind: AutosaveFailureKind): NewsletterSaveIssue {
       : kind === 'server'
         ? t('misc.serverSaveFailed')
         : t('misc.serverSaveRejected');
-  return { path: `server.${kind}`, message, blockLabel: 'Newsletter' };
+  return { path: `server.${kind}`, message, blockLabel: t('validation.newsletter') };
 }
 
 export function useNewsletterAutosave({

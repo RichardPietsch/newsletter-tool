@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { ZodIssue } from 'zod';
+import { t } from '@/lib/i18n';
 
 export type ApiErrorCode =
-  | 'BAD_REQUEST'
-  | 'CONFLICT'
-  | 'FORBIDDEN'
-  | 'NOT_FOUND'
-  | 'UNAUTHENTICATED'
-  | 'VALIDATION_ERROR';
+  'BAD_REQUEST' | 'CONFLICT' | 'FORBIDDEN' | 'NOT_FOUND' | 'UNAUTHENTICATED' | 'VALIDATION_ERROR';
 
 export type ApiErrorIssue = {
   code?: string;
@@ -37,26 +33,26 @@ export function apiError(status: number, code: ApiErrorCode, message: string, is
   return NextResponse.json(body, { status });
 }
 
-export function badRequest(message = 'Ungültige Anfrage.') {
+export function badRequest(message = t('api.badRequest')) {
   return apiError(400, 'BAD_REQUEST', message);
 }
 
-export function conflict(message: string) {
+export function conflict(message = t('api.conflict')) {
   return apiError(409, 'CONFLICT', message);
 }
 
-export function forbidden(message = 'Nicht erlaubt') {
+export function forbidden(message = t('api.forbidden')) {
   return apiError(403, 'FORBIDDEN', message);
 }
 
-export function notFound(message = 'Nicht gefunden') {
+export function notFound(message = t('api.notFound')) {
   return apiError(404, 'NOT_FOUND', message);
 }
 
-export function unauthenticated(message = 'Nicht authentifiziert') {
+export function unauthenticated(message = t('api.unauthenticated')) {
   return apiError(401, 'UNAUTHENTICATED', message);
 }
 
-export function validationError(message = 'Ungültige Eingaben.', issues: ApiErrorIssue[] = []) {
+export function validationError(message = t('api.invalidInput'), issues: ApiErrorIssue[] = []) {
   return apiError(400, 'VALIDATION_ERROR', message, issues);
 }

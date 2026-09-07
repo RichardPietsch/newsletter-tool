@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { t } from '@/lib/i18n';
 import { tiptapDocSchema } from '@/lib/newsletter/schema';
 import { newsletterThemePalettes } from '@/lib/newsletter/module-styles';
 
-const colorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Farbe muss als sechsstelliger Hex-Wert angegeben werden.');
+const colorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, t('validation.invalidHexColor'));
 
 const newsletterThemePaletteShape = {
   background: colorSchema,

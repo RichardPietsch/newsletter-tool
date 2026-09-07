@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { t } from '@/lib/i18n';
 import { newsletterEditableTextColors, newsletterLegacyTextColors } from './module-styles';
 import { CURRENT_NEWSLETTER_SCHEMA_VERSION } from './migrations/version';
 export const allowedUrl = (v: string) => {
@@ -9,7 +10,7 @@ export const allowedUrl = (v: string) => {
     return false;
   }
 };
-const url = z.string().trim().refine(allowedUrl, 'Nur http, https oder mailto erlaubt');
+const url = z.string().trim().refine(allowedUrl, t('validation.invalidUrl'));
 const base = z.object({ id: z.string().min(1), locked: z.boolean().optional() });
 
 export const allowedTextColors = [...newsletterEditableTextColors, '#17303d', ...newsletterLegacyTextColors] as const;
@@ -94,7 +95,7 @@ const imageFields = {
 };
 export const imageBlockSchema = base.extend({ type: z.literal('image'), ...imageFields }).superRefine((v, c) => {
   if ((v.src || v.assetId) && !v.decorative && !v.alt?.trim())
-    c.addIssue({ code: 'custom', path: ['alt'], message: 'Alternativtext ist erforderlich.' });
+    c.addIssue({ code: 'custom', path: ['alt'], message: t('validation.altRequired') });
 });
 export const eventItemSchema = z
   .object({
@@ -102,7 +103,7 @@ export const eventItemSchema = z
     sourceEventId: z.string().optional(),
     image: z.object(imageFields).optional(),
     category: z.string().optional(),
-    title: z.string().min(1, 'Titel ist erforderlich'),
+    title: z.string().min(1, t('validation.titleRequired')),
     speakerName: z.string().optional(),
     speakerRole: z.string().optional(),
     date: z.string().optional(),
@@ -113,9 +114,9 @@ export const eventItemSchema = z
   })
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
-      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
     if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
-      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const eventBlockSchema = base
   .extend({
@@ -123,7 +124,7 @@ export const eventBlockSchema = base
     sourceEventId: z.string().optional(),
     image: z.object(imageFields).optional(),
     category: z.string().optional(),
-    title: z.string().min(1, 'Titel ist erforderlich'),
+    title: z.string().min(1, t('validation.titleRequired')),
     speakerName: z.string().optional(),
     speakerRole: z.string().optional(),
     date: z.string().optional(),
@@ -134,9 +135,9 @@ export const eventBlockSchema = base
   })
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
-      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
     if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
-      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const featuredEventBlockSchema = base
   .extend({
@@ -145,7 +146,7 @@ export const featuredEventBlockSchema = base
     overline: z.string().default('Featured Event'),
     background: z.enum(['blue', 'white']).default('blue'),
     image: z.object(imageFields).optional(),
-    title: z.string().min(1, 'Titel ist erforderlich'),
+    title: z.string().min(1, t('validation.titleRequired')),
     speakerName: z.string().optional(),
     speakerRole: z.string().optional(),
     date: z.string().optional(),
@@ -156,25 +157,25 @@ export const featuredEventBlockSchema = base
   })
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
-      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: 'Button-Label ist bei URL erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
     if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
-      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: 'Alternativtext ist erforderlich.' });
+      c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const quoteBlockSchema = base.extend({
   type: z.literal('quote'),
-  quote: z.string().min(1, 'Zitat ist erforderlich'),
+  quote: z.string().min(1, t('validation.quoteRequired')),
   author: z.string().optional(),
   role: z.string().optional(),
 });
 export const sectionHeadingBlockSchema = base.extend({
   type: z.literal('sectionHeading'),
-  label: z.string().min(1, 'Abschnittsüberschrift ist erforderlich'),
+  label: z.string().min(1, t('validation.sectionHeadingRequired')),
 });
 export const eventGridBlockSchema = base.extend({
   type: z.literal('eventGrid'),
   heading: z.string().optional(),
   layout: z.enum(['grid', 'list']).default('grid'),
-  items: z.array(eventItemSchema).min(1, 'Mindestens ein Event ist erforderlich'),
+  items: z.array(eventItemSchema).min(1, t('validation.eventRequired')),
 });
 export const newsletterContentBlockSchema = z.union([
   textBlockSchema,
@@ -188,7 +189,7 @@ export const newsletterContentBlockSchema = z.union([
 export const backgroundSectionBlockSchema = base.extend({
   type: z.literal('backgroundSection'),
   background: z.enum(['neutral', 'blue']).default('neutral'),
-  blocks: z.array(newsletterContentBlockSchema).min(1, 'Mindestens ein Modul ist erforderlich'),
+  blocks: z.array(newsletterContentBlockSchema).min(1, t('validation.moduleRequired')),
 });
 export const newsletterBlockSchema = z.union([
   headerBlockSchema,
@@ -205,9 +206,9 @@ export const newsletterDocumentSchema = z
   .strict()
   .superRefine((d, c) => {
     if (d.blocks[0]?.type !== 'header')
-      c.addIssue({ code: 'custom', path: ['blocks', 0], message: 'Dokument muss mit Header beginnen' });
+      c.addIssue({ code: 'custom', path: ['blocks', 0], message: t('validation.documentStartsWithHeader') });
     if (d.blocks.at(-1)?.type !== 'footer')
-      c.addIssue({ code: 'custom', path: ['blocks'], message: 'Dokument muss mit Footer enden' });
+      c.addIssue({ code: 'custom', path: ['blocks'], message: t('validation.documentEndsWithFooter') });
   });
 export type NewsletterDocument = z.infer<typeof newsletterDocumentSchema>;
 export type NewsletterBlock = z.infer<typeof newsletterBlockSchema>;

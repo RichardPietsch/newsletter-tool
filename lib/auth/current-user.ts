@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { forbidden, notFound, unauthenticated } from '@/lib/api/api-error';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 import { AUTH_COOKIE_NAME } from './cookies';
 import { type AuthContext, type AuthUser, validateSession } from './session';
 
@@ -27,7 +28,9 @@ export async function requirePageUser(): Promise<AuthUser> {
   return (await requirePageContext()).user;
 }
 
-export async function requireTenantPageContext(): Promise<AuthContext & { tenant: NonNullable<AuthContext['tenant']> }> {
+export async function requireTenantPageContext(): Promise<
+  AuthContext & { tenant: NonNullable<AuthContext['tenant']> }
+> {
   const context = await requirePageContext();
   if (context.mode === 'admin' || !context.tenant) redirect('/admin');
   return { ...context, tenant: context.tenant };
@@ -56,11 +59,11 @@ async function supportWriteBlocked(request: Request, context: AuthContext, recor
     actorUserId: context.user.id,
     severity: 'warning',
     outcome: 'blocked',
-    summary: 'Schreibversuch im Supportmodus blockiert.',
+    summary: t('audit.supportWriteBlocked'),
     correlationId: requestIdFrom(request),
     metadata: { method: request.method, path: new URL(request.url).pathname },
   });
-  return forbidden('Der Supportmodus erlaubt ausschließlich Lesezugriffe.');
+  return forbidden(t('api.supportReadOnly'));
 }
 
 export async function enforceTenantApiContext(
@@ -84,7 +87,10 @@ export async function blockSupportMutationIfActive(request: Request) {
   return context?.mode === 'support' ? supportWriteBlocked(request, context) : null;
 }
 
-export async function requireTenantApiContext(request?: Request, write = false): Promise<
+export async function requireTenantApiContext(
+  request?: Request,
+  write = false,
+): Promise<
   | { context: AuthContext & { tenant: NonNullable<AuthContext['tenant']> }; response: null }
   | { context: null; response: NextResponse }
 > {
@@ -93,9 +99,11 @@ export async function requireTenantApiContext(request?: Request, write = false):
   return enforceTenantApiContext(auth.context, request, write);
 }
 
-export async function requireAdminApiContext(request?: Request, write = false, allowSupportExit = false): Promise<
-  { context: AuthContext; response: null } | { context: null; response: NextResponse }
-> {
+export async function requireAdminApiContext(
+  request?: Request,
+  write = false,
+  allowSupportExit = false,
+): Promise<{ context: AuthContext; response: null } | { context: null; response: NextResponse }> {
   const auth = await requireApiContext();
   if (auth.response) return auth;
   return enforceAdminApiContext(auth.context, request, write, allowSupportExit);

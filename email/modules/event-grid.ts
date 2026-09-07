@@ -1,4 +1,5 @@
 import type { EventGridBlock, EventItem } from '@/lib/newsletter/schema';
+import { emailTheme } from '@/email/theme';
 import {
   newsletterEmailClasses as classes,
   newsletterModuleStyles as styles,
@@ -6,6 +7,7 @@ import {
 } from '@/lib/newsletter/module-styles';
 
 const px = (value: number) => `${value}px`;
+const gridCardWidth = (emailTheme.container - styles.eventGrid.outerPaddingX * 2 - styles.eventGrid.gap) / 2;
 
 function card(item: EventItem, colors: NewsletterColorPalette) {
   const hasButton = Boolean(item.buttonUrl);
@@ -27,7 +29,7 @@ export function renderEventGrid(block: EventGridBlock, colors: NewsletterColorPa
     if (remaining === 1) {
       out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column></mj-section>`;
     } else {
-      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column><mj-column css-class="${classes.teaser} ${classes.rounded}" width="50%" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i + 1], colors)}</mj-column></mj-section>`;
+      out += `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="12px ${px(styles.eventGrid.outerPaddingX)}"><mj-column css-class="${classes.teaser} ${classes.rounded}" width="${px(gridCardWidth)}" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i], colors)}</mj-column><mj-column width="${px(styles.eventGrid.gap)}"><mj-spacer height="${px(styles.eventGrid.gap)}" padding="0" /></mj-column><mj-column css-class="${classes.teaser} ${classes.rounded}" width="${px(gridCardWidth)}" background-color="${colors.teaser}" border-radius="4px">${card(block.items[i + 1], colors)}</mj-column></mj-section>`;
     }
   }
   return out;

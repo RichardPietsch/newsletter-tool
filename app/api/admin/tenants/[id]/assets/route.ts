@@ -11,6 +11,7 @@ import { db } from '@/lib/db';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 import { assets, tenants } from '@/lib/db/schema';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -26,7 +27,7 @@ export async function POST(request: Request, { params }: Context) {
 
   const form = await request.formData();
   const file = form.get('file');
-  if (!(file instanceof File)) return badRequest('Datei fehlt');
+  if (!(file instanceof File)) return badRequest(t('api.missingFile'));
 
   let uploaded: Awaited<ReturnType<typeof validateAndUpload>>;
   try {

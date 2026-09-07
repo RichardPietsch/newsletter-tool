@@ -7,6 +7,7 @@ import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { createAuditEventRecord } from '@/lib/db/audit-events';
 import { auditEvents, sessions } from '@/lib/db/schema';
+import { t } from '@/lib/i18n';
 import { requestIdFrom } from '@/lib/logging/logger';
 
 export async function POST(request: Request) {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
       eventType: 'support.ended',
       tenantId: auth.context.tenant.id,
       actorUserId: auth.context.user.id,
-      summary: 'Lesender Supportmodus beendet.',
+      summary: t('audit.supportEnded'),
       correlationId: requestIdFrom(request),
       entityType: 'tenant',
       entityId: auth.context.tenant.id,

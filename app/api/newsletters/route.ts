@@ -11,6 +11,7 @@ import { createDefaultDocument } from '@/lib/newsletter/defaults';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 import { requestIdFrom } from '@/lib/logging/logger';
 import { getTenantSettings } from '@/lib/settings/store';
+import { t } from '@/lib/i18n';
 
 export async function GET() {
   const auth = await requireTenantApiContext();
@@ -30,13 +31,13 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const id = nanoid();
   const settings = await getTenantSettings(auth.context.tenant.id);
-  const document = createDefaultDocument('Neuer Newsletter', settings.headerVariants[0]?.id);
+  const document = createDefaultDocument(t('misc.defaultNewsletterTitle'), settings.headerVariants[0]?.id);
   await db.insert(newsletters).values({ id, tenantId: auth.context.tenant.id, title: document.title, document });
   await recordAuditEvent({
     eventType: 'newsletter.created',
     tenantId: auth.context.tenant.id,
     actorUserId: auth.context.user.id,
-    summary: 'Neuer Newsletter gestartet.',
+    summary: t('audit.newsletterCreated'),
     correlationId: requestIdFrom(request),
     entityType: 'newsletter',
     entityId: id,
