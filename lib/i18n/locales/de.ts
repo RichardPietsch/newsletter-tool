@@ -59,7 +59,8 @@ export const de = {
     contrastTeaserText: 'Haupttext auf Teaserfläche',
     contrastTeaserAccent: 'Akzent auf Teaserfläche',
     headerDefaults: 'Standard-Header',
-    headerDefaultsIntro: 'Header-Varianten stehen dem Mandanten beim ersten Login bereits zur Auswahl.',
+    headerDefaultsIntro:
+      'Header-Varianten stehen dem Mandanten beim ersten Login bereits zur Auswahl und können zusätzlich für Hintergrundbereiche freigegeben werden.',
     uploadHeader: 'Header-Bild hochladen',
     footerDefault: 'Globaler Standard-Footer',
     footerDefaultIntro: 'Der Mandant kann diesen vorausgefüllten Footer später weiterhin selbst anpassen.',
@@ -294,8 +295,9 @@ export const de = {
     backToNewsletterList: '← Zur Newsletter-Liste',
     settingsIntro: 'Bearbeite globale Header-Varianten und den systemweiten Footer.',
     headerVariantsDescription:
-      'Jede Variante besteht aus einem hochgeladenen Bild. Die Auswahl erfolgt je Newsletter im Header-Inspector.',
+      'Jede Variante besteht aus einem hochgeladenen Bild. Sie kann für den Newsletter-Header und optional als Bereichs-Header verwendet werden.',
     roundHeaderImage: 'Header-Grafik mit abgerundeten Ecken anzeigen',
+    useAsSectionHeader: 'Als Bereichs-Header verwenden',
     noHeaderVariant: 'Noch keine Header-Variante vorhanden. Lade ein JPEG, PNG oder GIF hoch.',
     globalFooter: 'Globaler Footer',
     globalFooterDescription:
@@ -417,6 +419,13 @@ export const de = {
     backgroundSection: 'Hintergrundbereich',
     backgroundSectionIntro:
       'Der Hintergrund läuft über die volle E-Mail-Breite; die enthaltenen Module bleiben in der 600-px-Inhaltsspalte.',
+    sectionHeader: 'Bereichs-Header',
+    sectionHeaderIntro:
+      'Nutze eine freigegebene Headervariante oder ein Bild aus der Medienübersicht. Bereits verwendete Varianten bleiben erhalten, wenn ihre Freigabe später entfernt wird.',
+    noSectionHeader: 'Kein Bereichs-Header',
+    chooseSectionHeaderImage: 'Bild wählen …',
+    changeSectionHeaderImage: 'Anderes Bild wählen',
+    sectionHeaderNoLongerAvailable: 'nicht mehr freigegeben',
     removeFromBackground: 'Aus Hintergrundbereich lösen',
     configuration: 'Konfiguration',
     headerVariants: 'Header-Varianten',

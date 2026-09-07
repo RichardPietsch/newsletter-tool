@@ -10,6 +10,7 @@ import {
 } from '@/lib/events/snapshot';
 import type { EventRecord } from '@/lib/events/schema';
 import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
+import { usedHeaderVariantIdsFromDocument } from '@/lib/newsletter/section-header';
 import {
   insertBlock,
   insertBlockIntoBackground,
@@ -149,5 +150,17 @@ describe('user-testing feedback features', () => {
       'text',
       'quote',
     ]);
+  });
+
+  it('protects header variants used by regular and background-section headers', () => {
+    const document = createDefaultDocument('Header-Nutzung', 'main-header');
+    const background = createBlock('backgroundSection');
+    if (background.type !== 'backgroundSection') throw new Error('Hintergrundbereich erwartet');
+    const withSectionHeader = insertBlock(document, 1, {
+      ...background,
+      sectionHeader: { source: 'headerVariant', headerVariantId: 'partner-header' },
+    });
+
+    expect(usedHeaderVariantIdsFromDocument(withSectionHeader)).toEqual(['main-header', 'partner-header']);
   });
 });

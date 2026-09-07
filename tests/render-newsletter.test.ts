@@ -284,6 +284,43 @@ describe('MJML newsletter rendering', () => {
     );
   });
 
+  it('renders configured header variants and media images at the start of background sections', () => {
+    const settings = createDefaultSettings();
+    settings.headerVariants.push({
+      id: 'partner-header',
+      name: 'Partner',
+      imageUrl: 'https://assets.example.com/partner-header.png',
+      alt: 'Partnerbereich',
+      roundedCorners: true,
+      usableAsSectionHeader: false,
+    });
+    const background = createBlock('backgroundSection');
+    if (background.type !== 'backgroundSection') throw new Error('Hintergrundbereich erwartet');
+    const variantDocument = insertBlock(createDefaultDocument('Bereich'), 1, {
+      ...background,
+      sectionHeader: { source: 'headerVariant', headerVariantId: 'partner-header' },
+    });
+    const assetDocument = insertBlock(createDefaultDocument('Partner'), 1, {
+      ...background,
+      id: 'asset-background',
+      sectionHeader: {
+        source: 'asset',
+        assetId: 'partner-logo',
+        src: 'https://assets.example.com/partner-logo.png',
+        alt: 'Logo des Partners',
+      },
+    });
+
+    const variantHtml = renderNewsletter(variantDocument, settings);
+    const assetHtml = renderNewsletter(assetDocument, settings);
+
+    expect(variantHtml).toContain('src="https://assets.example.com/partner-header.png"');
+    expect(variantHtml).toContain('alt="Partnerbereich"');
+    expect(variantHtml).toContain('border-radius:8px');
+    expect(assetHtml).toContain('src="https://assets.example.com/partner-logo.png"');
+    expect(assetHtml).toContain('alt="Logo des Partners"');
+  });
+
   it('blocks invalid, private and non-HTTPS images before export', () => {
     const privateImageDocument = documentWithBlocks([
       { ...imageBlock(), src: 'http://192.168.1.10/newsletter/hero.jpg' },

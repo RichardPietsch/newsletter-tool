@@ -175,6 +175,15 @@ export const eventGridBlockSchema = base.extend({
   layout: z.enum(['grid', 'list']).default('grid'),
   items: z.array(eventItemSchema).min(1, t('validation.eventRequired')),
 });
+export const sectionHeaderSchema = z.discriminatedUnion('source', [
+  z.object({ source: z.literal('headerVariant'), headerVariantId: z.string().min(1) }),
+  z.object({
+    source: z.literal('asset'),
+    assetId: z.string().optional(),
+    src: url,
+    alt: z.string().trim().min(1, t('validation.altRequired')),
+  }),
+]);
 export const newsletterContentBlockSchema = z.union([
   textBlockSchema,
   eventBlockSchema,
@@ -187,6 +196,7 @@ export const newsletterContentBlockSchema = z.union([
 export const backgroundSectionBlockSchema = base.extend({
   type: z.literal('backgroundSection'),
   background: z.enum(['neutral', 'blue']).default('neutral'),
+  sectionHeader: sectionHeaderSchema.optional(),
   blocks: z.array(newsletterContentBlockSchema).min(1, t('validation.moduleRequired')),
 });
 export const newsletterBlockSchema = z.union([

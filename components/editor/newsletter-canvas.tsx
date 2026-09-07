@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import type { NewsletterContentBlock } from '@/lib/newsletter/schema';
 import type { NewsletterSaveIssue } from '@/lib/newsletter/save-validation';
-import type { GlobalSettings } from '@/lib/settings/schema';
+import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
+import { resolveSectionHeaderImage } from '@/lib/newsletter/section-header';
 import { useNewsletterStore } from '@/lib/newsletter/store';
 import { InsertionPoint } from './insertion-point';
 import { ModulePickerDialog } from './module-picker-dialog';
@@ -95,6 +96,7 @@ export function NewsletterCanvas({
             block.background === 'blue' ? styles.colorVariables.featureBackground : styles.colorVariables.surface;
           const labelColor =
             block.background === 'blue' ? styles.colorVariables.featureMuted : styles.colorVariables.muted;
+          const sectionHeaderImage = resolveSectionHeaderImage(block, settings);
           return (
             <div key={block.id} className={moduleSpacing}>
               <section
@@ -112,6 +114,16 @@ export function NewsletterCanvas({
                   {t('misc.backgroundSection')}
                 </div>
                 <div className="mx-auto w-[600px]">
+                  {sectionHeaderImage ? (
+                    <img
+                      src={sectionHeaderImage.src}
+                      alt={sectionHeaderImage.alt}
+                      className="mx-auto mb-6 w-full max-w-[200px] object-contain"
+                      style={{
+                        borderRadius: sectionHeaderImage.roundedCorners ? ROUNDED_HEADER_IMAGE_RADIUS_PX : 0,
+                      }}
+                    />
+                  ) : null}
                   {block.blocks.map((child, childIndex) => (
                     <div key={child.id} className={childIndex === 0 ? '' : 'mt-6'}>
                       <div

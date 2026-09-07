@@ -29,6 +29,34 @@ describe('newsletter core', () => {
     expect(legacyImage).not.toHaveProperty('href');
   });
 
+  it('validates header variants and media images used by background sections', () => {
+    const document = createDefaultDocument('Bereichs-Header');
+    const background = createBlock('backgroundSection');
+    if (background.type !== 'backgroundSection') throw new Error('Hintergrundbereich erwartet');
+
+    expect(
+      newsletterDocumentSchema.safeParse(
+        insertBlock(document, 1, {
+          ...background,
+          sectionHeader: { source: 'headerVariant', headerVariantId: 'partner-header' },
+        }),
+      ).success,
+    ).toBe(true);
+    expect(
+      newsletterDocumentSchema.safeParse(
+        insertBlock(document, 1, {
+          ...background,
+          sectionHeader: {
+            source: 'asset',
+            assetId: 'partner-logo',
+            src: 'https://assets.example.com/partner.png',
+            alt: '',
+          },
+        }),
+      ).success,
+    ).toBe(false);
+  });
+
   it('inserts deletes and moves only content blocks', () => {
     let d = createDefaultDocument();
     const t = createBlock('text');

@@ -49,7 +49,7 @@ function InspectorContent({ block, settings, issues, onChange, onOpenGlobalSetti
     case 'eventGrid':
       return <EventGridInspector block={block} issues={issues} onChange={onChange} />;
     case 'backgroundSection':
-      return <BackgroundSectionInspector block={block} onChange={onChange} />;
+      return <BackgroundSectionInspector block={block} settings={settings} issues={issues} onChange={onChange} />;
     case 'event':
       return <EventInspector block={block} issues={issues} onChange={onChange} />;
     case 'image':

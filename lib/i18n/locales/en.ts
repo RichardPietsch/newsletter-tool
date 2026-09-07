@@ -60,7 +60,8 @@ export const en = {
     contrastTeaserText: 'Primary text on teaser surface',
     contrastTeaserAccent: 'Accent on teaser surface',
     headerDefaults: 'Default headers',
-    headerDefaultsIntro: 'Header variants are already available when the tenant signs in for the first time.',
+    headerDefaultsIntro:
+      'Header variants are available when the tenant signs in for the first time and can additionally be enabled for background sections.',
     uploadHeader: 'Upload header image',
     footerDefault: 'Global default footer',
     footerDefaultIntro: 'The tenant can continue to customize this prefilled footer later.',
@@ -290,8 +291,9 @@ export const en = {
     backToNewsletterList: '← Back to newsletter list',
     settingsIntro: 'Edit global header variants and the system-wide footer.',
     headerVariantsDescription:
-      'Each variant consists of an uploaded image and can be selected in the header inspector.',
+      'Each variant consists of an uploaded image. It can be used for the newsletter header and optionally as a section header.',
     roundHeaderImage: 'Show header image with rounded corners',
+    useAsSectionHeader: 'Use as section header',
     noHeaderVariant: 'No header variant yet. Upload a JPEG, PNG or GIF.',
     globalFooter: 'Global footer',
     globalFooterDescription:
@@ -409,6 +411,13 @@ export const en = {
     backgroundSection: 'Background section',
     backgroundSectionIntro:
       'The background spans the full email width while its modules remain inside the 600px content column.',
+    sectionHeader: 'Section header',
+    sectionHeaderIntro:
+      'Use an enabled header variant or an image from the media library. Existing selections remain when a variant is disabled later.',
+    noSectionHeader: 'No section header',
+    chooseSectionHeaderImage: 'Choose image …',
+    changeSectionHeaderImage: 'Choose another image',
+    sectionHeaderNoLongerAvailable: 'no longer enabled',
     removeFromBackground: 'Move out of background section',
     configuration: 'Configuration',
     headerVariants: 'Header variants',

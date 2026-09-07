@@ -39,6 +39,7 @@ describe('settings defaults', () => {
         imageUrl: headerUrl('header-agc.jpg'),
         alt: 'AGC Newsletter Header',
         roundedCorners: false,
+        usableAsSectionHeader: false,
       },
       {
         id: 'agc-junioren',
@@ -46,6 +47,7 @@ describe('settings defaults', () => {
         imageUrl: headerUrl('header-agc-junioren.jpg'),
         alt: 'AGC Junioren Newsletter Header',
         roundedCorners: false,
+        usableAsSectionHeader: false,
       },
       {
         id: 'agc-gastro',
@@ -53,6 +55,7 @@ describe('settings defaults', () => {
         imageUrl: headerUrl('header-agc-gastronomie.jpg'),
         alt: 'AGC Gastro Newsletter Header',
         roundedCorners: false,
+        usableAsSectionHeader: false,
       },
     ]);
     expect(settings.footerRichText.content?.map(textFromNode)).toEqual([
@@ -97,6 +100,7 @@ describe('settings defaults', () => {
         imageUrl: 'https://cdn.example.com/header.jpg',
         alt: 'Header',
         roundedCorners: true,
+        usableAsSectionHeader: true,
       },
     ];
     settings.footerRichText = {
@@ -106,8 +110,9 @@ describe('settings defaults', () => {
 
     const persisted = serializeTenantSettings(settings);
 
-    expect(persisted.schemaVersion).toBe(2);
+    expect(persisted.schemaVersion).toBe(3);
     expect(persisted.headerVariants[0].roundedCorners).toBe(true);
+    expect(persisted.headerVariants[0].usableAsSectionHeader).toBe(true);
     expect(isCurrentPersistedTenantSettings(persisted)).toBe(true);
     expect(resolvePersistedTenantSettings(persisted)).toEqual(settings);
     expect(tenantSettingsPersistenceUpgrade(persisted)).toBeNull();
@@ -131,10 +136,14 @@ describe('settings defaults', () => {
     });
 
     expect(upgraded).not.toBeNull();
-    expect(upgraded?.headerVariants).toContainEqual({ ...customHeader, roundedCorners: false });
+    expect(upgraded?.headerVariants).toContainEqual({
+      ...customHeader,
+      roundedCorners: false,
+      usableAsSectionHeader: false,
+    });
     expect(upgraded?.footerRichText).toEqual(customFooter);
     expect(upgraded?.colors).toEqual(newsletterThemePalettes);
-    expect(upgraded?.schemaVersion).toBe(2);
+    expect(upgraded?.schemaVersion).toBe(3);
   });
 
   it('adds only the schema version to a complete unversioned custom design', () => {
@@ -154,21 +163,44 @@ describe('settings defaults', () => {
 
     const upgraded = tenantSettingsPersistenceUpgrade(custom);
 
-    expect(upgraded).toEqual({ schemaVersion: 2, ...custom });
+    expect(upgraded).toEqual({ schemaVersion: 3, ...custom });
   });
 
-  it('upgrades version 1 tenant designs with disabled rounded header corners', () => {
+  it('upgrades version 1 tenant designs with disabled optional header features', () => {
     const current = createDefaultSettings();
     const versionOne = {
       schemaVersion: 1,
       ...current,
-      headerVariants: current.headerVariants.map(({ roundedCorners: _roundedCorners, ...variant }) => variant),
+      headerVariants: current.headerVariants.map(
+        ({ roundedCorners: _roundedCorners, usableAsSectionHeader: _usableAsSectionHeader, ...variant }) => variant,
+      ),
     };
 
     const upgraded = tenantSettingsPersistenceUpgrade(versionOne);
 
-    expect(upgraded?.schemaVersion).toBe(2);
+    expect(upgraded?.schemaVersion).toBe(3);
     expect(upgraded?.headerVariants.every((variant) => variant.roundedCorners === false)).toBe(true);
+    expect(upgraded?.headerVariants.every((variant) => variant.usableAsSectionHeader === false)).toBe(true);
+  });
+
+  it('upgrades version 2 tenant designs without changing existing design values', () => {
+    const current = createDefaultSettings();
+    const versionTwo = {
+      schemaVersion: 2,
+      ...current,
+      headerVariants: current.headerVariants.map(({ usableAsSectionHeader: _usableAsSectionHeader, ...variant }) => ({
+        ...variant,
+        roundedCorners: true,
+      })),
+    };
+
+    const upgraded = tenantSettingsPersistenceUpgrade(versionTwo);
+
+    expect(upgraded?.schemaVersion).toBe(3);
+    expect(upgraded?.headerVariants.every((variant) => variant.roundedCorners === true)).toBe(true);
+    expect(upgraded?.headerVariants.every((variant) => variant.usableAsSectionHeader === false)).toBe(true);
+    expect(upgraded?.colors).toEqual(current.colors);
+    expect(upgraded?.footerRichText).toEqual(current.footerRichText);
   });
 
   it('describes incomplete stored design documents without exposing their contents', () => {
