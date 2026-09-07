@@ -44,6 +44,7 @@ export function FeaturedEventBlock({ block }: { block: B }) {
             style={{
               backgroundColor: isWhite ? colors.featureBackground : colors.featureButtonBackground,
               color: isWhite ? colors.featureText : colors.featureButtonText,
+              borderRadius: styles.buttonRadius,
             }}
           >
             {block.buttonLabel}

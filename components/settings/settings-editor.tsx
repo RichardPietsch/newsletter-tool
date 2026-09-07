@@ -73,16 +73,19 @@ export function SettingsEditor({
   embedded = false,
   readOnly = false,
   initialSection,
+  onSettingsSaved,
 }: {
   initialSettings: GlobalSettings;
   usedHeaderVariantIds: string[];
   embedded?: boolean;
   readOnly?: boolean;
   initialSection?: 'header' | 'footer';
+  onSettingsSaved?: (settings: GlobalSettings) => void;
 }) {
   const [settings, setSettings] = useState(initialSettings);
   const [status, setStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [uploading, setUploading] = useState(false);
+  const [activeSectionHeaderSaveId, setActiveSectionHeaderSaveId] = useState<string>();
 
   useEffect(() => {
     if (!embedded || !initialSection) return;
@@ -92,12 +95,23 @@ export function SettingsEditor({
   async function save(next = settings) {
     if (readOnly) return;
     setStatus('saving');
-    const response = await fetch('/api/settings', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(next),
-    });
-    setStatus(response.ok ? 'saved' : 'error');
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+      if (!response.ok) {
+        setStatus('error');
+        return;
+      }
+      const saved = (await response.json()) as GlobalSettings;
+      setSettings(saved);
+      onSettingsSaved?.(saved);
+      setStatus('saved');
+    } catch {
+      setStatus('error');
+    }
   }
 
   async function uploadHeaderImage(file: File) {
@@ -248,6 +262,7 @@ export function SettingsEditor({
                     type="checkbox"
                     className="h-4 w-4 rounded border-slate-300"
                     checked={variant.usableAsSectionHeader}
+                    disabled={activeSectionHeaderSaveId === variant.id && status === 'saving'}
                     onChange={(event) => {
                       const next = {
                         ...settings,
@@ -256,11 +271,20 @@ export function SettingsEditor({
                         ),
                       };
                       setSettings(next);
+                      setActiveSectionHeaderSaveId(variant.id);
                       void save(next);
                     }}
                   />
                   {t('misc.useAsSectionHeader')}
                 </label>
+                {activeSectionHeaderSaveId === variant.id ? (
+                  <p
+                    className={`mt-1 text-xs ${status === 'error' ? 'text-red-700' : 'text-slate-600'}`}
+                    aria-live="polite"
+                  >
+                    {status === 'saving' ? t('save.saving') : status === 'error' ? t('save.failed') : t('save.saved')}
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   className="mt-3 rounded border px-3 py-2 text-sm text-red-700 disabled:cursor-not-allowed disabled:text-slate-400"

@@ -41,7 +41,7 @@ function Card({ item, wide }: { item: EventItem; wide?: boolean }) {
         {item.buttonUrl && (
           <span
             className="mt-5 inline-block border px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em]"
-            style={{ borderColor: colors.text, color: colors.text }}
+            style={{ borderColor: colors.text, color: colors.text, borderRadius: styles.buttonRadius }}
           >
             {item.buttonLabel}
           </span>

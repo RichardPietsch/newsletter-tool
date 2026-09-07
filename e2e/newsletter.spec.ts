@@ -20,6 +20,7 @@ const e2eTenantId = 'e2e-tenant';
 const e2eNewsletterId = 'e2e-demo-newsletter';
 const e2eAssetId = 'e2e-asset';
 const e2eEventId = 'e2e-register-event';
+const e2eBaseUrl = `http://127.0.0.1:${Number(process.env.PLAYWRIGHT_PORT ?? 3000)}`;
 
 const securityTenantIds = ['e2e-security-tenant-a', 'e2e-security-tenant-b'] as const;
 const securityUsers = {
@@ -251,7 +252,7 @@ async function installSession(page: Page, token: string) {
     {
       name: AUTH_COOKIE_NAME,
       value: token,
-      url: 'http://127.0.0.1:3000',
+      url: e2eBaseUrl,
       httpOnly: true,
       sameSite: 'Lax',
     },
@@ -340,6 +341,27 @@ test('covers the main authenticated editor flow', async ({ page }) => {
     'Ein prägnantes Zitat für den Newsletter.',
   );
 
+  await page.getByLabel('Komponente an dieser Stelle hinzufügen').first().click();
+  await page.getByRole('button', { name: /Hintergrundbereich/ }).click();
+  await expect(inspector.getByRole('heading', { name: 'Hintergrundbereich' })).toBeVisible();
+
+  await page.getByLabel('Einstellungen', { exact: true }).click();
+  const settingsDialog = page.getByRole('dialog', { name: 'Einstellungen' });
+  const sectionHeaderCheckbox = settingsDialog.getByLabel('Als Bereichs-Header verwenden').first();
+  const sectionHeaderCard = sectionHeaderCheckbox.locator('xpath=ancestor::article');
+  const settingsResponse = page.waitForResponse(
+    (response) => response.url().endsWith('/api/settings') && response.request().method() === 'PUT',
+  );
+  await sectionHeaderCheckbox.check();
+  expect((await settingsResponse).ok()).toBe(true);
+  await expect(sectionHeaderCard.getByText('Gespeichert', { exact: true })).toBeVisible();
+  await settingsDialog.getByRole('button', { name: 'Einstellungen schließen' }).click();
+
+  const sectionHeaderSelect = inspector.getByLabel('Bereichs-Header');
+  await expect(sectionHeaderSelect.locator('option[value="variant:agc"]')).toHaveText('AGC');
+  await sectionHeaderSelect.selectOption('variant:agc');
+  await expect(page.getByAltText('AGC Newsletter Header')).toHaveCount(2);
+
   await page.getByLabel('Medien').click();
   await expect(page.getByRole('dialog', { name: 'Medien' })).toContainText('E2E Hero');
   await page.getByRole('button', { name: 'Medien schließen' }).click();
@@ -412,7 +434,7 @@ test('keeps platform administration separate and support mode read-only', async 
   expect(adminHtml).toContain('Security Tenant B');
   expect((await page.context().request.get('/api/newsletters')).status()).toBe(403);
 
-  const origin = { origin: 'http://127.0.0.1:3000' };
+  const origin = { origin: e2eBaseUrl };
   const start = await page.context().request.post('/api/admin/support', {
     form: { tenantId: securityTenantIds[0] },
     headers: origin,
@@ -462,7 +484,7 @@ test('revokes sessions on account and tenant deactivation without deleting conte
     .update(sessions)
     .set({ supportTenantId: null, supportStartedAt: null })
     .where(eq(sessions.id, 'e2e-security-session-admin'));
-  const origin = { origin: 'http://127.0.0.1:3000' };
+  const origin = { origin: e2eBaseUrl };
 
   await installSession(page, securityTokens.admin);
   const deactivateAccount = await page

@@ -15,6 +15,7 @@ import {
   deriveNewsletterColorPalette,
   newsletterColorPalettes,
   newsletterContrastRatio,
+  newsletterModuleStyles,
   newsletterThemeColorTokens,
   type NewsletterPreviewMode,
   type NewsletterThemeColorToken,
@@ -115,7 +116,11 @@ function ThemePreview({ colors }: { colors: GlobalSettings['colors'] }) {
             </p>
             <span
               className="mt-4 inline-block border px-3 py-2 text-xs font-semibold"
-              style={{ borderColor: palette.text, color: palette.text }}
+              style={{
+                borderColor: palette.text,
+                color: palette.text,
+                borderRadius: newsletterModuleStyles.buttonRadius,
+              }}
             >
               {t('admin.previewEventButton')}
             </span>
@@ -134,7 +139,11 @@ function ThemePreview({ colors }: { colors: GlobalSettings['colors'] }) {
           </p>
           <span
             className="mt-4 inline-block px-3 py-2 text-xs font-semibold"
-            style={{ backgroundColor: palette.featureButtonBackground, color: palette.featureButtonText }}
+            style={{
+              backgroundColor: palette.featureButtonBackground,
+              color: palette.featureButtonText,
+              borderRadius: newsletterModuleStyles.buttonRadius,
+            }}
           >
             {t('admin.previewFeatureButton')}
           </span>
@@ -212,6 +221,7 @@ export function TenantDesignEditor({
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [uploading, setUploading] = useState(false);
+  const [activeSectionHeaderSaveId, setActiveSectionHeaderSaveId] = useState<string>();
   const validColors = Object.values(settings.colors).every((palette) =>
     Object.values(palette).every((color) => /^#[0-9a-fA-F]{6}$/.test(color)),
   );
@@ -253,20 +263,24 @@ export function TenantDesignEditor({
     }
   }
 
-  async function save() {
+  async function save(next = settings) {
     if (!validColors) return;
     setStatus('saving');
-    const response = await fetch(`/api/admin/tenants/${tenantId}/design`, {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(settings),
-    });
-    if (!response.ok) {
+    try {
+      const response = await fetch(`/api/admin/tenants/${tenantId}/design`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+      if (!response.ok) {
+        setStatus('error');
+        return;
+      }
+      setSettings((await response.json()) as GlobalSettings);
+      setStatus('saved');
+    } catch {
       setStatus('error');
-      return;
     }
-    setSettings(await response.json());
-    setStatus('saved');
   }
 
   async function uploadHeader(file: File) {
@@ -485,18 +499,29 @@ export function TenantDesignEditor({
                     type="checkbox"
                     className="h-4 w-4 rounded border-slate-300"
                     checked={variant.usableAsSectionHeader}
+                    disabled={activeSectionHeaderSaveId === variant.id && status === 'saving'}
                     onChange={(event) => {
-                      setSettings((current) => ({
-                        ...current,
-                        headerVariants: current.headerVariants.map((item) =>
+                      const next = {
+                        ...settings,
+                        headerVariants: settings.headerVariants.map((item) =>
                           item.id === variant.id ? { ...item, usableAsSectionHeader: event.target.checked } : item,
                         ),
-                      }));
-                      setStatus('idle');
+                      };
+                      setSettings(next);
+                      setActiveSectionHeaderSaveId(variant.id);
+                      void save(next);
                     }}
                   />
                   {t('misc.useAsSectionHeader')}
                 </label>
+                {activeSectionHeaderSaveId === variant.id && status !== 'idle' ? (
+                  <p
+                    className={`mt-1 text-xs ${status === 'error' ? 'text-red-700' : 'text-slate-600'}`}
+                    aria-live="polite"
+                  >
+                    {status === 'saving' ? t('save.saving') : status === 'error' ? t('save.failed') : t('save.saved')}
+                  </p>
+                ) : null}
                 <button
                   type="button"
                   className="mt-3 rounded border px-3 py-2 text-sm text-red-700 disabled:text-slate-400"

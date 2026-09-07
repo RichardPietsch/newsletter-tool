@@ -31,6 +31,7 @@ export function NewsletterOverviewShell({
   readOnly?: boolean;
 }) {
   const [overlay, setOverlay] = useState<'media' | 'events' | 'settings' | 'account' | null>(null);
+  const [currentSettings, setCurrentSettings] = useState(settings);
 
   return (
     <div className="flex min-h-screen bg-[#f4f1ec]">
@@ -46,9 +47,10 @@ export function NewsletterOverviewShell({
       <SettingsOverlay
         open={overlay === 'settings'}
         onClose={() => setOverlay(null)}
-        settings={settings}
+        settings={currentSettings}
         usedHeaderVariantIds={usedHeaderVariantIds}
         readOnly={readOnly}
+        onSettingsSaved={setCurrentSettings}
       />
       <AccountOverlay open={overlay === 'account'} onClose={() => setOverlay(null)} account={account} />
       <OnboardingTour variant="overview" accountEmail={account.email} firstNewsletterHref={firstNewsletterHref} />

@@ -1,4 +1,7 @@
 import { defineConfig } from '@playwright/test';
+
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 3000);
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: false,
@@ -6,8 +9,8 @@ export default defineConfig({
   maxFailures: 0,
   reporter: 'list',
   webServer: {
-    command: 'pnpm db:ensure && NEXT_PHASE=phase-production-build pnpm build && pnpm start',
-    url: 'http://127.0.0.1:3000',
+    command: `pnpm db:ensure && NEXT_PHASE=phase-production-build pnpm build && pnpm start --port ${port}`,
+    url: `http://127.0.0.1:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
     env: {
@@ -15,5 +18,5 @@ export default defineConfig({
       SMTP_PASSWORD: 'playwright',
     },
   },
-  use: { baseURL: 'http://127.0.0.1:3000' },
+  use: { baseURL: `http://127.0.0.1:${port}` },
 });

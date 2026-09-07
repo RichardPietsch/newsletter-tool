@@ -247,6 +247,29 @@ describe('MJML newsletter rendering', () => {
     );
   });
 
+  it('uses one subtle radius for every newsletter call-to-action button', () => {
+    const event = {
+      ...(createBlock('event') as EventBlock),
+      buttonLabel: 'Anmelden',
+      buttonUrl: 'https://example.com/event',
+    };
+    const featuredEvent = {
+      ...(createBlock('featuredEvent') as FeaturedEventBlock),
+      buttonUrl: 'https://example.com/featured-event',
+    };
+    const eventGrid = createBlock('eventGrid') as EventGridBlock;
+    eventGrid.items = eventGrid.items.map((item) => ({
+      ...item,
+      buttonUrl: 'https://example.com/event-grid',
+    }));
+    const radius = `border-radius="${newsletterModuleStyles.buttonRadius}px"`;
+
+    expect(newsletterModuleStyles.buttonRadius).toBe(4);
+    expect(renderEvent(event)).toContain(radius);
+    expect(renderFeaturedEvent(featuredEvent)).toContain(radius);
+    expect(renderEventGrid(eventGrid)).toContain(radius);
+  });
+
   it('keeps module gaps while preserving the seamless header-to-text transition', () => {
     const html = renderNewsletter(documentWithBlocks([richTextBlock(), imageBlock()]));
 
