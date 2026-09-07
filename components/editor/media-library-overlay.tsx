@@ -63,12 +63,12 @@ export function MediaLibraryOverlay({
           <p className="text-sm text-slate-600">{t('misc.mediaLibraryIntro')}</p>
           <p aria-live="polite" className="text-sm text-slate-500">
             {status === 'loading'
-              ? 'Lade Medien …'
+              ? t('misc.mediaLoading')
               : status === 'saving'
-                ? 'Speichere …'
+                ? t('misc.mediaSaving')
                 : status === 'error'
-                  ? 'Fehler beim Speichern oder Laden'
-                  : `${assets.length} Medien`}
+                  ? t('misc.mediaLoadSaveFailed')
+                  : t('misc.mediaCount').replace('{count}', String(assets.length))}
           </p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -83,7 +83,7 @@ export function MediaLibraryOverlay({
                 {asset.width}×{asset.height}px · {Math.round(asset.sizeBytes / 1024)} KB
               </p>
               <label className="mt-3 block text-sm font-medium">
-                Titel
+                {t('misc.title')}
                 <input
                   className="mt-1 w-full rounded border p-2"
                   value={asset.title ?? ''}

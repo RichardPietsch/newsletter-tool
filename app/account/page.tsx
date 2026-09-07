@@ -18,7 +18,7 @@ export default async function AccountPage() {
       </a>
       {user.role === 'platform_admin' ? (
         <a href="/admin" className="ml-3 mt-6 inline-block rounded border px-4 py-2 text-blue-700">
-          Administration
+          {t('admin.administrationLink')}
         </a>
       ) : null}
     </main>

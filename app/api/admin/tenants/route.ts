@@ -7,6 +7,7 @@ import { validateMutationOrigin } from '@/lib/api/origin';
 import { createTenant } from '@/lib/admin/operations';
 import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 
 const schema = z.object({ name: z.string().trim().min(1).max(160), adminNotes: z.string().max(2000).optional() });
 
@@ -17,7 +18,7 @@ export async function POST(request: Request) {
   if (auth.response) return auth.response;
   const form = await request.formData();
   const parsed = schema.safeParse({ name: form.get('name'), adminNotes: form.get('adminNotes') || undefined });
-  if (!parsed.success) return badRequest('Ungültige Mandantendaten.');
+  if (!parsed.success) return badRequest(t('api.invalidTenantData'));
   const id = await createTenant(parsed.data, auth.context.user, requestIdFrom(request));
   return NextResponse.redirect(publicAppUrl(`/admin/tenants/${id}`), 303);
 }

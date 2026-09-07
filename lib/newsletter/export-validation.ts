@@ -1,4 +1,5 @@
 import type { NewsletterBlock, NewsletterDocument } from './schema';
+import { t } from '@/lib/i18n';
 
 type ExportValidationMode = 'development' | 'production';
 
@@ -48,13 +49,13 @@ function hostnameIssue(hostname: string): Pick<ExportValidationIssue, 'code' | '
   if (INTERNAL_HOSTS.has(normalized) || normalized.endsWith('.local')) {
     return {
       code: 'LOCAL_IMAGE_URL',
-      message: 'Bild-URL verwendet einen lokalen oder internen Hostnamen und ist in E-Mail-Clients nicht erreichbar.',
+      message: t('validation.localImageUrl'),
     };
   }
   if (isPrivateIPv4(normalized)) {
     return {
       code: 'PRIVATE_IMAGE_URL',
-      message: 'Bild-URL verwendet eine lokale oder private IP-Adresse und ist in E-Mail-Clients nicht erreichbar.',
+      message: t('validation.privateImageUrl'),
     };
   }
   return null;
@@ -131,7 +132,7 @@ function validateImageUrl(candidate: ExportImageCandidate, mode: ExportValidatio
       blockId: candidate.blockId,
       blockType: candidate.blockType,
       path: candidate.path.replace(/\.src$/, '.alt'),
-      message: 'Nicht-dekorative Bilder benötigen einen Alternativtext.',
+      message: t('validation.missingImageAlt'),
     });
   }
 
@@ -144,7 +145,7 @@ function validateImageUrl(candidate: ExportImageCandidate, mode: ExportValidatio
       blockId: candidate.blockId,
       blockType: candidate.blockType,
       path: candidate.path,
-      message: 'Bild-URL ist ungültig.',
+      message: t('validation.invalidImageUrl'),
     });
     return issues;
   }
@@ -155,7 +156,7 @@ function validateImageUrl(candidate: ExportImageCandidate, mode: ExportValidatio
       blockId: candidate.blockId,
       blockType: candidate.blockType,
       path: candidate.path,
-      message: 'Bild-URLs müssen in der öffentlichen Testumgebung HTTPS verwenden.',
+      message: t('validation.nonHttpsImageUrl'),
     });
   }
 

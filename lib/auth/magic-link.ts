@@ -7,6 +7,7 @@ import { sendEmail } from '@/lib/email/send-email';
 import { magicLinkEmail } from '@/lib/email/templates/magic-link';
 import { publicAppUrl } from '@/lib/app-url';
 import { logger } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 import { createSession } from './session';
 import { MAGIC_LINK_TTL_MINUTES, normalizeEmail } from './config';
 import { consumeMagicLinkToken } from './magic-link-consumption';
@@ -67,12 +68,12 @@ export async function requestMagicLink(
   url.searchParams.set('token', token);
   const message = magicLinkEmail({ url: url.toString(), ttlMinutes: MAGIC_LINK_TTL_MINUTES });
   try {
-    await sendEmail({ to: email, subject: 'Dein Zugangslink zum Newsletter Tool', ...message });
+    await sendEmail({ to: email, subject: t('email.magicLinkSubject'), ...message });
     await recordAuditEvent({
       actorUserId: row.user.id,
       tenantId: row.user.tenantId,
       eventType: 'auth.magic_link.requested',
-      summary: 'Magic Link angefordert.',
+      summary: t('audit.magicLinkRequested'),
       correlationId: metadata.correlationId,
     });
   } catch (error) {
@@ -91,7 +92,7 @@ export async function requestMagicLink(
       eventType: 'application.error',
       severity: 'error',
       outcome: 'failed',
-      summary: 'Magic Link konnte nicht versendet werden.',
+      summary: t('audit.magicLinkSendFailed'),
       correlationId: metadata.correlationId,
       metadata: { operation: 'magic_link_delivery' },
     });
@@ -125,7 +126,7 @@ export async function verifyMagicLink(
         eventType: 'auth.login_failed',
         severity: 'warning',
         outcome: 'failed',
-        summary: 'Login für inaktiven Account oder Mandanten abgewiesen.',
+        summary: t('audit.inactiveLoginRejected'),
         correlationId: metadata.correlationId,
         metadata: { reason: 'inactive' },
       });
@@ -154,7 +155,7 @@ export async function verifyMagicLink(
       actorUserId: consumed.userId,
       tenantId: user.tenantId,
       eventType: 'auth.login_succeeded',
-      summary: 'Login erfolgreich.',
+      summary: t('audit.loginSucceeded'),
       correlationId: metadata.correlationId,
     });
     await tx.insert(auditEvents).values(event);
@@ -172,7 +173,7 @@ export async function verifyMagicLink(
       eventType: 'auth.login_failed',
       severity: 'warning',
       outcome: 'failed',
-      summary: 'Ungültiger oder abgelaufener Magic Link.',
+      summary: t('audit.invalidMagicLink'),
       correlationId: metadata.correlationId,
       metadata: { reason: 'invalid_or_expired' },
     });

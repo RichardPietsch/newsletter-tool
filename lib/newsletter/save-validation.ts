@@ -1,4 +1,5 @@
 import { newsletterDocumentSchema, type NewsletterDocument } from './schema';
+import { t } from '@/lib/i18n';
 
 export type NewsletterSaveIssue = {
   path: string;
@@ -9,22 +10,22 @@ export type NewsletterSaveIssue = {
 };
 
 function blockLabel(document: NewsletterDocument, blockIndex?: number, itemIndex?: number) {
-  if (blockIndex === undefined) return 'Newsletter';
+  if (blockIndex === undefined) return t('validation.newsletter');
   const block = document.blocks[blockIndex];
-  if (!block) return `Modul ${blockIndex + 1}`;
+  if (!block) return `${t('validation.module')} ${blockIndex + 1}`;
   const labels: Record<string, string> = {
-    header: 'Header',
-    footer: 'Footer',
-    text: 'Textmodul',
-    image: 'Bildmodul',
-    event: 'Event',
-    featuredEvent: 'Highlight-Teaser',
-    quote: 'Zitat',
-    sectionHeading: 'Abschnittsüberschrift',
-    eventGrid: 'Teaser-Grid',
-    backgroundSection: 'Hintergrundbereich',
+    header: t('misc.header'),
+    footer: t('misc.footer'),
+    text: t('misc.textModule'),
+    image: t('image.moduleTitle'),
+    event: t('misc.event'),
+    featuredEvent: t('validation.featuredEvent'),
+    quote: t('misc.quote'),
+    sectionHeading: t('misc.sectionHeading'),
+    eventGrid: t('modulePicker.eventGridTitle'),
+    backgroundSection: t('misc.backgroundSection'),
   };
-  const base = labels[block.type] ?? 'Modul';
+  const base = labels[block.type] ?? t('validation.module');
   return itemIndex === undefined ? `${base} ${blockIndex + 1}` : `${base} ${blockIndex + 1}, Event ${itemIndex + 1}`;
 }
 
@@ -62,7 +63,7 @@ export function validateNewsletterForSave(document: NewsletterDocument): Newslet
       blockLabel:
         nestedIndex === undefined
           ? blockLabel(document, blockIndex, itemIndex)
-          : `${block?.type === 'eventGrid' ? 'Teaser-Grid' : 'Modul'} ${blockIndex! + 1}.${nestedIndex + 1}`,
+          : `${block?.type === 'eventGrid' ? t('modulePicker.eventGridTitle') : t('validation.module')} ${blockIndex! + 1}.${nestedIndex + 1}`,
       fieldKey: fieldKeyFromPath(issue.path),
     };
   });

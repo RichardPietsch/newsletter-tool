@@ -17,11 +17,9 @@ describe('mutating route inventory', () => {
     const unguarded = routeFiles(appDirectory).filter((file) => {
       const source = readFileSync(file, 'utf8');
       if (!/export async function (POST|PUT|PATCH|DELETE)/.test(source)) return false;
-      return ![
-        'requireTenantApiContext',
-        'requireAdminApiContext',
-        'blockSupportMutationIfActive',
-      ].some((guard) => source.includes(guard));
+      return !['requireTenantApiContext', 'requireAdminApiContext', 'blockSupportMutationIfActive'].some((guard) =>
+        source.includes(guard),
+      );
     });
     expect(unguarded).toEqual([]);
   });

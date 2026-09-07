@@ -75,17 +75,18 @@ Das lokale Compose-Setup nutzt weiterhin PostgreSQL, MinIO und Mailpit. Mailpit 
 3. Zwingend setzen: die festen Namen für Infrastrukturprojekt, internes Netzwerk und externe Daten-Volumes sowie `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `DATABASE_URL`, `APP_URL=https://newsletter.example.com`, ein zufälliges `AUTH_RATE_LIMIT_SECRET`, `PUBLIC_ASSET_BASE_URL=https://assets.example.com/newsletter-assets`, echte SMTP-Daten und MinIO/S3-Zugangsdaten. Für die komfortable Erstinstallation zusätzlich `BOOTSTRAP_ADMIN_EMAIL` und `BOOTSTRAP_ADMIN_NAME` setzen. Fehlende Pflichtwerte brechen den Compose-Start bewusst ab.
 4. Die leere Infrastruktur ausschließlich bei einer echten Erstinstallation bewusst initialisieren:
 
-```bash
-./scripts/init-production-infrastructure.sh \
-  --env-file .env.production \
-  --create-empty-data-volumes
+   ```bash
+   ./scripts/init-production-infrastructure.sh \
+     --env-file .env.production \
+     --create-empty-data-volumes
 
-./scripts/deploy-production.sh \
-  --env-file .env.production \
-  --backup-dir /mnt/offsite-backups/newsletter-alpha
-```
+   ./scripts/deploy-production.sh \
+     --env-file .env.production \
+     --backup-dir /mnt/offsite-backups/newsletter-alpha
+   ```
 
    Bei einer bestehenden Installation müssen stattdessen zuerst die bisherigen Volume-Namen übernommen werden. Das Initialisierungsskript erzeugt ohne die ausdrückliche Option niemals leere Daten-Volumes.
+
 5. Reverse Proxy / Portainer so konfigurieren, dass HTTPS auf den internen Web-Service `web:3000` zeigt. PostgreSQL und die MinIO-Admin-Konsole sollen nicht öffentlich exposed werden. In Portainer werden Infrastruktur und Anwendung als getrennte Stacks betrieben; beide verwenden das konfigurierte externe Netzwerk.
 6. MinIO/Asset-Auslieferung so konfigurieren, dass `PUBLIC_ASSET_BASE_URL` von externen Mailclients erreichbar ist. Lokale oder private URLs funktionieren in exportierten Newslettern außerhalb des Servers nicht zuverlässig.
 7. Das Deployment-Skript erstellt zwingend ein validiertes PostgreSQL-/MinIO-Backup, führt Migration und Bootstrap als einmalige Jobs aus und ersetzt ausschließlich die kurzlebigen Anwendungscontainer. Danach den Magic-Link für `BOOTSTRAP_ADMIN_EMAIL` anfordern.

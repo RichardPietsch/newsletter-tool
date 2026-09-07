@@ -233,12 +233,14 @@ describe('assets API route', () => {
     const payload = await responseJson(response);
 
     expect(response.status).toBe(200);
-    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(expect.objectContaining({
-      actorUserId: 'user-1',
-      tenantId: 'tenant-1',
-      eventType: 'asset.uploaded',
-      entityId: payload.id,
-    }));
+    expect(mocks.recordAuditEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actorUserId: 'user-1',
+        tenantId: 'tenant-1',
+        eventType: 'asset.uploaded',
+        entityId: payload.id,
+      }),
+    );
   });
 
   it('updates title and alt text for owned assets', async () => {

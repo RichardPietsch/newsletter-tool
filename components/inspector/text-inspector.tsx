@@ -40,7 +40,7 @@ export function TextInspector() {
       <p className="text-sm text-slate-600">{t('misc.textInspectorIntro')}</p>
       {block ? (
         <label className="block text-sm font-medium">
-          Hintergrund
+          {t('misc.background')}
           <select
             className="mt-1 w-full rounded border p-2"
             value={block.background ?? 'white'}

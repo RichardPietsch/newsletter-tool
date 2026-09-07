@@ -25,7 +25,7 @@ export function useNewsletterActions({
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ title: nextTitle }),
     });
-    if (!response.ok) throw new Error('Rename failed');
+    if (!response.ok) throw new Error('RENAME_FAILED');
     setTitle(nextTitle);
   }
 

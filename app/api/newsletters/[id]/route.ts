@@ -13,6 +13,7 @@ import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { newsletterDocumentSchema, type NewsletterDocument } from '@/lib/newsletter/schema';
 import { recordAuditEvent } from '@/lib/db/audit-events';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 
 type NewsletterRouteContext = {
   params: Promise<{ id: string }>;
@@ -39,7 +40,7 @@ export async function GET(_: Request, { params }: NewsletterRouteContext) {
   if (!newsletter) return notFound();
   const migratedDocument = safeMigrateNewsletterDocument(newsletter.document);
   if (!migratedDocument.success)
-    return validationError('Gespeicherter Newsletter ist ungültig.', [
+    return validationError(t('api.invalidSavedNewsletter'), [
       { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
     ]);
   return NextResponse.json({ ...newsletter, document: migratedDocument.data });
@@ -56,7 +57,7 @@ export async function PUT(request: Request, { params }: NewsletterRouteContext) 
     .from(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!current) return notFound();
-  if (current.sentAt) return conflict('Versendete Newsletter können nicht mehr bearbeitet werden.');
+  if (current.sentAt) return conflict(t('api.sentNewsletterImmutable'));
 
   const parsed = await parseJson(request, putSchema);
   if (parsed.response) return parsed.response;
@@ -88,7 +89,7 @@ export async function PATCH(request: Request, { params }: NewsletterRouteContext
     .from(newsletters)
     .where(and(eq(newsletters.id, id), eq(newsletters.tenantId, auth.context.tenant.id)));
   if (!current) return notFound();
-  if (current.sentAt && patch.title) return conflict('Versendete Newsletter können nicht umbenannt werden.');
+  if (current.sentAt && patch.title) return conflict(t('api.sentNewsletterRenameBlocked'));
 
   const wasSent = current.sentAt !== null;
   const sentAt = patch.sent === true ? (current.sentAt ?? new Date()) : patch.sent === false ? null : current.sentAt;
@@ -138,7 +139,7 @@ export async function DELETE(request: Request, { params }: NewsletterRouteContex
 function cloneDocumentWithFreshIds(document: NewsletterDocument) {
   return {
     ...document,
-    title: `Kopie von ${document.title}`,
+    title: t('misc.clonedNewsletterTitle').replace('{title}', document.title),
     blocks: document.blocks.map((block) => ({
       ...block,
       id: nanoid(),
@@ -161,7 +162,7 @@ export async function POST(request: Request, { params }: NewsletterRouteContext)
 
   const migratedDocument = safeMigrateNewsletterDocument(current.document);
   if (!migratedDocument.success)
-    return validationError('Gespeicherter Newsletter ist ungültig.', [
+    return validationError(t('api.invalidSavedNewsletter'), [
       { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
     ]);
 
@@ -176,7 +177,7 @@ export async function POST(request: Request, { params }: NewsletterRouteContext)
     actorUserId: auth.context.user.id,
     tenantId: auth.context.tenant.id,
     eventType: 'newsletter.created',
-    summary: 'Newsletter als Kopie gestartet.',
+    summary: t('audit.newsletterCloned'),
     entityType: 'newsletter',
     entityId: cloneId,
     correlationId: requestIdFrom(request),

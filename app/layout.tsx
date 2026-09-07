@@ -1,7 +1,8 @@
 import './globals.css';
 import { getCurrentAuthContext } from '@/lib/auth/current-user';
 import { t } from '@/lib/i18n';
-export const metadata = { title: 'Newsletter Tool', description: 'HTML Newsletter Editor' };
+
+export const metadata = { title: t('admin.appName'), description: t('misc.appDescription') };
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const context = await getCurrentAuthContext();
   return (

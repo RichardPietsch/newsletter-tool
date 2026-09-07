@@ -1,5 +1,6 @@
 import type { NextResponse } from 'next/server';
 import { forbidden } from './api-error';
+import { t } from '@/lib/i18n';
 import { serverEnv } from '@/lib/env';
 
 type OriginEnv = Pick<typeof serverEnv, 'appUrl' | 'isProduction'>;
@@ -41,10 +42,8 @@ function requestSourceOrigin(request: Request) {
 export function validateMutationOrigin(request: Request, env: OriginEnv = serverEnv): NextResponse | null {
   const sourceOrigin = requestSourceOrigin(request);
   if (!sourceOrigin) {
-    return env.isProduction ? forbidden('Anfrage wurde wegen fehlender Herkunft blockiert.') : null;
+    return env.isProduction ? forbidden(t('api.missingOrigin')) : null;
   }
 
-  return allowedOrigins(request, env).has(sourceOrigin)
-    ? null
-    : forbidden('Anfrage wurde wegen ungültiger Herkunft blockiert.');
+  return allowedOrigins(request, env).has(sourceOrigin) ? null : forbidden(t('api.invalidOrigin'));
 }

@@ -1,5 +1,6 @@
 import sharp from 'sharp';
 import { nanoid } from 'nanoid';
+import { t } from '@/lib/i18n';
 import { putAsset } from './storage';
 
 const allowed = new Set(['image/jpeg', 'image/png', 'image/gif']);
@@ -13,11 +14,7 @@ export const UPLOAD_LIMITS = {
 } as const;
 
 export type UploadErrorCode =
-  | 'FILE_TOO_LARGE'
-  | 'IMAGE_DIMENSIONS_TOO_LARGE'
-  | 'IMAGE_PIXELS_TOO_LARGE'
-  | 'INVALID_IMAGE'
-  | 'UNSUPPORTED_FORMAT';
+  'FILE_TOO_LARGE' | 'IMAGE_DIMENSIONS_TOO_LARGE' | 'IMAGE_PIXELS_TOO_LARGE' | 'INVALID_IMAGE' | 'UNSUPPORTED_FORMAT';
 
 export class UploadValidationError extends Error {
   constructor(
@@ -42,14 +39,16 @@ function assertImageDimensions(width: number, height: number, frameCount: number
   if (width > UPLOAD_LIMITS.maxWidth || height > UPLOAD_LIMITS.maxHeight) {
     throw new UploadValidationError(
       'IMAGE_DIMENSIONS_TOO_LARGE',
-      `Bild darf maximal ${UPLOAD_LIMITS.maxWidth}×${UPLOAD_LIMITS.maxHeight} Pixel groß sein.`,
+      t('validation.imageDimensionsTooLarge')
+        .replace('{width}', String(UPLOAD_LIMITS.maxWidth))
+        .replace('{height}', String(UPLOAD_LIMITS.maxHeight)),
     );
   }
 
   if (width * height * frameCount > UPLOAD_LIMITS.maxPixels) {
     throw new UploadValidationError(
       'IMAGE_PIXELS_TOO_LARGE',
-      `Bild darf maximal ${UPLOAD_LIMITS.maxPixels.toLocaleString('de-DE')} Pixel enthalten.`,
+      t('validation.imagePixelsTooLarge').replace('{pixels}', UPLOAD_LIMITS.maxPixels.toLocaleString('de-DE')),
     );
   }
 }
@@ -70,20 +69,20 @@ async function normalizeImage(buffer: Buffer, format: string, width?: number) {
 export async function validateAndUpload(file: File, upload: AssetUploader = putAsset, tenantId?: string) {
   const input = Buffer.from(await file.arrayBuffer());
   if (input.length > UPLOAD_LIMITS.maxBytes)
-    throw new UploadValidationError('FILE_TOO_LARGE', 'Datei ist größer als 10 MB.');
+    throw new UploadValidationError('FILE_TOO_LARGE', t('validation.fileTooLarge'));
 
   let inputMetadata: sharp.Metadata;
   try {
     inputMetadata = await sharp(input, { animated: true }).metadata();
   } catch {
-    throw new UploadValidationError('INVALID_IMAGE', 'Bilddatei konnte nicht gelesen werden.');
+    throw new UploadValidationError('INVALID_IMAGE', t('validation.imageUnreadable'));
   }
 
   const mimeType = mimeFromSharpFormat(inputMetadata.format);
   if (!allowed.has(mimeType))
-    throw new UploadValidationError('UNSUPPORTED_FORMAT', 'Nur JPEG, PNG und GIF sind erlaubt.');
+    throw new UploadValidationError('UNSUPPORTED_FORMAT', t('validation.unsupportedImageFormat'));
   if (!inputMetadata.width || !inputMetadata.height)
-    throw new UploadValidationError('INVALID_IMAGE', 'Bilddimensionen konnten nicht gelesen werden.');
+    throw new UploadValidationError('INVALID_IMAGE', t('validation.imageDimensionsUnreadable'));
   assertImageDimensions(inputMetadata.width, inputMetadata.height, inputMetadata.pages ?? 1);
 
   const output = await normalizeImage(input, inputMetadata.format!, inputMetadata.width);

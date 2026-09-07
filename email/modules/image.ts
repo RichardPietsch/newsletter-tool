@@ -6,6 +6,7 @@ import {
 } from '@/lib/newsletter/module-styles';
 export function renderImage(b: ImageBlock, colors: NewsletterColorPalette = styles.colors) {
   if (!b.src) return '';
-  const img = `<mj-image src="${b.src}" alt="${b.decorative ? '' : b.alt || ''}" padding="0 24px 20px" />`;
-  return `<mj-section css-class="${classes.surface}" background-color="${colors.surface}"><mj-column>${b.href ? `<mj-wrapper padding="0"><mj-column><mj-text><a href="${b.href}">${img}</a></mj-text></mj-column></mj-wrapper>` : img}</mj-column></mj-section>`;
+  const href = b.href ? ` href="${b.href}"` : '';
+  const image = `<mj-image src="${b.src}" alt="${b.decorative ? '' : b.alt || ''}"${href} padding="0" border-radius="4px" />`;
+  return `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="0"><mj-column>${image}</mj-column></mj-section>`;
 }

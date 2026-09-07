@@ -12,6 +12,7 @@ import { db } from '@/lib/db';
 import { assets } from '@/lib/db/schema';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
 import { recordAuditEvent } from '@/lib/db/audit-events';
+import { t } from '@/lib/i18n';
 
 const assetUpdateSchema = z.object({
   id: z.string().min(1),
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
       { event: 'asset.upload.rejected', requestId, userId: auth.context.user.id, tenantId: auth.context.tenant.id },
       { reason: 'invalid_form_data' },
     );
-    return badRequest('Ungültige Upload-Daten.');
+    return badRequest(t('api.invalidUploadData'));
   }
 
   const file = form.get('file');
@@ -49,7 +50,7 @@ export async function POST(req: Request) {
       { event: 'asset.upload.rejected', requestId, userId: auth.context.user.id, tenantId: auth.context.tenant.id },
       { reason: 'missing_file' },
     );
-    return badRequest('Datei fehlt');
+    return badRequest(t('api.missingFile'));
   }
   let data: Awaited<ReturnType<typeof validateAndUpload>>;
   try {

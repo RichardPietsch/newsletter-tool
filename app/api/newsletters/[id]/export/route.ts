@@ -13,6 +13,7 @@ import { safeMigrateNewsletterDocument } from '@/lib/newsletter/migrations';
 import { getTenantSettings } from '@/lib/settings/store';
 import { logger, requestIdFrom } from '@/lib/logging/logger';
 import { recordAuditEvent } from '@/lib/db/audit-events';
+import { t } from '@/lib/i18n';
 
 type NewsletterExportRouteContext = {
   params: Promise<{ id: string }>;
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
 
   const migratedDocument = safeMigrateNewsletterDocument(newsletter.document);
   if (!migratedDocument.success)
-    return validationError('Gespeicherter Newsletter ist ungültig.', [
+    return validationError(t('api.invalidSavedNewsletter'), [
       { code: migratedDocument.error.code, message: migratedDocument.error.message, path: ['document'] },
     ]);
   const document = migratedDocument.data;
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
 
   if (format === 'yml') {
     if (serverEnv.isProduction) {
-      return forbidden('YML-Template-Export ist nur in der lokalen Entwicklungsumgebung verfügbar.');
+      return forbidden(t('api.localTemplateExportOnly'));
     }
 
     const yml = serializeNewsletterTemplate({
@@ -80,7 +81,7 @@ export async function GET(request: NextRequest, { params }: NewsletterExportRout
   const issues = validateNewsletterForExport(document);
   if (issues.length > 0) {
     logger.warn({ ...logContext, event: 'newsletter.export.validation_failed' }, { issueCount: issues.length });
-    return validationError('Newsletter kann nicht exportiert werden.', issues);
+    return validationError(t('api.newsletterExportFailed'), issues);
   }
 
   const settings = await getTenantSettings(auth.context.tenant.id);

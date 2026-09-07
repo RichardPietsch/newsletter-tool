@@ -35,9 +35,7 @@ export function AssetPickerDialog({
     setLoading(true);
     setError(undefined);
     fetch('/api/assets')
-      .then((response) =>
-        response.ok ? response.json() : Promise.reject(new Error('Medien konnten nicht geladen werden.')),
-      )
+      .then((response) => (response.ok ? response.json() : Promise.reject(new Error(t('misc.mediaLoadFailed')))))
       .then((payload: Asset[] | { assets?: Asset[] }) => {
         if (active) setAssets(assetListFromPayload(payload));
       })
@@ -61,8 +59,8 @@ export function AssetPickerDialog({
     setUploading(false);
 
     if (!response.ok) {
-      const payload = await response.json().catch(() => ({ error: 'Upload fehlgeschlagen.' }));
-      setError(getApiErrorMessage(payload, 'Upload fehlgeschlagen.'));
+      const payload = await response.json().catch(() => ({ error: t('misc.uploadFailed') }));
+      setError(getApiErrorMessage(payload, t('misc.uploadFailed')));
       return;
     }
 
@@ -80,7 +78,7 @@ export function AssetPickerDialog({
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-slate-600">{t('misc.assetPickerIntro')}</p>
           <label className="shrink-0 cursor-pointer rounded bg-blue-700 px-4 py-2 text-sm font-medium text-white">
-            {uploading ? 'Upload läuft …' : 'Bild hochladen'}
+            {uploading ? t('misc.uploadInProgress') : t('misc.uploadImage')}
             <input
               className="sr-only"
               type="file"

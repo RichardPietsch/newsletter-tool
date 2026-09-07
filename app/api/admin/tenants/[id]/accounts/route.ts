@@ -7,6 +7,7 @@ import { validateMutationOrigin } from '@/lib/api/origin';
 import { createTenantAccount } from '@/lib/admin/operations';
 import { requireAdminApiContext } from '@/lib/auth/current-user';
 import { requestIdFrom } from '@/lib/logging/logger';
+import { t } from '@/lib/i18n';
 
 type Context = { params: Promise<{ id: string }> };
 const schema = z.object({ name: z.string().trim().min(1).max(160), email: z.string().trim().email().max(320) });
@@ -19,7 +20,7 @@ export async function POST(request: Request, { params }: Context) {
   const { id } = await params;
   const form = await request.formData();
   const parsed = schema.safeParse({ name: form.get('name'), email: form.get('email') });
-  if (!parsed.success) return badRequest('Ungültige Accountdaten.');
+  if (!parsed.success) return badRequest(t('api.invalidAccountData'));
   await createTenantAccount(id, parsed.data, auth.context.user, requestIdFrom(request));
   return NextResponse.redirect(publicAppUrl(`/admin/tenants/${id}`), 303);
 }

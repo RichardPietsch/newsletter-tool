@@ -15,6 +15,7 @@ import { seedNewsletterTemplatesForTenant } from '@/lib/newsletter/template-file
 import { normalizeEmail } from '@/lib/auth/config';
 import { createDefaultSettings } from '@/lib/settings/defaults';
 import { serializeTenantSettings } from '@/lib/settings/persistence';
+import { t } from '@/lib/i18n';
 
 type Actor = { id: string };
 
@@ -28,7 +29,7 @@ export async function createTenant(
     eventType: 'tenant.created',
     tenantId: id,
     actorUserId: actor.id,
-    summary: 'Mandant angelegt.',
+    summary: t('audit.tenantCreated'),
     correlationId,
     entityType: 'tenant',
     entityId: id,
@@ -64,7 +65,7 @@ export async function setTenantStatus(tenantId: string, status: TenantStatus, ac
     eventType,
     tenantId,
     actorUserId: actor.id,
-    summary: status === 'active' ? 'Mandant reaktiviert.' : 'Mandant deaktiviert.',
+    summary: status === 'active' ? t('audit.tenantReactivated') : t('audit.tenantDeactivated'),
     correlationId,
     entityType: 'tenant',
     entityId: tenantId,
@@ -99,7 +100,7 @@ export async function createTenantAccount(
     eventType: 'account.created',
     tenantId,
     actorUserId: actor.id,
-    summary: 'Mitarbeiter-Account angelegt.',
+    summary: t('audit.accountCreated'),
     correlationId,
     entityType: 'user',
     entityId: id,
@@ -131,7 +132,7 @@ export async function setAccountStatus(
     eventType,
     tenantId,
     actorUserId: actor.id,
-    summary: status === 'active' ? 'Mitarbeiter-Account reaktiviert.' : 'Mitarbeiter-Account deaktiviert.',
+    summary: status === 'active' ? t('audit.accountReactivated') : t('audit.accountDeactivated'),
     correlationId,
     entityType: 'user',
     entityId: userId,
