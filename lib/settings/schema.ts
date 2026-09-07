@@ -37,9 +37,13 @@ export const headerVariantSchema = z.object({
   imageUrl: z.string().url(),
   alt: z.string().min(1),
   roundedCorners: z.boolean().default(false),
+  usableAsSectionHeader: z.boolean().default(false),
 });
 
-const persistedHeaderVariantSchema = headerVariantSchema.extend({ roundedCorners: z.boolean() });
+const persistedHeaderVariantSchema = headerVariantSchema.extend({
+  roundedCorners: z.boolean(),
+  usableAsSectionHeader: z.boolean(),
+});
 
 export const globalSettingsSchema = z.object({
   headerVariants: z.array(headerVariantSchema).default([]),
@@ -47,7 +51,7 @@ export const globalSettingsSchema = z.object({
   colors: newsletterDesignColorsSchema,
 });
 
-export const CURRENT_TENANT_SETTINGS_SCHEMA_VERSION = 2 as const;
+export const CURRENT_TENANT_SETTINGS_SCHEMA_VERSION = 3 as const;
 
 export const persistedGlobalSettingsSchema = z
   .object({

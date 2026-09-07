@@ -1,5 +1,5 @@
 import mjml2html from 'mjml';
-import type { GlobalSettings } from '@/lib/settings/schema';
+import { ROUNDED_HEADER_IMAGE_RADIUS_PX, type GlobalSettings } from '@/lib/settings/schema';
 import {
   newsletterDocumentSchema,
   type NewsletterContentBlock,
@@ -23,6 +23,7 @@ import {
   type NewsletterColorPalette,
 } from '@/lib/newsletter/module-styles';
 import { logger } from '@/lib/logging/logger';
+import { resolveSectionHeaderImage } from '@/lib/newsletter/section-header';
 
 const moduleGap = (colors: NewsletterColorPalette) =>
   `<mj-section css-class="${classes.background}" background-color="${colors.background}" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>`;
@@ -48,15 +49,20 @@ function renderContentBlock(block: NewsletterContentBlock, colors: NewsletterCol
 function renderBackgroundSection(
   block: Extract<NewsletterDocument['blocks'][number], { type: 'backgroundSection' }>,
   colors: NewsletterColorPalette,
+  settings?: GlobalSettings,
 ) {
   const isBlue = block.background === 'blue';
   const backgroundClass = isBlue ? classes.featureBackground : classes.surface;
   const backgroundColor = isBlue ? colors.featureBackground : colors.surface;
+  const sectionHeaderImage = resolveSectionHeaderImage(block, settings);
+  const sectionHeader = sectionHeaderImage
+    ? `<mj-section css-class="${backgroundClass}" background-color="${backgroundColor}" padding="0"><mj-column><mj-image src="${sectionHeaderImage.src}" alt="${sectionHeaderImage.alt}" width="200px" align="center" padding="0 32px 32px" border-radius="${sectionHeaderImage.roundedCorners ? `${ROUNDED_HEADER_IMAGE_RADIUS_PX}px` : '0'}" /></mj-column></mj-section>`
+    : '';
   const backgroundGap = `<mj-section css-class="${backgroundClass}" background-color="${backgroundColor}" padding="0"><mj-column><mj-spacer height="32px" /></mj-column></mj-section>`;
   const content = block.blocks
     .map((child, index) => `${index > 0 ? `${backgroundGap}\n` : ''}${renderContentBlock(child, colors)}`)
     .join('\n');
-  return `<mj-wrapper full-width="full-width" css-class="${backgroundClass}" background-color="${backgroundColor}" padding="32px 0">${content}</mj-wrapper>`;
+  return `<mj-wrapper full-width="full-width" css-class="${backgroundClass}" background-color="${backgroundColor}" padding="32px 0">${sectionHeader}${content}</mj-wrapper>`;
 }
 
 export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSettings) {
@@ -69,7 +75,7 @@ export function renderNewsletter(input: NewsletterDocument, settings?: GlobalSet
       const needsGap = index > 0 && !(previousBlock?.type === 'header' && b.type === 'text');
       const rendered =
         b.type === 'backgroundSection'
-          ? renderBackgroundSection(b, lightColors)
+          ? renderBackgroundSection(b, lightColors, settings)
           : b.type === 'header'
             ? renderHeader(b.branding, b.headerVariantId, settings, {
                 squareBottom: doc.blocks[index + 1]?.type === 'text',

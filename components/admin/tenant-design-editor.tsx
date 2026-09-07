@@ -290,6 +290,7 @@ export function TenantDesignEditor({
           imageUrl: asset.publicUrl,
           alt: t('admin.defaultHeaderAlt'),
           roundedCorners: false,
+          usableAsSectionHeader: false,
         },
       ],
     }));
@@ -478,6 +479,23 @@ export function TenantDesignEditor({
                     }}
                   />
                   {t('misc.roundHeaderImage')}
+                </label>
+                <label className="mt-3 flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 rounded border-slate-300"
+                    checked={variant.usableAsSectionHeader}
+                    onChange={(event) => {
+                      setSettings((current) => ({
+                        ...current,
+                        headerVariants: current.headerVariants.map((item) =>
+                          item.id === variant.id ? { ...item, usableAsSectionHeader: event.target.checked } : item,
+                        ),
+                      }));
+                      setStatus('idle');
+                    }}
+                  />
+                  {t('misc.useAsSectionHeader')}
                 </label>
                 <button
                   type="button"

@@ -64,6 +64,15 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
   const images: ExportImageCandidate[] = [];
   const collectBlock = (block: NewsletterBlock, blockPath: string) => {
     if (block.type === 'backgroundSection') {
+      if (block.sectionHeader?.source === 'asset') {
+        images.push({
+          blockId: block.id,
+          blockType: block.type,
+          path: `${blockPath}.sectionHeader.src`,
+          src: block.sectionHeader.src,
+          alt: block.sectionHeader.alt,
+        });
+      }
       block.blocks.forEach((child, childIndex) => collectBlock(child, `${blockPath}.blocks[${childIndex}]`));
       return;
     }

@@ -77,4 +77,20 @@ describe('export validation', () => {
     expect(issueCodes(featuredDocument)).toContain('LOCAL_IMAGE_URL');
     expect(issueCodes(gridDocument)).toContain('PRIVATE_IMAGE_URL');
   });
+
+  it('checks media images used as section headers', () => {
+    const background = createBlock('backgroundSection');
+    if (background.type !== 'backgroundSection') throw new Error('Hintergrundbereich erwartet');
+    const document = documentWithBlock({
+      ...background,
+      sectionHeader: {
+        source: 'asset',
+        assetId: 'partner-logo',
+        src: 'http://localhost:9000/partner-logo.png',
+        alt: 'Partnerlogo',
+      },
+    });
+
+    expect(issueCodes(document)).toContain('LOCAL_IMAGE_URL');
+  });
 });

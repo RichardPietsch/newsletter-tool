@@ -7,6 +7,7 @@ import { requireAdminPageContext } from '@/lib/auth/current-user';
 import { db } from '@/lib/db';
 import { auditEvents, newsletters, tenants, users } from '@/lib/db/schema';
 import { t } from '@/lib/i18n';
+import { usedHeaderVariantIdsFromDocument } from '@/lib/newsletter/section-header';
 import { getTenantSettings } from '@/lib/settings/store';
 
 export default async function TenantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,14 +25,7 @@ export default async function TenantDetailPage({ params }: { params: Promise<{ i
     getTenantSettings(id),
     db.select({ document: newsletters.document }).from(newsletters).where(eq(newsletters.tenantId, id)),
   ]);
-  const usedHeaderVariantIds = newsletterRows.flatMap((row) => {
-    const document = row.document as { blocks?: Array<{ type?: string; headerVariantId?: string }> };
-    return (
-      document.blocks
-        ?.filter((block) => block.type === 'header' && block.headerVariantId)
-        .map((block) => block.headerVariantId as string) ?? []
-    );
-  });
+  const usedHeaderVariantIds = newsletterRows.flatMap((row) => usedHeaderVariantIdsFromDocument(row.document));
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 p-6">
