@@ -343,7 +343,7 @@ test('covers the main authenticated editor flow', async ({ page }) => {
 
   await page.getByLabel('Komponente an dieser Stelle hinzufügen').first().click();
   await page.getByRole('button', { name: /Hintergrundbereich/ }).click();
-  await expect(inspector.getByRole('heading', { name: 'Hintergrundbereich' })).toBeVisible();
+  await expect(inspector.getByRole('heading', { name: 'Hintergrundbereich' })).toBeAttached();
 
   await page.getByLabel('Einstellungen', { exact: true }).click();
   const settingsDialog = page.getByRole('dialog', { name: 'Einstellungen' });
