@@ -13,7 +13,7 @@ export const allowedUrl = (v: string) => {
 const url = z.string().trim().refine(allowedUrl, t('validation.invalidUrl'));
 const base = z.object({ id: z.string().min(1), locked: z.boolean().optional() });
 
-export const allowedTextColors = [...newsletterEditableTextColors, '#17303d', ...newsletterLegacyTextColors] as const;
+export const allowedTextColors = [...newsletterEditableTextColors, ...newsletterLegacyTextColors] as const;
 const allowedTextColorSchema = z.enum(allowedTextColors);
 const headingAttrsSchema = z.object({ level: z.union([z.literal(2), z.literal(3)]) }).strict();
 const linkAttrsSchema = z
@@ -90,11 +90,9 @@ const imageFields = {
   assetId: z.string().optional(),
   src: url.optional().or(z.literal('')),
   alt: z.string().optional(),
-  decorative: z.boolean().default(false),
-  href: url.optional().or(z.literal('')),
 };
 export const imageBlockSchema = base.extend({ type: z.literal('image'), ...imageFields }).superRefine((v, c) => {
-  if ((v.src || v.assetId) && !v.decorative && !v.alt?.trim())
+  if ((v.src || v.assetId) && !v.alt?.trim())
     c.addIssue({ code: 'custom', path: ['alt'], message: t('validation.altRequired') });
 });
 export const eventItemSchema = z
@@ -115,7 +113,7 @@ export const eventItemSchema = z
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
       c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
-    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+    if (v.image?.src && !v.image.alt?.trim())
       c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const eventBlockSchema = base
@@ -136,7 +134,7 @@ export const eventBlockSchema = base
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
       c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
-    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+    if (v.image?.src && !v.image.alt?.trim())
       c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const featuredEventBlockSchema = base
@@ -158,7 +156,7 @@ export const featuredEventBlockSchema = base
   .superRefine((v, c) => {
     if (v.buttonUrl && !v.buttonLabel?.trim())
       c.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
-    if (v.image?.src && !v.image.decorative && !v.image.alt?.trim())
+    if (v.image?.src && !v.image.alt?.trim())
       c.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
   });
 export const quoteBlockSchema = base.extend({

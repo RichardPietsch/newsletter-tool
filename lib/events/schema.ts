@@ -24,7 +24,6 @@ export const eventImageSchema = z
     assetId: z.string().optional(),
     src: optionalUrl,
     alt: z.string().max(300).optional(),
-    decorative: z.boolean().default(false),
   })
   .optional();
 
@@ -45,7 +44,7 @@ export const eventInputSchema = z
     if (value.buttonUrl && !value.buttonLabel) {
       context.addIssue({ code: 'custom', path: ['buttonLabel'], message: t('validation.buttonLabelRequired') });
     }
-    if (value.image?.src && !value.image.decorative && !value.image.alt?.trim()) {
+    if (value.image?.src && !value.image.alt?.trim()) {
       context.addIssue({ code: 'custom', path: ['image', 'alt'], message: t('validation.altRequired') });
     }
   });

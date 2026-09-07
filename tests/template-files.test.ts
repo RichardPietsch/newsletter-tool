@@ -38,7 +38,6 @@ describe('newsletter template files', () => {
       image: {
         src: 'http://localhost:3000/assets/newsletter-templates/demo-assets/demo-whisky.jpg',
         alt: 'Placeholder',
-        decorative: false,
       },
     });
 
@@ -59,7 +58,6 @@ describe('newsletter template files', () => {
       assetId: 'asset-whisky',
       src: 'https://example.com/assets/newsletter-templates/demo-assets/demo-whisky.jpg',
       alt: 'Whiskytasting im Anglo-German Club',
-      decorative: false,
     });
   });
 });

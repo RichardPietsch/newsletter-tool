@@ -89,7 +89,6 @@ export function FeaturedEventInspector({
         assetId: asset.id,
         src: asset.publicUrl,
         alt: block.image?.alt || asset.altText || asset.title || asset.originalFilename.replace(/\.[^.]+$/, ''),
-        decorative: false,
       },
     });
   }
@@ -117,8 +116,8 @@ export function FeaturedEventInspector({
           value={block.background ?? 'blue'}
           onChange={(event) => onChange({ background: event.target.value as FeaturedEventBlock['background'] })}
         >
-          <option value="blue">{t('misc.darkBlue')}</option>
-          <option value="white">{t('misc.white')}</option>
+          <option value="blue">{t('misc.dark')}</option>
+          <option value="white">{t('misc.light')}</option>
         </select>
       </label>
       <div className="space-y-2">
@@ -135,7 +134,7 @@ export function FeaturedEventInspector({
         {block.image?.src ? (
           <img
             src={block.image.src}
-            alt={block.image.decorative ? '' : block.image.alt || ''}
+            alt={block.image.alt || ''}
             className="max-h-40 w-full rounded border object-contain"
           />
         ) : (
@@ -143,42 +142,14 @@ export function FeaturedEventInspector({
         )}
         <label className="block text-sm font-medium">
           {t('image.alt')}
-          {block.image?.decorative ? '' : ' *'}
+          {block.image?.src ? ' *' : ''}
           <input
             className={`mt-1 w-full rounded border p-2 ${hasIssue('image.alt') ? 'border-red-500 outline outline-2 outline-red-500' : ''}`}
             value={block.image?.alt || ''}
-            disabled={block.image?.decorative}
-            onChange={(event) =>
-              onChange({ image: { ...(block.image || { decorative: false }), alt: event.target.value } })
-            }
+            required={Boolean(block.image?.src)}
+            onChange={(event) => onChange({ image: { ...(block.image || {}), alt: event.target.value } })}
           />
         </label>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={block.image?.decorative ?? false}
-            onChange={(event) =>
-              onChange({
-                image: {
-                  ...(block.image || { src: '', decorative: false }),
-                  decorative: event.target.checked,
-                  alt: event.target.checked ? '' : block.image?.alt,
-                },
-              })
-            }
-          />
-          {t('image.decorative')}
-        </label>
-        <details className="text-sm text-slate-600">
-          <summary>{t('image.manualUrl')}</summary>
-          <input
-            className="mt-2 w-full rounded border p-2"
-            value={block.image?.src || ''}
-            onChange={(event) =>
-              onChange({ image: { ...(block.image || { decorative: false }), src: event.target.value } })
-            }
-          />
-        </details>
       </div>
       <Field label={t('misc.overline')} value={block.overline} onChange={(overline) => onChange({ overline })} />
       <Field

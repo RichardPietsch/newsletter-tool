@@ -15,8 +15,8 @@ function documentWithBlock(block: NewsletterBlock): NewsletterDocument {
   return insertBlock(createDefaultDocument('Export Validation'), 1, block);
 }
 
-function imageDocument(src: string, alt = 'Testbild', decorative = false) {
-  return documentWithBlock({ ...(createBlock('image') as ImageBlock), src, alt, decorative });
+function imageDocument(src: string, alt = 'Testbild') {
+  return documentWithBlock({ ...(createBlock('image') as ImageBlock), src, alt });
 }
 
 function issueCodes(document: NewsletterDocument, mode: 'production' | 'development' = 'production') {
@@ -48,23 +48,18 @@ describe('export validation', () => {
     ).toEqual([]);
   });
 
-  it('requires alt text for non-decorative images and accepts decorative empty-alt images', () => {
+  it('requires alt text for every image', () => {
     expect(issueCodes(imageDocument('https://assets.example.com/test.jpg', ''))).toContain('MISSING_IMAGE_ALT');
-    expect(
-      validateNewsletterForExport(imageDocument('https://assets.example.com/test.jpg', '', true), {
-        mode: 'production',
-      }),
-    ).toEqual([]);
   });
 
   it('checks event, featured event and event grid images', () => {
     const eventDocument = documentWithBlock({
       ...(createBlock('event') as EventBlock),
-      image: { src: 'http://localhost:9000/event.jpg', alt: 'Event', decorative: false },
+      image: { src: 'http://localhost:9000/event.jpg', alt: 'Event' },
     });
     const featuredDocument = documentWithBlock({
       ...(createBlock('featuredEvent') as FeaturedEventBlock),
-      image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event', decorative: false },
+      image: { src: 'http://minio:9000/featured.jpg', alt: 'Featured Event' },
     });
     const eventGrid = createBlock('eventGrid') as EventGridBlock;
     const gridDocument = documentWithBlock({
@@ -72,7 +67,7 @@ describe('export validation', () => {
       items: [
         {
           ...eventGrid.items[0],
-          image: { src: 'http://192.168.1.10/grid.jpg', alt: 'Grid Event', decorative: false },
+          image: { src: 'http://192.168.1.10/grid.jpg', alt: 'Grid Event' },
         },
         eventGrid.items[1],
       ],

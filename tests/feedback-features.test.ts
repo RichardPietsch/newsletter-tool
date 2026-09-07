@@ -13,7 +13,7 @@ import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import {
   insertBlock,
   insertBlockIntoBackground,
-  moveBlockIntoBackground,
+  moveBlock,
   removeBlockFromBackground,
 } from '@/lib/newsletter/operations';
 import {
@@ -69,9 +69,7 @@ describe('user-testing feedback features', () => {
       title: 'Im Newsletter überarbeitet',
       image: {
         src: 'https://example.com/event.jpg',
-        href: 'https://example.com/not-part-of-the-register-image',
         alt: 'Eventmotiv',
-        decorative: false,
       },
     };
     const featuredBlock = {
@@ -84,7 +82,7 @@ describe('user-testing feedback features', () => {
     const eventInput = eventBlockToInput(eventBlock);
     expect(eventInput).toMatchObject({ title: 'Im Newsletter überarbeitet', category: source.category });
     expect(eventInput).not.toHaveProperty('sourceEventId');
-    expect(eventInput.image).not.toHaveProperty('href');
+    expect(eventInput.image).toEqual({ src: 'https://example.com/event.jpg', alt: 'Eventmotiv' });
     expect(featuredEventBlockToInput(featuredBlock)).toMatchObject({
       title: 'Hervorgehobenes Event',
       category: 'Clubabend',
@@ -104,21 +102,24 @@ describe('user-testing feedback features', () => {
     ).toBe(true);
   });
 
-  it('moves modules into and out of full-width background sections', () => {
+  it('moves modules within and out of full-width background sections', () => {
     let document = createDefaultDocument('Hintergrund-Test');
-    const text = createBlock('text');
     const background = createBlock('backgroundSection');
-    document = insertBlock(document, 1, text);
-    document = insertBlock(document, 2, background);
-    document = moveBlockIntoBackground(document, text.id, background.id);
+    document = insertBlock(document, 1, background);
+    document = insertBlockIntoBackground(document, background.id, 1, createBlock('quote') as NewsletterContentBlock);
 
     const section = document.blocks.find((block) => block.id === background.id);
-    expect(section?.type === 'backgroundSection' ? section.blocks.some((block) => block.id === text.id) : false).toBe(
-      true,
-    );
+    if (section?.type !== 'backgroundSection') throw new Error('Hintergrundbereich erwartet');
+    const quote = section.blocks[1];
+    document = moveBlock(document, quote.id, -1);
+    const reordered = document.blocks.find((block) => block.id === background.id);
+    expect(reordered?.type === 'backgroundSection' ? reordered.blocks.map((block) => block.type) : []).toEqual([
+      'quote',
+      'text',
+    ]);
 
-    document = removeBlockFromBackground(document, text.id);
-    expect(document.blocks.some((block) => block.id === text.id)).toBe(true);
+    document = removeBlockFromBackground(document, quote.id);
+    expect(document.blocks.some((block) => block.id === quote.id)).toBe(true);
     expect(newsletterDocumentSchema.safeParse(document).success).toBe(true);
   });
 

@@ -41,8 +41,8 @@ export function ModulePickerDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-[100] bg-slate-950/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-[101] w-[720px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-8 shadow-xl">
+        <Dialog.Overlay className="fixed inset-0 z-[200] bg-slate-950/50" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-[201] w-[720px] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-8 shadow-xl">
           <Dialog.Title className="text-2xl font-bold">{t('misc.addModule')}</Dialog.Title>
           <div className="mt-6 grid grid-cols-3 gap-4">
             {cards

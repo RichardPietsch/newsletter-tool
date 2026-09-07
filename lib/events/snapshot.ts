@@ -8,7 +8,6 @@ function imageSnapshot(event: EventRecord) {
         assetId: event.image.assetId,
         src: event.image.src,
         alt: event.image.alt,
-        decorative: event.image.decorative ?? false,
       }
     : undefined;
 }
@@ -61,7 +60,6 @@ function imageInput(image: EventBlock['image'] | EventItem['image'] | FeaturedEv
     assetId: image.assetId,
     src: image.src,
     alt: image.alt,
-    decorative: image.decorative ?? false,
   };
 }
 

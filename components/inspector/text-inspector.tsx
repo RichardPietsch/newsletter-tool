@@ -51,8 +51,8 @@ export function TextInspector() {
               })
             }
           >
-            <option value="white">{t('misc.defaultWhite')}</option>
-            <option value="blue">{t('misc.featureBlue')}</option>
+            <option value="white">{t('misc.light')}</option>
+            <option value="blue">{t('misc.dark')}</option>
           </select>
         </label>
       ) : null}

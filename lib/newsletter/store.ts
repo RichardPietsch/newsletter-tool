@@ -9,7 +9,6 @@ import {
   insertBlock,
   insertBlockIntoBackground,
   moveBlock,
-  moveBlockIntoBackground,
   removeBlockFromBackground,
   updateBlock,
 } from './operations';
@@ -47,7 +46,6 @@ type StoreActions = {
     type: Exclude<InsertableBlockType, 'backgroundSection'>,
   ) => void;
   removeFromBackground: (id: string) => void;
-  moveIntoBackground: (id: string, backgroundId: string) => void;
   delete: (id: string) => void;
   move: (id: string, direction: -1 | 1) => void;
   update: (id: string, patch: NewsletterBlockPatch) => void;
@@ -103,12 +101,6 @@ export const useNewsletterStore = create<NewsletterStore>((set, get) => ({
     const state = get();
     if (!state.initialized) return;
     const doc = commitDocument(state, removeBlockFromBackground(state.doc, id));
-    set({ doc, selectedId: id });
-  },
-  moveIntoBackground: (id, backgroundId) => {
-    const state = get();
-    if (!state.initialized) return;
-    const doc = commitDocument(state, moveBlockIntoBackground(state.doc, id, backgroundId));
     set({ doc, selectedId: id });
   },
   delete: (id) => {

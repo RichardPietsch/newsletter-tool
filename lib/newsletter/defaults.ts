@@ -92,5 +92,5 @@ export function createBlock(
       background: 'neutral',
       blocks: [{ id: nanoid(), type: 'text', content: emptyTiptapDoc, background: 'white' }],
     };
-  return { id: nanoid(), type: 'image', decorative: false, alt: '' };
+  return { id: nanoid(), type: 'image', alt: '' };
 }

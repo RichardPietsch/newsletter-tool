@@ -18,8 +18,10 @@ import type {
   NewsletterDocument,
   TextBlock,
 } from '@/lib/newsletter/schema';
+import { imageBlockSchema } from '@/lib/newsletter/schema';
 import {
   newsletterColorPalettes,
+  newsletterColorVariables,
   newsletterEmailClasses,
   newsletterModuleStyles,
   newsletterPreviewCssVariables,
@@ -68,7 +70,6 @@ function imageBlock(): ImageBlock {
     ...(createBlock('image') as ImageBlock),
     src: 'https://assets.example.com/newsletter/hero.jpg',
     alt: 'Clubabend im Ballsaal',
-    decorative: false,
   };
 }
 
@@ -145,6 +146,38 @@ describe('MJML newsletter rendering', () => {
     expect(html).toContain('#223344');
     expect(html).toContain('#334455');
     expect(html).toContain('#abcdef');
+  });
+
+  it('resolves selectable text emphasis colors from the tenant theme', () => {
+    const settings = createDefaultSettings();
+    settings.colors.light.muted = '#627381';
+    settings.colors.light.accent = '#b14242';
+    const block = richTextBlock();
+    block.content = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Sekundär',
+              marks: [{ type: 'textStyle', attrs: { color: newsletterColorVariables.muted } }],
+            },
+            {
+              type: 'text',
+              text: 'Akzent',
+              marks: [{ type: 'textStyle', attrs: { color: newsletterColorVariables.accent } }],
+            },
+          ],
+        },
+      ],
+    };
+
+    const html = renderNewsletter(documentWithBlocks([block]), settings);
+
+    expect(html).toContain(`<span class="${newsletterEmailClasses.muted}" style="color:#627381">Sekundär</span>`);
+    expect(html).toContain(`<span class="${newsletterEmailClasses.accent}" style="color:#b14242">Akzent</span>`);
   });
 
   it('renders text module paragraphs, H2, H3 and links as email HTML', () => {
@@ -229,8 +262,9 @@ describe('MJML newsletter rendering', () => {
     expect(html).toContain('alt="Clubabend im Ballsaal"');
   });
 
-  it('renders image modules full-width without a surface card and with rounded corners', () => {
-    const html = renderNewsletter(documentWithBlocks([{ ...imageBlock(), href: 'https://example.com/gallery' }]));
+  it('renders image modules full-width with rounded corners and without an image link', () => {
+    const legacyImage = imageBlockSchema.parse({ ...imageBlock(), href: 'https://example.com/gallery' });
+    const html = renderNewsletter(documentWithBlocks([legacyImage]));
     const mjml = renderImage(imageBlock());
 
     expect(mjml).toContain(`css-class="${newsletterEmailClasses.background}"`);
@@ -238,7 +272,7 @@ describe('MJML newsletter rendering', () => {
     expect(mjml).toContain('padding="0" border-radius="4px"');
     expect(html).toContain('width="600"');
     expect(html).toContain('border-radius:4px;');
-    expect(html).toContain('href="https://example.com/gallery"');
+    expect(html).not.toContain('href="https://example.com/gallery"');
   });
 
   it('keeps the configured gap between two exported event-grid cards', () => {

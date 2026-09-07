@@ -57,18 +57,17 @@ function demoFilenameFromUrl(src?: string) {
 }
 
 function applyDemoImage(
-  image: { src?: string; alt?: string; decorative?: boolean; assetId?: string; href?: string } | undefined,
+  image: { src?: string; alt?: string; assetId?: string } | undefined,
   demoAssets: DemoAssetSeedMap,
 ) {
   const filename = demoFilenameFromUrl(image?.src);
-  if (!filename || !demoAssets[filename]) return image ? { ...image, decorative: image.decorative ?? false } : image;
+  if (!filename || !demoAssets[filename]) return image;
   const asset = demoAssets[filename];
   return {
     ...image,
     assetId: asset.id,
     src: asset.publicUrl,
     alt: asset.altText,
-    decorative: false,
   };
 }
 

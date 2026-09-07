@@ -109,7 +109,6 @@ export function InspectorPanel({
   const del = useNewsletterStore((store) => store.delete);
   const move = useNewsletterStore((store) => store.move);
   const removeFromBackground = useNewsletterStore((store) => store.removeFromBackground);
-  const moveIntoBackground = useNewsletterStore((store) => store.moveIntoBackground);
 
   if (!doc) return null;
 
@@ -118,7 +117,6 @@ export function InspectorPanel({
   const backgroundParent = doc.blocks.find((entry) => entry.id === parentId);
   const canDelete =
     !parentId || (backgroundParent?.type === 'backgroundSection' && backgroundParent.blocks.length !== 1);
-  const backgroundTargets = doc.blocks.filter((entry) => entry.type === 'backgroundSection');
   const blockIssues = block ? validationIssues.filter((issue) => issue.blockId === block.id) : [];
 
   if (readOnly) {
@@ -154,25 +152,6 @@ export function InspectorPanel({
         onChange={(patch) => update(block.id, patch)}
         onOpenGlobalSettings={onOpenGlobalSettings}
       />
-      {!parentId &&
-      block.type !== 'header' &&
-      block.type !== 'footer' &&
-      block.type !== 'backgroundSection' &&
-      backgroundTargets.length !== 0 ? (
-        <div className="mt-6 space-y-2 border-t pt-4">
-          <p className="text-sm font-medium">{t('misc.moveIntoBackground')}</p>
-          {backgroundTargets.map((target, index) => (
-            <button
-              key={target.id}
-              type="button"
-              className="w-full rounded border px-3 py-2 text-sm text-blue-700"
-              onClick={() => moveIntoBackground(block.id, target.id)}
-            >
-              {t('misc.backgroundSection')} {index + 1}
-            </button>
-          ))}
-        </div>
-      ) : null}
     </aside>
   );
 }

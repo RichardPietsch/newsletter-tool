@@ -20,7 +20,6 @@ type ExportImageCandidate = {
   path: string;
   src?: string;
   alt?: string;
-  decorative?: boolean;
 };
 
 const INTERNAL_HOSTS = new Set(['localhost', 'minio', 'db', 'web']);
@@ -75,7 +74,6 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
         path: `${blockPath}.src`,
         src: block.src,
         alt: block.alt,
-        decorative: block.decorative,
       });
       return;
     }
@@ -87,7 +85,6 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
         path: `${blockPath}.image.src`,
         src: image?.src,
         alt: image?.alt,
-        decorative: image?.decorative,
       });
       return;
     }
@@ -99,7 +96,6 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
         path: `${blockPath}.image.src`,
         src: image?.src,
         alt: image?.alt,
-        decorative: image?.decorative,
       });
       return;
     }
@@ -112,7 +108,6 @@ function collectImages(document: NewsletterDocument): ExportImageCandidate[] {
           path: `${blockPath}.items[${itemIndex}].image.src`,
           src: item.image.src,
           alt: item.image.alt,
-          decorative: item.image.decorative,
         });
       });
     }
@@ -126,7 +121,7 @@ function validateImageUrl(candidate: ExportImageCandidate, mode: ExportValidatio
   const src = candidate.src?.trim();
   if (!src) return issues;
 
-  if (!candidate.decorative && !candidate.alt?.trim()) {
+  if (!candidate.alt?.trim()) {
     issues.push({
       code: 'MISSING_IMAGE_ALT',
       blockId: candidate.blockId,

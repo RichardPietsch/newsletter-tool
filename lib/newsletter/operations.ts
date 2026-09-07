@@ -110,28 +110,6 @@ export function removeBlockFromBackground(doc: NewsletterDocument, id: string): 
   return { ...doc, blocks };
 }
 
-export function moveBlockIntoBackground(doc: NewsletterDocument, id: string, backgroundId: string): NewsletterDocument {
-  const sourceIndex = doc.blocks.findIndex((block) => block.id === id);
-  const source = doc.blocks[sourceIndex];
-  if (
-    sourceIndex < 1 ||
-    !source ||
-    source.type === 'header' ||
-    source.type === 'footer' ||
-    source.type === 'backgroundSection'
-  )
-    return doc;
-  const remaining = doc.blocks.filter((block) => block.id !== id);
-  if (!remaining.some((block) => block.type === 'backgroundSection' && block.id === backgroundId)) return doc;
-  return {
-    ...doc,
-    blocks: remaining.map((block) =>
-      block.type === 'backgroundSection' && block.id === backgroundId
-        ? { ...block, blocks: [...block.blocks, source] }
-        : block,
-    ),
-  };
-}
 export class History<T> {
   past: T[] = [];
   future: T[] = [];

@@ -129,8 +129,7 @@ documentJson: |
         "image": {
           "assetId": "zaDgEwlyRnymZZ3xnDGN7",
           "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-gaense.jpg",
-          "alt": "demo-gaense",
-          "decorative": false
+          "alt": "demo-gaense"
         },
         "title": "Gänseessen der Junioren",
         "date": "Freitag, 20. November",
@@ -145,8 +144,7 @@ documentJson: |
         "image": {
           "assetId": "eGsPHlmPoYVFBI13_qN6n",
           "src": "https://lettres.jardin-des-plantes.de/assets/newsletter-templates/agc-demo-assets/demo-whisky.jpg",
-          "alt": "demo-whisky",
-          "decorative": false
+          "alt": "demo-whisky"
         },
         "title": "Whisky Tasting",
         "date": "27. November",

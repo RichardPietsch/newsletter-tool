@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { RichTextToolbar } from '@/components/editor/rich-text-toolbar';
 import { t } from '@/lib/i18n';
 import {
+  createNewsletterPreviewCssVariables,
   deriveNewsletterColorPalette,
   newsletterColorPalettes,
   newsletterContrastRatio,
@@ -214,6 +215,9 @@ export function TenantDesignEditor({
   const validColors = Object.values(settings.colors).every((palette) =>
     Object.values(palette).every((color) => /^#[0-9a-fA-F]{6}$/.test(color)),
   );
+  const editorPalette = Object.values(settings.colors.light).every(validHexColor)
+    ? deriveNewsletterColorPalette(settings.colors.light)
+    : newsletterColorPalettes.light;
 
   function updateColor(mode: NewsletterPreviewMode, token: NewsletterThemeColorToken, color: string) {
     setSettings((current) => ({
@@ -293,7 +297,7 @@ export function TenantDesignEditor({
   }
 
   return (
-    <section className="rounded-xl bg-white p-5 shadow-sm">
+    <section className="rounded-xl bg-white p-5 shadow-sm" style={createNewsletterPreviewCssVariables(editorPalette)}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">{t('admin.designTitle')}</h2>

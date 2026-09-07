@@ -2,6 +2,7 @@ import { allowedTextColors, type TextBlock, type TiptapMark, type TiptapNode } f
 import {
   newsletterEmailClasses as classes,
   newsletterModuleStyles as styles,
+  newsletterTextColorRole,
   type NewsletterColorPalette,
 } from '@/lib/newsletter/module-styles';
 
@@ -20,22 +21,9 @@ function renderMarks(text: string, marks: TiptapMark[] = [], colors: NewsletterC
     if (mark.type === 'textStyle') {
       const rawColor = mark.attrs?.color;
       if (rawColor && allowedTextColors.includes(rawColor)) {
-        const isAccent = rawColor === '#dc2626' || rawColor === styles.colors.accent;
-        const isMuted = rawColor === styles.colors.muted;
-        const color = isAccent
-          ? colors.accent
-          : isMuted
-            ? colors.muted
-            : rawColor === '#ffffff'
-              ? colors.featureText
-              : colors.text;
-        const colorClass = isAccent
-          ? classes.accent
-          : isMuted
-            ? classes.muted
-            : rawColor === '#ffffff'
-              ? classes.featureText
-              : classes.text;
+        const role = newsletterTextColorRole(rawColor) ?? 'text';
+        const color = colors[role];
+        const colorClass = classes[role];
         return `<span class="${colorClass}" style="color:${color}">${current}</span>`;
       }
     }

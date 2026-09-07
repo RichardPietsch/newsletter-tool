@@ -13,11 +13,7 @@ export function FeaturedEventBlock({ block }: { block: B }) {
       }}
     >
       {block.image?.src && (
-        <img
-          src={block.image.src}
-          alt={block.image.decorative ? '' : block.image.alt || ''}
-          className="h-48 w-full object-cover"
-        />
+        <img src={block.image.src} alt={block.image.alt || ''} className="h-48 w-full object-cover" />
       )}
       <div className="flex flex-col px-8 py-7">
         <div

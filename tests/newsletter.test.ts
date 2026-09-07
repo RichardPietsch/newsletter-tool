@@ -4,6 +4,7 @@ import { createBlock, createDefaultDocument } from '@/lib/newsletter/defaults';
 import { deleteBlock, History, insertBlock, moveBlock, updateBlock } from '@/lib/newsletter/operations';
 import { validateNewsletterForSave } from '@/lib/newsletter/save-validation';
 import { allowedUrl, imageBlockSchema, newsletterDocumentSchema, tiptapDocSchema } from '@/lib/newsletter/schema';
+import { newsletterColorVariables, newsletterEditableTextColors } from '@/lib/newsletter/module-styles';
 
 describe('newsletter core', () => {
   it('validates block schemas and defaults', () => {
@@ -16,9 +17,16 @@ describe('newsletter core', () => {
     expect(
       imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: false }).success,
     ).toBe(false);
-    expect(
-      imageBlockSchema.safeParse({ id: 'i', type: 'image', src: 'https://x.test/a.png', decorative: true }).success,
-    ).toBe(true);
+    const legacyImage = imageBlockSchema.parse({
+      id: 'i',
+      type: 'image',
+      src: 'https://x.test/a.png',
+      alt: 'Beschreibung',
+      decorative: true,
+      href: 'https://x.test/target',
+    });
+    expect(legacyImage).not.toHaveProperty('decorative');
+    expect(legacyImage).not.toHaveProperty('href');
   });
 
   it('inserts deletes and moves only content blocks', () => {
@@ -84,6 +92,7 @@ describe('newsletter core', () => {
     });
 
     expect(result.success).toBe(true);
+    expect(newsletterEditableTextColors).toEqual([newsletterColorVariables.muted, newsletterColorVariables.accent]);
   });
 
   it('rejects unsupported TipTap nodes, unsafe links and unknown colors', () => {

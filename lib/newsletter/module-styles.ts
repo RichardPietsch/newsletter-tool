@@ -135,12 +135,6 @@ export const newsletterColorPalettes = {
 export type NewsletterColorToken = keyof NewsletterColorPalette;
 export type NewsletterDesignPalettes = Record<NewsletterPreviewMode, NewsletterThemePalette>;
 
-export const newsletterEditableTextColors = [
-  newsletterColorPalettes.light.muted,
-  newsletterColorPalettes.light.accent,
-] as const;
-export const newsletterLegacyTextColors = ['#dc2626', '#111827', '#ffffff'] as const;
-
 const colorTokens = Object.keys(newsletterColorPalettes.light) as NewsletterColorToken[];
 const cssVariableName = (token: NewsletterColorToken) =>
   `--newsletter-${token.replace(/[A-Z]/g, (character) => `-${character.toLowerCase()}`)}`;
@@ -148,6 +142,31 @@ const cssVariableName = (token: NewsletterColorToken) =>
 export const newsletterColorVariables = Object.fromEntries(
   colorTokens.map((token) => [token, `var(${cssVariableName(token)})`]),
 ) as Record<NewsletterColorToken, string>;
+
+export const newsletterEditableTextColors = [newsletterColorVariables.muted, newsletterColorVariables.accent] as const;
+export const newsletterLegacyTextColors = [
+  newsletterThemePalettes.light.muted,
+  newsletterThemePalettes.light.accent,
+  '#dc2626',
+  '#111827',
+  '#ffffff',
+  '#17303d',
+] as const;
+
+export type NewsletterTextColorRole = 'muted' | 'accent' | 'text' | 'featureText';
+
+export function newsletterTextColorRole(color: string): NewsletterTextColorRole | undefined {
+  if (color === newsletterColorVariables.muted || color === newsletterThemePalettes.light.muted) return 'muted';
+  if (
+    color === newsletterColorVariables.accent ||
+    color === newsletterThemePalettes.light.accent ||
+    color === '#dc2626'
+  )
+    return 'accent';
+  if (color === '#ffffff') return 'featureText';
+  if (color === '#111827' || color === '#17303d') return 'text';
+  return undefined;
+}
 
 export const newsletterPreviewCssVariables = Object.fromEntries(
   (Object.keys(newsletterColorPalettes) as NewsletterPreviewMode[]).map((mode) => [

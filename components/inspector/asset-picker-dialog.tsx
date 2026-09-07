@@ -73,7 +73,7 @@ export function AssetPickerDialog({
   if (!open) return null;
 
   return (
-    <Overlay title={t('image.choose')} onClose={onClose}>
+    <Overlay title={t('image.choose')} onClose={onClose} level="nested">
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-slate-600">{t('misc.assetPickerIntro')}</p>

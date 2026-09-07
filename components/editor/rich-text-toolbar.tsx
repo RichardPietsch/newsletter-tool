@@ -16,8 +16,8 @@ type IconButtonProps = {
 const buttonClass =
   'inline-flex h-9 w-9 items-center justify-center rounded border bg-white text-slate-700 hover:border-blue-600 hover:text-blue-700 aria-pressed:border-blue-600 aria-pressed:bg-blue-50 aria-pressed:text-blue-700';
 const accentTextColors = [
-  { label: t('misc.textColorGray'), value: newsletterEditableTextColors[0] },
-  { label: t('misc.textColorRed'), value: newsletterEditableTextColors[1] },
+  { label: t('misc.textColorSecondary'), value: newsletterEditableTextColors[0] },
+  { label: t('misc.textColorAccent'), value: newsletterEditableTextColors[1] },
 ];
 
 function IconButton({ label, pressed, onClick, children }: IconButtonProps) {

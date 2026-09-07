@@ -48,51 +48,20 @@ export function ImageInspector({
         {t('image.choose')}
       </button>
       {block.src ? (
-        <img
-          src={block.src}
-          alt={block.decorative ? '' : block.alt || ''}
-          className="max-h-40 w-full rounded border object-contain"
-        />
+        <img src={block.src} alt={block.alt || ''} className="max-h-40 w-full rounded border object-contain" />
       ) : (
         <p className="rounded border border-dashed p-4 text-sm text-slate-600">{t('image.none')}</p>
       )}
       <label className="block text-sm font-medium">
         {t('image.alt')}
-        {block.decorative ? '' : ' *'}
+        {block.src ? ' *' : ''}
         <input
           className={`mt-1 w-full rounded border p-2 ${hasIssue('alt') ? 'border-red-500 outline outline-2 outline-red-500' : ''}`}
           value={block.alt || ''}
-          disabled={block.decorative}
+          required={Boolean(block.src)}
           onChange={(event) => onChange({ alt: event.target.value })}
         />
       </label>
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={block.decorative}
-          onChange={(event) =>
-            onChange({ decorative: event.target.checked, alt: event.target.checked ? '' : block.alt })
-          }
-        />{' '}
-        {t('image.decorative')}
-      </label>
-      <label className="block text-sm font-medium">
-        {t('image.optionalTargetUrl')}
-        <input
-          className="mt-1 w-full rounded border p-2"
-          value={block.href || ''}
-          onChange={(event) => onChange({ href: event.target.value })}
-          placeholder="https://…"
-        />
-      </label>
-      <details className="text-sm text-slate-600">
-        <summary>{t('image.manualUrl')}</summary>
-        <input
-          className="mt-2 w-full rounded border p-2"
-          value={block.src || ''}
-          onChange={(event) => onChange({ src: event.target.value })}
-        />
-      </details>
       <AssetPickerDialog open={pickerOpen} onClose={() => setPickerOpen(false)} onSelect={selectAsset} />
     </div>
   );

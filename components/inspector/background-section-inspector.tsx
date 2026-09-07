@@ -23,8 +23,8 @@ export function BackgroundSectionInspector({
           value={block.background}
           onChange={(event) => onChange({ background: event.target.value as BackgroundSectionBlock['background'] })}
         >
-          <option value="neutral">{t('misc.backgroundNeutral')}</option>
-          <option value="blue">{t('misc.backgroundBlue')}</option>
+          <option value="neutral">{t('misc.light')}</option>
+          <option value="blue">{t('misc.dark')}</option>
         </select>
       </label>
     </div>
