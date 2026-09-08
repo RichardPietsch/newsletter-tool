@@ -29,6 +29,7 @@ export function EditorOverlays({
   onHtmlExport,
   onTemplateExport,
   onCloseExportError,
+  onSettingsSaved,
   readOnly = false,
   settingsSection,
 }: {
@@ -48,6 +49,7 @@ export function EditorOverlays({
   onHtmlExport: () => Promise<void>;
   onTemplateExport: () => Promise<void>;
   onCloseExportError: () => void;
+  onSettingsSaved: (settings: GlobalSettings) => void;
   readOnly?: boolean;
   settingsSection?: 'header' | 'footer';
 }) {
@@ -63,6 +65,7 @@ export function EditorOverlays({
           usedHeaderVariantIds={usedHeaderVariantIds}
           readOnly={readOnly}
           initialSection={settingsSection}
+          onSettingsSaved={onSettingsSaved}
         />
       ) : null}
       <AccountOverlay open={overlay === 'account'} onClose={onCloseOverlay} account={account} />

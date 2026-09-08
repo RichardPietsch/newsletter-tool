@@ -38,6 +38,7 @@ export function EditorShell({
   const [saveIssues, setSaveIssues] = useState<NewsletterSaveIssue[]>([]);
   const [previewMode, setPreviewMode] = useState<NewsletterPreviewMode>('light');
   const [settingsSection, setSettingsSection] = useState<'header' | 'footer'>();
+  const [currentSettings, setCurrentSettings] = useState(settings);
   const doc = useNewsletterStore((state) => state.doc);
   const setTitle = useNewsletterStore((state) => state.setTitle);
   const openOverlay = useCallback((nextOverlay: Exclude<EditorOverlay, null>) => setOverlay(nextOverlay), []);
@@ -48,6 +49,7 @@ export function EditorShell({
   }, []);
 
   useEffect(() => initStore(id, document), [id, document]);
+  useEffect(() => setCurrentSettings(settings), [settings]);
 
   const { sentAtState, isReadOnly, renameNewsletter, toggleNewsletterSent, cloneNewsletter, deleteNewsletter } =
     useNewsletterActions({ id, sentAt, forceReadOnly });
@@ -72,7 +74,8 @@ export function EditorShell({
         className="flex-1 transition-colors"
         data-editor-interface="newsletter-editor"
         style={{
-          backgroundColor: settings?.colors[previewMode].background ?? newsletterColorPalettes[previewMode].background,
+          backgroundColor:
+            currentSettings?.colors[previewMode].background ?? newsletterColorPalettes[previewMode].background,
         }}
       >
         <EditorTopBar
@@ -84,21 +87,21 @@ export function EditorShell({
           onTitleChange={setTitle}
         />
         <NewsletterCanvas
-          settings={settings}
+          settings={currentSettings}
           readOnly={isReadOnly}
           validationIssues={saveIssues}
           previewMode={previewMode}
         />
       </main>
       <InspectorPanel
-        settings={settings}
+        settings={currentSettings}
         readOnly={isReadOnly}
         validationIssues={saveIssues}
         onOpenGlobalSettings={openGlobalSettings}
       />
       <EditorOverlays
         overlay={overlay}
-        settings={settings}
+        settings={currentSettings}
         account={account}
         usedHeaderVariantIds={usedHeaderVariantIds}
         readOnly={forceReadOnly}
@@ -115,6 +118,7 @@ export function EditorShell({
         onHtmlExport={handleHtmlExport}
         onTemplateExport={handleTemplateExport}
         onCloseExportError={clearExportError}
+        onSettingsSaved={setCurrentSettings}
       />
       <OnboardingTour variant="editor" accountEmail={account.email} />
     </div>

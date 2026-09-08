@@ -266,6 +266,7 @@ export const newsletterEmailDarkModeCss = createNewsletterEmailDarkModeCss(newsl
 export const newsletterModuleStyles = {
   colors: newsletterColorPalettes.light,
   colorVariables: newsletterColorVariables,
+  buttonRadius: 4,
   eventGrid: {
     outerPaddingX: 24,
     outerPaddingY: 20,

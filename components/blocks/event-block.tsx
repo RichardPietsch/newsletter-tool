@@ -26,8 +26,12 @@ export function EventBlock({ block }: { block: E }) {
       <p>{block.description}</p>
       {block.buttonUrl && (
         <span
-          className="inline-block rounded px-4 py-2"
-          style={{ backgroundColor: styles.colorVariables.brand, color: styles.colorVariables.brandText }}
+          className="inline-block px-4 py-2"
+          style={{
+            backgroundColor: styles.colorVariables.brand,
+            color: styles.colorVariables.brandText,
+            borderRadius: styles.buttonRadius,
+          }}
         >
           {block.buttonLabel}
         </span>
